@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Squad Chat | Travel and Trouble</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #0f172a; color: white; height: 100vh; display: flex; flex-direction: column; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .message-wrapper { display: flex; flex-direction: column; max-width: 75%; position: relative; }
+        .message-wrapper.sent { align-self: flex-end; align-items: flex-end; }
+        .message-wrapper.received { align-self: flex-start; align-items: flex-start; }
+        
+        .message-bubble { padding: 10px 15px; border-radius: 20px; font-size: 0.95rem; position: relative; word-wrap: break-word; }
+        .message-wrapper.sent .message-bubble { background: #0ea5e9; color: white; border-bottom-right-radius: 5px; }
+        .message-wrapper.received .message-bubble { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-bottom-left-radius: 5px; }
+        
+        /* Image Styling */
+        .chat-image { max-width: 100%; border-radius: 10px; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); }
+        .chat-image:hover { opacity: 0.9; }
+
+        .sender-name { font-size: 0.75rem; margin-bottom: 3px; color: rgba(255,255,255,0.6); }
+        
+        /* Action Buttons */
+        .msg-actions { opacity: 0; transition: 0.2s; margin-top: 2px; font-size: 0.8rem; }
+        .message-wrapper:hover .msg-actions { opacity: 1; }
+        .action-btn { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 0 5px; }
+        .action-btn:hover { color: white; }
+        .action-btn.delete-btn:hover { color: #ef4444; }
+        .action-btn.edit-btn:hover { color: #f59e0b; }
+        
+        /* Input Area & Emoji Picker */
+        .input-area { background: #1e293b; padding: 10px; border-top: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .emoji-picker-container { position: absolute; bottom: 80px; left: 20px; z-index: 1000; display: none; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center bg-dark">
+        <div class="d-flex align-items-center">
+            <a href="/dashboard" class="btn btn-sm btn-outline-light me-3"><i class="fa-solid fa-arrow-left"></i></a>
+            <div>
+                <h5 class="fw-bold mb-0">Batch Chat 🎒</h5>
+                <small style="color: rgba(255,255,255,0.6);">Logged in as: {{ user }} {% if is_admin %}<span class="text-warning small">(Admin)</span>{% endif %}</small>
+            </div>
+        </div>
+        <span class="badge bg-success rounded-pill px-3">Online</span>
+    </div>
+
+    <div class="chat-container" id="chat-box">
+        <div class="text-center small mt-5" style="color: rgba(255,255,255,0.5);">Loading secure messages...</div>
+    </div>
+
+    <div class="input-area">
+        <input type="file" id="image-input" accept="image/*" style="display: none;">
+        <div id="emoji-picker" class="emoji-picker-container"></div>
+
+        <form id="chat-form" class="d-flex gap-2 align-items-center">
+            <button type="button" id="emoji-btn" class="btn btn-dark rounded-circle border-secondary"><i class="fa-regular fa-face-smile text-warning"></i></button>
+            <button type="button" id="upload-btn" class="btn btn-dark rounded-circle border-secondary"><i class="fa-solid fa-paperclip text-info"></i></button>
+            <input type="text" id="message-input" class="form-control bg-dark text-white border-secondary rounded-pill" placeholder="Type a message..." autocomplete="off">
+            <button type="submit" class="btn btn-primary rounded-circle" style="width: 45px; height: 45px;"><i class="fa-solid fa-paper-plane"></i></button>
+        </form>
+    </div>
+
+    <script>
+        const room = "{{ room }}";
+        const currentUser = "{{ user }}";
+        const chatBox = document.getElementById('chat-box');
+        
+        // --- 1. EMOJI BUTTON SETUP ---
+        // Simple emoji insertion without external dependencies
+        const commonEmojis = ['😀', '😂', '😍', '👍', '🔥', '🎉', '❤️', '😎', '🤔', '👏', '🙌', '✨', '🚀', '📸', '🏔️', '🏖️', '🎒', '✈️'];
+        
+        const emojiBtn = document.getElementById('emoji-btn');
+        const emojiContainer = document.getElementById('emoji-picker');
+        
+        // Build emoji picker on click
+        emojiBtn.addEventListener('click', () => {
+            if (emojiContainer.style.display === 'block') {
+                emojiContainer.style.display = 'none';
+                return;
+            }
+            
+            emojiContainer.innerHTML = '';
+            emojiContainer.style.display = 'block';
+            emojiContainer.style.background = '#1e293b';
+            emojiContainer.style.border = '1px solid rgba(255,255,255,0.2)';
+            emojiContainer.style.borderRadius = '10px';
+            emojiContainer.style.padding = '10px';
+            emojiContainer.style.display = 'flex';
+            emojiContainer.style.flexWrap = 'wrap';
+            emojiContainer.style.gap = '5px';
+            emojiContainer.style.maxWidth = '200px';
+            
+            commonEmojis.forEach(emoji => {
+                const btn = document.createElement('button');
+                btn.textContent = emoji;
+                btn.style.fontSize = '20px';
+                btn.style.background = 'transparent';
+                btn.style.border = 'none';
+                btn.style.cursor = 'pointer';
+                btn.style.padding = '5px';
+                btn.onclick = () => {
+                    const input = document.getElementById('message-input');
+                    input.value += emoji;
+                    input.focus();
+                    emojiContainer.style.display = 'none';
+                };
+                emojiContainer.appendChild(btn);
+            });
+        });
+        
+        // Close emoji picker when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!emojiBtn.contains(e.target) && !emojiContainer.contains(e.target)) {
+                emojiContainer.style.display = 'none';
+            }
+        });
+
+        // --- 2. IMAGE UPLOAD SETUP ---
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('image-input');
+
+        uploadBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', async () => {
+            if (fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('room', room);
+
+                const btnIcon = uploadBtn.querySelector('i');
+                btnIcon.className = 'fa-solid fa-spinner fa-spin';
+
+                try {
+                    const res = await fetch('/upload_chat_image', { method: 'POST', body: formData });
+                    if (res.ok) { loadMessages(); }
+                } catch (err) { console.error(err); } 
+                finally {
+                    btnIcon.className = 'fa-solid fa-paperclip text-info';
+                    fileInput.value = '';
+                }
+            }
+        });
+
+        // --- 3. LOAD MESSAGES & SHOW EDIT/DELETE ---
+        async function loadMessages() {
+            try {
+                const response = await fetch(`/get_messages/${room}`);
+                const messages = await response.json();
+                
+                // Don't clear if user is actively editing to avoid glitch
+                // But for simplicity in this version, we clear to ensure updates
+                chatBox.innerHTML = ''; 
+                
+                messages.forEach(msg => {
+                    const isMe = msg.sender === currentUser;
+                    
+                    // Content Logic (Text vs Image)
+                    let contentHtml = '';
+                    if (msg.msg_type === 'image') {
+                        contentHtml = `<a href="/static/uploads/${msg.content}" target="_blank">
+                                        <img src="/static/uploads/${msg.content}" class="chat-image" alt="Image">
+                                       </a>`;
+                    } else {
+                        contentHtml = `<div class="message-bubble">${msg.content}</div>`;
+                    }
+
+                    // Button Logic (Edit/Delete)
+                    let buttonsHtml = '';
+                    // Only show EDIT for text messages sent by me
+                    if (msg.can_edit && msg.msg_type !== 'image') {
+                        buttonsHtml += `<button onclick="editMsg(${msg.id}, '${msg.content}')" class="action-btn edit-btn" title="Edit"><i class="fa-solid fa-pen"></i></button>`;
+                    }
+                    if (msg.can_delete) {
+                        buttonsHtml += `<button onclick="deleteMsg(${msg.id})" class="action-btn delete-btn" title="Delete"><i class="fa-solid fa-trash"></i></button>`;
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = `message-wrapper ${isMe ? 'sent' : 'received'}`;
+                    div.innerHTML = `
+                        <span class="sender-name">${isMe ? 'You' : msg.sender}</span>
+                        ${contentHtml}
+                        <div class="msg-actions">${buttonsHtml}</div>
+                    `;
+                    chatBox.appendChild(div);
+                });
+                
+            } catch (error) {
+                console.error("Error loading chat:", error);
+            }
+        }
+
+        // --- 4. SEND TEXT MESSAGE ---
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('message-input');
+            const text = input.value;
+            if(!text) return;
+
+            await fetch('/send_message', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ room: room, message: text, type: 'text' })
+            });
+            input.value = '';
+            loadMessages();
+        });
+
+        // --- 5. EDIT & DELETE FUNCTIONS ---
+        async function deleteMsg(id) {
+            if(confirm("Delete this message?")) {
+                await fetch(`/delete_message/${id}`, { method: 'POST' });
+                loadMessages();
+            }
+        }
+
+        function editMsg(id, oldContent) {
+            const newContent = prompt("Edit your message:", oldContent);
+            if (newContent !== null && newContent !== oldContent && newContent.trim() !== "") {
+                fetch(`/edit_message/${id}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ content: newContent })
+                }).then(() => loadMessages());
+            }
+        }
+
+        setInterval(loadMessages, 3000);
+        loadMessages();
+    </script>
+</body>
+</html>

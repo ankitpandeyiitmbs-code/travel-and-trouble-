@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Explore Trips | Travel & Trouble</title>
+    <meta name="description" content="Discover curated treks, mountain adventures, and expeditions. Filter by location, difficulty, and more.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .search-box { position: relative; }
+        .search-box input { padding-left: 40px; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .trek-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; transition: all 0.3s var(--ease); box-shadow: var(--shadow-sm); height: 100%; }
+        .trek-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
+        .trek-card img { width: 100%; height: 220px; object-fit: cover; display: block; transition: transform 0.5s var(--ease); }
+        .trek-card:hover img { transform: scale(1.04); }
+        .trek-body { padding: 1.25rem; display: flex; flex-direction: column; flex: 1; }
+        .trek-title { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
+        .trek-desc { color: var(--text-secondary); font-size: 0.87rem; line-height: 1.6; flex: 1; margin-bottom: 1rem; }
+        .trek-price { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; color: var(--terra); line-height: 1; }
+        .badge-location { background: rgba(28,49,68,0.09); color: var(--navy); border: 1px solid rgba(28,49,68,0.15); }
+        .badge-difficulty-easy { background: var(--success-bg); color: var(--success); border: 1px solid rgba(45,106,79,0.2); }
+        .badge-difficulty-moderate { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(125,90,0,0.2); }
+        .badge-difficulty-hard { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(155,35,53,0.2); }
+        .pagination .page-link { background: var(--bg-elevated); border-color: var(--border); color: var(--text-secondary); }
+        .pagination .page-link:hover { background: var(--bg-sunken); border-color: var(--terra); color: var(--terra); }
+        .pagination .active .page-link { background: var(--terra); border-color: var(--terra); color: #fff; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            {% if settings and settings.logo_url %}
+                <img src="{{ settings.logo_url }}" alt="Logo" class="custom-brand-logo" style="height: 40px; margin-right: 10px; border-radius: 4px; object-fit: contain;">
+            {% else %}
+                <div class="logo-mark"><i class="fa-solid fa-compass"></i></div>
+            {% endif %}
+            <div class="brand-text">
+                <span class="main">Travel & Trouble</span>
+                <span class="sub">Adventure Awaits</span>
+            </div>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-1">
+                <li class="nav-item"><a class="nav-link" href="/trips">Trips</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/treks">Explore</a></li>
+                <li class="nav-item"><a class="nav-link" href="/events">Events</a></li>
+                <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+                <li class="nav-item"><a class="nav-link" href="/community">Community</a></li>
+                <li class="nav-item"><a class="nav-link" href="/explorer-pass">Explorer Pass</a></li>
+                {% if session.get('user_id') %}
+                    <li class="nav-item ms-2"><a class="nav-link btn-nav" href="/dashboard">Dashboard</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                    <li class="nav-item ms-2"><a class="nav-link btn-nav" href="/signup">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<!-- PAGE HERO -->
+<section class="page-hero" style="padding-top:6rem;">
+    <div class="container text-center" style="position:relative;z-index:1;">
+        <div class="badge-hero mb-3"><i class="fa-solid fa-mountain me-2"></i>All Destinations</div>
+        <h1>Explore Our <em style="font-style:italic;color:var(--terra-light);">Adventures</em></h1>
+        <p class="mx-auto mt-3" style="max-width:520px;">Discover curated treks, mountain escapes, and expeditions. Filter by location, difficulty, or search.</p>
+    </div>
+</section>
+
+<div class="container" style="padding-top:3rem; padding-bottom:4rem;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Search & Filter Section -->
+    <div class="card mb-5">
+        <div class="card-body p-4">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <div class="search-box">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" name="search" class="form-control" placeholder="Search trips..." value="{{ search or '' }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select name="location" class="form-select">
+                        <option value="">All Locations</option>
+                        <option value="Himachal Pradesh" {% if location == 'Himachal Pradesh' %}selected{% endif %}>Himachal Pradesh</option>
+                        <option value="Uttarakhand" {% if location == 'Uttarakhand' %}selected{% endif %}>Uttarakhand</option>
+                        <option value="Goa" {% if location == 'Goa' %}selected{% endif %}>Goa</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="difficulty" class="form-select">
+                        <option value="">All Difficulties</option>
+                        <option value="Easy" {% if difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+                        <option value="Moderate" {% if difficulty == 'Moderate' %}selected{% endif %}>Moderate</option>
+                        <option value="Hard" {% if difficulty == 'Hard' %}selected{% endif %}>Hard</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        <option value="Adventure" {% if category == 'Adventure' %}selected{% endif %}>Adventure</option>
+                        <option value="Mountains" {% if category == 'Mountains' %}selected{% endif %}>Mountains</option>
+                        <option value="Beaches" {% if category == 'Beaches' %}selected{% endif %}>Beaches</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-terra w-100">
+                        <i class="fa-solid fa-filter me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+            {% if search or location or difficulty or category %}
+            <div class="mt-3">
+                <a href="/treks" class="btn btn-ghost btn-sm">
+                    <i class="fa-solid fa-times me-1"></i>Clear Filters
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <p class="mb-0" style="color:var(--text-secondary);">Showing {{ trips|length }} trips</p>
+        {% if total_pages > 1 %}
+        <p class="mb-0" style="color:var(--text-muted);">Page {{ page }} of {{ total_pages }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Trips Grid -->
+    <div class="row g-4">
+        {% for trip in trips %}
+        <div class="col-md-6 col-lg-4 fade-up">
+            <div class="trek-card">
+                <div class="position-relative">
+                    <img src="{{ trip['image_url'] }}" alt="{{ trip['title'] }}" loading="lazy">
+                    {% if trip['difficulty'] %}
+                    <span class="badge position-absolute top-0 end-0 m-3 badge-difficulty-{{ trip['difficulty'].lower() }}">
+                        {{ trip['difficulty'] }}
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="trek-body">
+                    <div class="d-flex gap-2 mb-2">
+                        <span class="badge badge-location">
+                            <i class="fa-solid fa-location-dot me-1"></i>{{ trip['location'] or 'Unknown' }}
+                        </span>
+                        <span class="badge badge-navy">{{ trip['duration'] }}</span>
+                    </div>
+                    <div class="trek-title">{{ trip['title'] }}</div>
+                    <p class="trek-desc">{{ trip['description'][:100] }}...</p>
+                    <div class="d-flex justify-content-between align-items-center pt-3" style="border-top:1px solid var(--border);">
+                        <div>
+                            <div class="trek-price">₹{{ trip['price'] }}</div>
+                            <small style="color:var(--text-muted);">per person</small>
+                        </div>
+                        <a href="/trip/{{ trip['id'] }}" class="btn btn-terra btn-sm">View Trip</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="icon-box icon-box-lg icon-terra mx-auto mb-4"><i class="fa-solid fa-mountain"></i></div>
+            <h3>No trips match your filters</h3>
+            <p>Try adjusting your search or clearing filters.</p>
+            <a href="/treks" class="btn btn-outline-navy mt-3">Clear Filters</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if total_pages > 1 %}
+    <nav class="mt-5 d-flex justify-content-center" aria-label="Trip pages">
+        <ul class="pagination">
+            {% if has_prev %}
+            <li class="page-item"><a class="page-link" href="?page={{ page - 1 }}&search={{ search }}&location={{ location }}&difficulty={{ difficulty }}&category={{ category }}">Previous</a></li>
+            {% endif %}
+            {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {{ 'active' if p == page else '' }}"><a class="page-link" href="?page={{ p }}&search={{ search }}&location={{ location }}&difficulty={{ difficulty }}&category={{ category }}">{{ p }}</a></li>
+            {% endfor %}
+            {% if has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page + 1 }}&search={{ search }}&location={{ location }}&difficulty={{ difficulty }}&category={{ category }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand">
+                    {% if settings and settings.logo_url %}
+                <img src="{{ settings.logo_url }}" alt="Logo" class="custom-brand-logo" style="height: 40px; margin-right: 10px; border-radius: 4px; object-fit: contain;">
+            {% else %}
+                <div class="logo-mark"><i class="fa-solid fa-compass"></i></div>
+            {% endif %}
+                    Travel & Trouble
+                </div>
+                <p class="footer-desc">India's first gamified adventure travel platform.</p>
+                <div class="social-links">
+                    <a href="{{ settings.instagram or '#' }}" class="social-link"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="{{ settings.twitter or '#' }}" class="social-link"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="{{ settings.youtube or '#' }}" class="social-link"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h5>Explore</h5>
+                <ul class="footer-links">
+                    <li><a href="/trips">All Trips</a></li>
+                    <li><a href="/events">Events</a></li>
+                    <li><a href="/shop">Shop</a></li>
+                    <li><a href="/community">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h5>Company</h5>
+                <ul class="footer-links">
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="/terms">Terms</a></li>
+                    <li><a href="/privacy">Privacy</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h5>Contact</h5>
+                <ul class="footer-links">
+                    <li><a href="mailto:{{ settings.email }}">{{ settings.email }}</a></li>
+                    <li><a href="tel:{{ settings.phone }}">{{ settings.phone }}</a></li>
+                    <li>{{ settings.address }}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; {{ settings.year_established or '2026' }} Travel & Trouble. All rights reserved.</span>
+            <span>Made with <i class="fa-solid fa-heart" style="color:var(--terra-light);"></i> for explorers</span>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body></html>

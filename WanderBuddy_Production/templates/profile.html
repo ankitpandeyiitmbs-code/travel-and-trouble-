@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .profile-shell {
+        padding: 8rem 0 5rem;
+        background: var(--bg-base);
+        min-height: calc(100vh - 80px);
+    }
+    .profile-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .profile-cover {
+        background: var(--navy);
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+    }
+    .profile-cover::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top right, rgba(196, 98, 45, 0.2), transparent 50%);
+    }
+    .avatar-wrapper {
+        width: 110px;
+        height: 110px;
+        background: var(--bg-surface);
+        border: 4px solid var(--terra);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        z-index: 2;
+        box-shadow: var(--shadow-md);
+    }
+    .avatar-char {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--navy);
+    }
+    .profile-name {
+        color: #fff;
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        position: relative;
+        z-index: 2;
+    }
+    .nav-profile {
+        padding: 0 2rem;
+        border-bottom: 2px solid var(--border);
+        background: var(--bg-sunken);
+    }
+    .nav-profile .nav-link {
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        border: none;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s var(--ease);
+    }
+    .nav-profile .nav-link.active {
+        color: var(--terra);
+        border-bottom-color: var(--terra);
+        background: transparent;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-shell">
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} mb-5 shadow-sm text-center">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="profile-card fade-up">
+            <!-- Header -->
+            <div class="profile-cover">
+                <div class="avatar-wrapper">
+                    <span class="avatar-char">{{ user['name'][0] }}</span>
+                </div>
+                <h2 class="profile-name h1">{{ user['name'] }}</h2>
+                <div class="text-white-50 small fw-bold">WanderBuddy ID: {{ user['id'] }}</div>
+            </div>
+
+            <!-- Tabs -->
+            <nav class="nav nav-profile" id="profileTab" role="tablist">
+                <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-pane">Personal Stats</button>
+                <button class="nav-link" id="safety-tab" data-bs-toggle="tab" data-bs-target="#safety-pane">Security Protocol</button>
+            </nav>
+
+            <div class="p-4 p-lg-5 tab-content" id="profileTabContent">
+                <!-- Personal Info Pane -->
+                <div class="tab-pane fade show active" id="info-pane">
+                    <h4 class="serif mb-4" style="color: var(--navy);">Coordinate Details</h4>
+                    <form action="/profile" method="POST">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Full Name</label>
+                                <input type="text" name="name" class="form-control p-3" value="{{ user['name'] }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Signal (Phone)</label>
+                                <input type="tel" name="phone" class="form-control p-3" value="{{ user['phone'] or '' }}" placeholder="+91 00000 00000">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Communication (Email)</label>
+                                <input type="email" name="email" class="form-control p-3" value="{{ user['email'] }}" required>
+                            </div>
+                            <div class="col-12 mt-5">
+                                <button type="submit" class="btn btn-terra btn-lg rounded-pill px-5 shadow-sm">Sync Profiles</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Security Pane -->
+                <div class="tab-pane fade" id="safety-pane">
+                    <h4 class="serif mb-1" style="color: var(--navy);">Encryption Keys</h4>
+                    <p class="text-muted small mb-4">Rotate your security credentials regularly to maintain enclave integrity.</p>
+                    
+                    <form action="/change-password" method="POST" class="mt-4">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Old Password</label>
+                                <input type="password" name="old_password" class="form-control p-3" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">New Security Key</label>
+                                <input type="password" name="new_password" class="form-control p-3" required minlength="6">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Verify New Key</label>
+                                <input type="password" name="confirm_password" class="form-control p-3" required minlength="6">
+                            </div>
+                            <div class="col-12 mt-5">
+                                <button type="submit" class="btn btn-navy btn-lg rounded-pill px-5 shadow-sm">Update Security</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="/dashboard" class="btn btn-outline-navy rounded-pill px-4"><i class="fa-solid fa-arrow-left me-2"></i>Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

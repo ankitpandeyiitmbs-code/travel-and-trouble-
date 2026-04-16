@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .contact-hero {
+        padding: 8rem 0 4rem;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+    }
+    .contact-shell {
+        padding: 5rem 0;
+        background: var(--bg-base);
+    }
+    .contact-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-md);
+    }
+    .info-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 1.5rem;
+        transition: all 0.3s var(--ease);
+    }
+    .info-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--terra);
+        box-shadow: var(--shadow-sm);
+    }
+    .contact-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+    .contact-value {
+        color: var(--navy);
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+    }
+    .contact-value:hover {
+        color: var(--terra);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="contact-hero">
+    <div class="container">
+        <span class="badge-hero mb-3"><i class="fa-solid fa-paper-plane me-2"></i>Get in Touch</span>
+        <h1 class="serif display-3 mb-3" style="color: var(--navy);">Contact Us</h1>
+        <p class="lead mx-auto" style="max-width: 600px; color: var(--text-secondary);">Have questions about a trip, partnership, or just want to say hello? Our team is here to help.</p>
+    </div>
+</section>
+
+<section class="contact-shell">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Contact Form -->
+            <div class="col-lg-7">
+                <div class="contact-card">
+                    <h3 class="serif mb-4" style="color: var(--navy);">Send a Message</h3>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} mb-4">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="/contact">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Full Name</label>
+                                <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Email Address</label>
+                                <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Subject</label>
+                                <select name="subject" class="form-select">
+                                    <option value="trip_inquiry">Trip Inquiry</option>
+                                    <option value="booking_help">Booking Help</option>
+                                    <option value="partnership">Partnership</option>
+                                    <option value="feedback">Feedback</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Message</label>
+                                <textarea name="message" class="form-control" rows="5" placeholder="How can we assist you today?" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-terra btn-lg w-100">
+                                    Submit Inquiry <i class="fa-solid fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="col-lg-5">
+                <div class="ps-lg-4">
+                    <div class="section-label mb-2">Connect Directly</div>
+                    <h2 class="serif mb-4" style="color: var(--navy);">We're Here <br>to Guide You</h2>
+                    
+                    <div class="d-flex flex-column gap-3">
+                        <div class="info-card d-flex align-items-center gap-4">
+                            <div class="icon-box icon-terra"><i class="fa-solid fa-envelope"></i></div>
+                            <div>
+                                <div class="contact-label">Email Support</div>
+                                <a href="mailto:{{ settings.get('email') }}" class="contact-value">{{ settings.get('email') }}</a>
+                            </div>
+                        </div>
+
+                        <div class="info-card d-flex align-items-center gap-4">
+                            <div class="icon-box icon-navy"><i class="fa-solid fa-phone"></i></div>
+                            <div>
+                                <div class="contact-label">Call Explorer Desk</div>
+                                <a href="tel:{{ settings.get('phone') }}" class="contact-value">{{ settings.get('phone') }}</a>
+                            </div>
+                        </div>
+
+                        <div class="info-card d-flex align-items-center gap-4">
+                            <div class="icon-box icon-gold"><i class="fa-solid fa-location-dot"></i></div>
+                            <div>
+                                <div class="contact-label">Our Base</div>
+                                <div class="contact-value">{{ settings.get('address') }}</div>
+                            </div>
+                        </div>
+
+                        <div class="info-card d-flex align-items-center gap-4">
+                            <div class="icon-box icon-success"><i class="fa-solid fa-clock"></i></div>
+                            <div>
+                                <div class="contact-label">Support Hours</div>
+                                <div class="contact-value">{{ settings.get('working_hours') }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 p-4 rounded-4 bg-sunken border">
+                        <h6 class="fw-bold mb-2">Corporate & Bulk Bookings</h6>
+                        <p class="small text-muted mb-0">Planning a corporate retreat or a large group trek? Contact our special events team at <a href="mailto:{{ settings.get('email') }}" class="text-terra">events@wanderbuddy.in</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

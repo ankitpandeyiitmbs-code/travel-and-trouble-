@@ -1,0 +1,150 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .shop-hero {
+        padding: 8rem 0 4rem;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+    }
+    .item-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        overflow: hidden;
+        transition: all 0.3s var(--ease);
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .item-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--terra-dim);
+    }
+    .item-image-wrapper {
+        height: 280px;
+        overflow: hidden;
+        background: var(--bg-sunken);
+    }
+    .item-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s var(--ease);
+    }
+    .item-card:hover .item-image-wrapper img {
+        transform: scale(1.05);
+    }
+    .item-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .item-cat {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+    .item-name {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--navy);
+        margin-bottom: 0.5rem;
+    }
+    .item-price {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--terra);
+        margin-bottom: 1rem;
+    }
+    .stock-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: var(--r-full);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 1.5rem;
+    }
+    .stock-in { background: var(--success-dim); color: var(--success); }
+    .stock-low { background: var(--warning-dim); color: var(--warning); }
+    .stock-out { background: var(--danger-dim); color: var(--danger); }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="shop-hero">
+    <div class="container">
+        <span class="badge-hero mb-3">Supply Drop</span>
+        <h1 class="serif display-3 mb-3" style="color: var(--navy);">Explorer <em class="text-terra serif italic">Gear</em></h1>
+        <p class="lead mx-auto" style="max-width: 600px; color: var(--text-secondary);">High-performance apparel and tools curated for the modern trekker. Built for the wild.</p>
+    </div>
+</section>
+
+<section class="py-5" style="background: var(--bg-base);">
+    <div class="container py-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} mb-5 border-0 shadow-sm">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row g-4">
+            {% for item in items %}
+            <div class="col-md-6 col-lg-4">
+                <article class="item-card">
+                    <div class="item-image-wrapper">
+                        <img src="{{ item['image_url'] }}" alt="{{ item['name'] }}">
+                    </div>
+                    <div class="item-body">
+                        <div class="item-cat">Adventure Provisions</div>
+                        <h3 class="item-name">{{ item['name'] }}</h3>
+                        <div class="item-price">₹{{ item['price'] }}</div>
+                        
+                        <div>
+                            {% if item['stock'] <= 0 %}
+                                <span class="stock-badge stock-out"><i class="fa-solid fa-circle-xmark"></i> Sold Out</span>
+                            {% elif item['stock'] < 5 %}
+                                <span class="stock-badge stock-low"><i class="fa-solid fa-triangle-exclamation"></i> Only {{ item['stock'] }} left</span>
+                            {% else %}
+                                <span class="stock-badge stock-in"><i class="fa-solid fa-circle-check"></i> In Stock</span>
+                            {% endif %}
+                        </div>
+
+                        <form action="/add_to_cart/{{ item.id }}" method="POST" class="mt-auto">
+                            <button type="submit" class="btn btn-terra w-100 rounded-pill" {% if item.stock <= 0 %}disabled{% endif %}>
+                                {% if item.stock > 0 %}
+                                    <i class="fa-solid fa-cart-shopping me-2"></i>Add to Cart
+                                {% else %}
+                                    Waitlist
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="icon-box icon-terra mx-auto mb-4">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h3 class="serif text-navy">The vault is currently empty</h3>
+                <p class="text-muted">A fresh supply drop is scheduled for next week. Stay tuned.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

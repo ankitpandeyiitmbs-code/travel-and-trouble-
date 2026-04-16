@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Terms of Service | Travel and Trouble</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-white pt-5">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top p-0">
+        <div class="container-fluid ps-4 pe-4">
+            <a class="navbar-brand py-0 d-flex align-items-center gap-3 text-decoration-none text-white" href="/">
+                {% if settings and settings.logo_url %}
+                <img src="{{ settings.logo_url }}" alt="Travel &amp; Trouble" style="height: 72px; object-fit: contain;">
+                {% else %}
+                <span class="fs-2"><i class="fa-solid fa-compass"></i></span>
+                <span class="fw-semibold">Travel &amp; Trouble</span>
+                {% endif %}
+            </a>
+            <ul class="navbar-nav ms-auto gap-4">
+                <li class="nav-item"><a class="nav-link fs-5" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link fs-5" href="/trips">Trips</a></li>
+                <li class="nav-item"><a class="nav-link fs-5" href="/events">Events</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+        <h1 class="display-4 fw-bold mb-4">Terms of <span class="text-accent">Service</span></h1>
+        <p style="color: rgba(255,255,255,0.7);" class="mb-4">Last updated: April 11, 2026</p>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">1. Acceptance of Terms</h4>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        By accessing or using Travel & Trouble's website and services, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our services.
+                    </p>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">2. Booking & Payment</h4>
+                    <h6 class="text-white mt-3">2.1 Booking Process:</h6>
+                    <ul style="color: #cbd5e1;">
+                        <li>All bookings are subject to availability and confirmation</li>
+                        <li>Minimum group size of 6 travelers required for trip confirmation</li>
+                        <li>Maximum group size is 16 travelers per batch</li>
+                        <li>Bookings can be made for 1-12 travelers per transaction</li>
+                    </ul>
+                    
+                    <h6 class="text-white mt-3">2.2 Pricing:</h6>
+                    <ul style="color: #cbd5e1;">
+                        <li>Quad sharing (4 people): Base price</li>
+                        <li>Triple sharing (3 people): Base price + ₹1,000 per person</li>
+                        <li>Double sharing (2 people): Base price + ₹3,000 per person</li>
+                        <li>Explorer Pass members receive additional 5-15% discount</li>
+                    </ul>
+                    
+                    <h6 class="text-white mt-3">2.3 Payment:</h6>
+                    <ul style="color: #cbd5e1;">
+                        <li>Full payment required at time of booking</li>
+                        <li>All prices are in Indian Rupees (INR)</li>
+                        <li>GST applicable as per government regulations</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">3. Cancellation Policy</h4>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Cancellation Time</th>
+                                    <th>Refund Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>30+ days before trip</td>
+                                    <td>90% refund</td>
+                                </tr>
+                                <tr>
+                                    <td>15-30 days before trip</td>
+                                    <td>75% refund</td>
+                                </tr>
+                                <tr>
+                                    <td>7-14 days before trip</td>
+                                    <td>50% refund</td>
+                                </tr>
+                                <tr>
+                                    <td>Less than 7 days</td>
+                                    <td>No refund</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="small" style="color: #94a3b8;">
+                        <i class="fa-solid fa-info-circle me-1"></i> Refunds are processed within 7-10 business days to the original payment method.
+                    </p>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">4. Trip Confirmations</h4>
+                    <ul style="color: #cbd5e1;">
+                        <li>Trips require minimum 6 confirmed bookings to proceed</li>
+                        <li>If minimum is not met 7 days before departure, trip may be rescheduled or cancelled with full refund</li>
+                        <li>Confirmed trip status will be communicated via email/WhatsApp</li>
+                        <li>Travelers can check batch status in their dashboard</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">5. Traveler Responsibilities</h4>
+                    <ul style="color: #cbd5e1;">
+                        <li>Provide accurate personal and medical information</li>
+                        <li>Arrive at designated pickup point on time</li>
+                        <li>Follow safety instructions from guides</li>
+                        <li>Respect local culture and environment</li>
+                        <li>Inform organizers of any dietary restrictions or health conditions</li>
+                        <li>Carry valid ID proof during the trip</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">6. Safety & Medical</h4>
+                    <ul style="color: #cbd5e1;">
+                        <li>Adventure activities carry inherent risks</li>
+                        <li>Basic first aid is available; comprehensive medical insurance recommended</li>
+                        <li>Organizers reserve right to deny participation for safety reasons</li>
+                        <li>Pre-existing medical conditions must be disclosed</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">7. Explorer Pass Membership</h4>
+                    <ul style="color: #cbd5e1;">
+                        <li>Membership benefits are non-transferable</li>
+                        <li>Valid for 1 year from date of purchase</li>
+                        <li>Discounts apply only to the pass holder's bookings</li>
+                        <li>Group members don't automatically receive pass holder's discount</li>
+                        <li>Free trips (Elite tier) must be redeemed within validity period</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">8. Limitation of Liability</h4>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        Travel & Trouble is not liable for:
+                    </p>
+                    <ul style="color: #cbd5e1;">
+                        <li>Personal injury or property damage during trips</li>
+                        <li>Trip cancellations due to natural disasters or government restrictions</li>
+                        <li>Loss of personal belongings</li>
+                        <li>Third-party services (vendors, hotels, transport)</li>
+                    </ul>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        Our maximum liability is limited to the amount paid for the specific booking.
+                    </p>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">9. Contact & Governing Law</h4>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        These terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in New Delhi.
+                    </p>
+                    <p style="color: #cbd5e1;">
+                        <strong>Contact:</strong><br>
+                        <i class="fa-solid fa-envelope me-2 text-accent"></i> ankit.pandeyiitmbs@gmail.com<br>
+                        <i class="fa-solid fa-phone me-2 text-accent"></i> +91 8347416221
+                    </p>
+                </section>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="p-3 rounded sticky-top" style="background: rgba(30,41,59,0.8); border: 1px solid rgba(255,255,255,0.1); top: 100px;">
+                    <h5 class="fw-bold mb-3 text-accent">Quick Links</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="/about" class="text-decoration-none" style="color: #cbd5e1;"><i class="fa-solid fa-circle-info me-2"></i>About Us</a></li>
+                        <li class="mb-2"><a href="/privacy" class="text-decoration-none" style="color: #cbd5e1;"><i class="fa-solid fa-shield-halved me-2"></i>Privacy Policy</a></li>
+                        <li class="mb-2"><a href="/contact" class="text-decoration-none" style="color: #cbd5e1;"><i class="fa-solid fa-envelope me-2"></i>Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body></html>

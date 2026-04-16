@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .cms-hero {
+        padding: 8rem 0 4rem;
+        background: var(--bg-surface);
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+    }
+    .cms-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top right, rgba(196, 98, 45, 0.08), transparent 45%);
+    }
+    .cms-shell {
+        padding: 4rem 0;
+        background: var(--bg-base);
+    }
+    .cms-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 3rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .cms-body {
+        color: var(--text-primary);
+        line-height: 1.8;
+    }
+    .cms-body h2,
+    .cms-body h3,
+    .cms-body h4 {
+        color: var(--navy);
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 700;
+    }
+    .cms-body p,
+    .cms-body li {
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+        margin-bottom: 1rem;
+    }
+    .cms-body ul {
+        padding-left: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .cms-aside {
+        background: var(--bg-sunken);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 2.5rem;
+        position: sticky;
+        top: 100px;
+    }
+    .aside-title {
+        color: var(--navy);
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="cms-hero">
+    <div class="container relative" style="z-index: 2;">
+        <span class="badge-hero mb-3">{{ page_name|replace('-', ' ')|title }}</span>
+        <h1 class="serif display-3 mb-3" style="color: var(--navy);">{{ page.title }}</h1>
+        <p class="lead" style="max-width: 600px; color: var(--text-secondary);">Verified information and guidelines for the WanderBuddy community.</p>
+    </div>
+</section>
+
+<section class="cms-shell">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <article class="cms-card cms-body">
+                    {{ page.content | safe }}
+                </article>
+            </div>
+            <div class="col-lg-4">
+                <aside class="cms-aside">
+                    <h5 class="aside-title">Need Assistance?</h5>
+                    <p class="mb-4" style="color: var(--text-secondary); font-size: 0.95rem;">Our team is available to help with bookings, policies, or trip planning.</p>
+                    
+                    <div class="d-flex flex-column gap-3 mb-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box icon-box-sm icon-terra"><i class="fa-solid fa-envelope"></i></div>
+                            <a href="mailto:{{ settings.get('email') }}" class="text-decoration-none" style="color: var(--navy); font-weight: 500;">{{ settings.get('email') }}</a>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box icon-box-sm icon-navy"><i class="fa-solid fa-phone"></i></div>
+                            <a href="tel:{{ settings.get('phone') }}" class="text-decoration-none" style="color: var(--navy); font-weight: 500;">{{ settings.get('phone') }}</a>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="/contact" class="btn btn-terra">Contact Support</a>
+                        <a href="/trips" class="btn btn-outline-navy">Browse Trips</a>
+                    </div>
+
+                    <hr class="my-4" style="border-color: var(--border);">
+                    
+                    <div class="small text-muted text-center italic">
+                        Last updated: {{ page.updated_at[:10] if page.updated_at else 'Recent' }}
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

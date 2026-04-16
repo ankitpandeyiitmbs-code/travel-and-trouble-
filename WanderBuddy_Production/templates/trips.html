@@ -1,0 +1,218 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <style>
+        /* Category Cards — use the global warm-ivory design tokens */
+        .category-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--r-xl);
+            transition: all 0.3s var(--ease);
+            overflow: hidden;
+            box-shadow: var(--shadow-xs);
+        }
+        .category-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--terra);
+            box-shadow: var(--shadow-lg);
+        }
+        .category-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+        .category-icon {
+            width: 56px; height: 56px; border-radius: var(--r-md);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.75rem; flex-shrink: 0;
+            background: var(--terra-dim); color: var(--terra);
+            border: 1px solid rgba(196,98,45,0.2);
+        }
+        .category-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--navy); margin: 0; }
+        .category-desc { color: var(--text-secondary); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.25rem; }
+        .sub-trips { background: var(--bg-sunken); border-radius: var(--r-md); padding: 1rem; border: 1px solid var(--border); }
+        .sub-trips-header { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--terra); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+        .sub-trip-item { padding: 0.75rem 0.875rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s var(--ease); border-radius: var(--r-sm); }
+        .sub-trip-item:hover { background: rgba(196,98,45,0.06); }
+        .sub-trip-item:last-child { border-bottom: none; }
+        .trip-name { color: var(--text-primary); font-size: 0.92rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+        .trip-name i { color: var(--terra); font-size: 0.78rem; }
+        .btn-view { padding: 0.38rem 0.9rem; border-radius: var(--r-sm); font-size: 0.8rem; font-weight: 600; background: transparent; border: 1.5px solid var(--border); color: var(--text-secondary); text-decoration: none; transition: all 0.2s var(--ease); }
+        .btn-view:hover { background: var(--terra-dim); border-color: var(--terra); color: var(--terra); }
+        
+        .page-header { padding: 7rem 0 3rem; text-align: center; }
+        .page-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary); }
+        .page-header p { color: var(--text-secondary); font-size: 1.05rem; max-width: 550px; margin: 0 auto; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Choose Your <span style="color: var(--terra);">Adventure</span></h1>
+        <p>Explore treks, mountain escapes, and thrilling adventures across North India</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <!-- Categories Grid -->
+    <div class="row g-4">
+        
+        <!-- HP Trek Category -->
+        <div class="col-md-6">
+            <div class="category-card p-4 h-100">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fa-solid fa-mountain"></i>
+                    </div>
+                    <div>
+                        <span class="category-badge">Himachal Pradesh</span>
+                        <h3 class="category-title">HP Trek</h3>
+                    </div>
+                </div>
+                <p class="category-desc">Epic treks through the magical landscapes of Himachal. From spiritual trails to high-altitude adventures.</p>
+                
+                <div class="sub-trips">
+                    <div class="sub-trips-header">
+                        <i class="fa-solid fa-list"></i> Available Treks
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Triund McLeodganj</span>
+                        <a href="/treks?location=McLeodganj" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Kareri Lake</span>
+                        <a href="/treks?search=Kareri" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Kheerganga</span>
+                        <a href="/treks?search=Kheerganga" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Prashar Lake Trek</span>
+                        <a href="/treks?search=Prashar" class="btn-view">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UK Trek Category -->
+        <div class="col-md-6">
+            <div class="category-card p-4 h-100">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fa-solid fa-person-hiking"></i>
+                    </div>
+                    <div>
+                        <span class="category-badge">Uttarakhand</span>
+                        <h3 class="category-title">UK Trek</h3>
+                    </div>
+                </div>
+                <p class="category-desc">The land of gods offers some of India's most iconic treks. From beginner-friendly to challenging expeditions.</p>
+                
+                <div class="sub-trips">
+                    <div class="sub-trips-header">
+                        <i class="fa-solid fa-list"></i> Available Treks
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Chopta-Tungnath</span>
+                        <a href="/treks?search=Chopta" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Nag Tibba Trek</span>
+                        <a href="/treks?search=Nag+Tibba" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Kedarkantha Trek</span>
+                        <a href="/treks?search=Kedarkantha" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Valley of Flowers Trek</span>
+                        <a href="/treks?search=Valley+of+Flowers" class="btn-view">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adventure Trips -->
+        <div class="col-md-6">
+            <div class="category-card p-4 h-100">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fa-solid fa-parachute-box"></i>
+                    </div>
+                    <div>
+                        <span class="category-badge">Adrenaline</span>
+                        <h3 class="category-title">Adventure Trips</h3>
+                    </div>
+                </div>
+                <p class="category-desc">For the thrill-seekers. High-octane adventures that get your heart racing and adrenaline pumping.</p>
+                
+                <div class="sub-trips">
+                    <div class="sub-trips-header">
+                        <i class="fa-solid fa-list"></i> Adventures
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-water"></i> Rishikesh - River Rafting</span>
+                        <a href="/treks?search=Rishikesh" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-person-falling"></i> Bungee Jumping</span>
+                        <a href="/treks?search=Bungee" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-water"></i> Tehri Lake Water Sports</span>
+                        <a href="/treks?search=Tehri" class="btn-view">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chill Mountain Escape -->
+        <div class="col-md-6">
+            <div class="category-card p-4 h-100">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fa-solid fa-mug-hot"></i>
+                    </div>
+                    <div>
+                        <span class="category-badge">Relaxation</span>
+                        <h3 class="category-title">Chill Mountain Escape</h3>
+                    </div>
+                </div>
+                <p class="category-desc">Peaceful getaways in the mountains. Perfect for those who want to unwind, relax, and soak in nature.</p>
+                
+                <div class="sub-trips">
+                    <div class="sub-trips-header">
+                        <i class="fa-solid fa-list"></i> Destinations
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Mussoorie</span>
+                        <a href="/treks?search=Mussoorie" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Mukteshwar</span>
+                        <a href="/treks?search=Mukteshwar" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Nithan Valley</span>
+                        <a href="/treks?search=Nithan" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Chakrata</span>
+                        <a href="/treks?search=Chakrata" class="btn-view">View</a>
+                    </div>
+                    <div class="sub-trip-item">
+                        <span class="trip-name"><i class="fa-solid fa-location-dot"></i> Jibhi</span>
+                        <a href="/treks?search=Jibhi" class="btn-view">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- View All CTA -->
+    <div class="text-center mt-5">
+        <a href="/treks" class="btn btn-terra btn-lg rounded-pill px-5">
+            <i class="fa-solid fa-compass me-2"></i>View All Trips & Quests
+        </a>
+    </div>
+</div>
+{% endblock %}

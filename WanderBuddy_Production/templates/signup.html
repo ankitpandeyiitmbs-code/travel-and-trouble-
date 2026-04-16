@@ -1,0 +1,185 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .auth-page-container {
+        display: flex;
+        min-height: calc(100vh - 80px);
+        background: var(--bg-base);
+    }
+    .auth-banner {
+        display: none;
+        width: 45%;
+        position: relative;
+        overflow: hidden;
+        background: var(--navy);
+    }
+    @media (min-width: 1024px) {
+        .auth-banner { display: block; }
+    }
+    .auth-banner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.5;
+    }
+    .auth-banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(160deg, rgba(28, 49, 68, 0.45) 0%, rgba(196, 98, 45, 0.15) 100%);
+        padding: 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        z-index: 2;
+    }
+    .perks-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+    .perks-list li {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .perks-list i {
+        color: var(--terra);
+        width: 20px;
+    }
+    .auth-form-panel {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+    }
+    .auth-card {
+        width: 100%;
+        max-width: 440px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-container">
+    <!-- Left Banner -->
+    <div class="auth-banner">
+        <img src="https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=800&q=80" alt="Mountain View">
+        <div class="auth-banner-overlay">
+            <h3 class="serif text-white mb-4" style="font-size: 2rem;">Join 10,000+ Explorers</h3>
+            <ul class="perks-list">
+                <li><i class="fa-solid fa-mountain-sun"></i> Curated Himalayan destinations</li>
+                <li><i class="fa-solid fa-gamepad"></i> Gamified XP & Rewards</li>
+                <li><i class="fa-solid fa-users"></i> Private Travel Squads</li>
+                <li><i class="fa-solid fa-tag"></i> Early-bird discounts</li>
+            </ul>
+            <div class="text-white opacity-50 small fw-bold text-uppercase letter-spacing-1">Start your journey today</div>
+        </div>
+    </div>
+
+    <!-- Signup Form -->
+    <div class="auth-form-panel">
+        <div class="auth-card">
+            <div class="mb-5">
+                <span class="badge-hero mb-3">Community Entry</span>
+                <h1 class="serif display-4 mb-2" style="color: var(--navy);">Create Account</h1>
+                <p class="text-muted">Join the WanderBuddy community for free.</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} mb-4">
+                            <i class="fa-solid fa-{{ 'check-circle' if category == 'success' else 'triangle-exclamation' }} me-2"></i>{{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/signup">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Full Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-sunken border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
+                        <input type="text" name="name" class="form-control border-start-0 p-3" placeholder="Riya Sharma" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-sunken border-end-0"><i class="fa-solid fa-envelope text-muted"></i></span>
+                        <input type="email" name="email" class="form-control border-start-0 p-3" placeholder="riya@example.com" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-sunken border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
+                        <input type="tel" name="phone" class="form-control border-start-0 p-3" placeholder="+91 98765 43210" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-sunken border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
+                        <input type="password" name="password" class="form-control border-start-0 p-3" placeholder="Min. 8 characters" required minlength="8">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold d-block">I am a...</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="role" id="role_traveler" value="traveler" checked onchange="toggleVendorFields()">
+                        <label class="btn btn-outline-navy" for="role_traveler">Traveler</label>
+
+                        <input type="radio" class="btn-check" name="role" id="role_vendor" value="vendor" onchange="toggleVendorFields()">
+                        <label class="btn btn-outline-navy" for="role_vendor">Vendor Partner</label>
+                    </div>
+                </div>
+
+                <div id="vendor_fields" style="display: none;" class="mb-4 p-3 bg-sunken rounded-4 border">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Business Name</label>
+                        <input type="text" id="business_name" name="business_name" class="form-control p-3" placeholder="Hotel / Agency Name">
+                    </div>
+                    <div>
+                        <label class="form-label small fw-bold">Business Type</label>
+                        <select name="business_type" class="form-select p-3">
+                            <option value="hotel">Accommodation</option>
+                            <option value="transport">Transportation</option>
+                            <option value="guide">Guide/Tours</option>
+                            <option value="equipment">Gear Rental</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-terra btn-lg w-100 rounded-pill mb-4 shadow-sm">
+                    Create Account <i class="fa-solid fa-arrow-right ms-2"></i>
+                </button>
+                
+                <p class="text-center small text-muted">By signing up, you agree to our <a href="/terms" class="text-terra">Terms</a> & <a href="/privacy" class="text-terra">Privacy</a>.</p>
+            </form>
+
+            <div class="text-center py-2">
+                <p class="text-muted small">Already a member? <a href="/login" class="text-terra fw-bold text-decoration-none">Sign in here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleVendorFields() {
+        const fields = document.getElementById('vendor_fields');
+        const isVendor = document.getElementById('role_vendor').checked;
+        fields.style.display = isVendor ? 'block' : 'none';
+        document.getElementById('business_name').required = isVendor;
+    }
+</script>
+{% endblock %}

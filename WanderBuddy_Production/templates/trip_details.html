@@ -1,0 +1,375 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .details-hero {
+        padding: 8rem 0 4rem;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+    }
+    .trip-gallery-card {
+        border-radius: var(--r-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+    }
+    .trip-gallery-card img {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+    }
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    .meta-item i {
+        color: var(--terra);
+        font-size: 1.1rem;
+    }
+    .experience-box {
+        background: var(--terra-dim);
+        border: 1px solid rgba(196, 98, 45, 0.2);
+        border-radius: var(--r-xl);
+        padding: 2.5rem;
+        margin: 2rem 0;
+    }
+    .itinerary-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .timeline-day {
+        display: flex;
+        gap: 1.5rem;
+        position: relative;
+    }
+    .timeline-day:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 24px;
+        top: 60px;
+        bottom: -24px;
+        width: 2px;
+        background: var(--border);
+    }
+    .day-marker {
+        width: 48px;
+        height: 48px;
+        background: var(--navy);
+        color: #fff;
+        border-radius: var(--r-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-weight: 700;
+        z-index: 2;
+    }
+    .day-content {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 1.5rem;
+        flex: 1;
+    }
+    .booking-panel {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-md);
+        position: sticky;
+        top: 100px;
+    }
+    .sharing-option {
+        border: 1.5px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 1.25rem;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s var(--ease);
+    }
+    .sharing-option:hover {
+        border-color: var(--terra-dim);
+        background: var(--bg-sunken);
+    }
+    .sharing-option.active {
+        border-color: var(--terra);
+        background: var(--terra-dim);
+    }
+    .price-tag {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--navy);
+        line-height: 1;
+    }
+    .addon-card {
+        background: var(--bg-sunken);
+        border: 1px solid var(--border);
+        border-radius: var(--r-md);
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="details-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/trips">Trips</a></li>
+                <li class="breadcrumb-item active">{{ trip['title'] }}</li>
+            </ol>
+        </nav>
+
+        <div class="row g-5">
+            <!-- Left Column: Content -->
+            <div class="col-lg-7">
+                <div class="trip-gallery-card mb-5">
+                    <img src="{{ trip['image_url'] }}" alt="{{ trip['title'] }}">
+                </div>
+
+                <span class="badge-hero mb-3">{{ trip['category'] }}</span>
+                <h1 class="serif display-4 mb-4" style="color: var(--navy);">{{ trip['title'] }}</h1>
+
+                <div class="d-flex flex-wrap gap-4 mb-5">
+                    <div class="meta-item"><i class="fa-regular fa-clock"></i> {{ trip['duration'] }}</div>
+                    {% if trip['location'] %}<div class="meta-item"><i class="fa-solid fa-location-dot"></i> {{ trip['location'] }}</div>{% endif %}
+                    {% if trip['difficulty'] %}<div class="meta-item"><i class="fa-solid fa-mountain"></i> {{ trip['difficulty'] }}</div>{% endif %}
+                </div>
+
+                <p class="lead" style="color: var(--text-secondary); line-height: 1.8;">
+                    {{ trip['description'] }}
+                </p>
+
+                <div class="experience-box">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="icon-box icon-terra"><i class="fa-solid fa-star"></i></div>
+                        <h4 class="serif mb-0" style="color: var(--navy);">The WanderBuddy Experience</h4>
+                    </div>
+                    <p style="color: var(--text-secondary);">We don't just organize trips; we create travel communities. Every journey features <strong>Travel Squads</strong> and gamified quests to help you connect with fellow explorers.</p>
+                    <div class="row g-3 mt-2">
+                        <div class="col-6"><i class="fa-solid fa-camera-retro me-2 text-terra"></i>Photography Quests</div>
+                        <div class="col-6"><i class="fa-solid fa-fire me-2 text-terra"></i>Squad Bonfires</div>
+                        <div class="col-6"><i class="fa-solid fa-puzzle-piece me-2 text-terra"></i>Team Challenges</div>
+                        <div class="col-6"><i class="fa-solid fa-map-location-dot me-2 text-terra"></i>Hidden Discoveries</div>
+                    </div>
+                </div>
+
+                {% if trip['itinerary'] %}
+                <div class="mt-5">
+                    <h3 class="serif mb-4" style="color: var(--navy);">The Journey Route</h3>
+                    <div class="itinerary-timeline">
+                        {% set days = trip['itinerary'].split('Day ') %}
+                        {% for day in days if day.strip() %}
+                            {% set parts = day.split('–') if '–' in day else [day] %}
+                            {% set day_num = parts[0].strip() %}
+                            {% set day_desc = parts[1].strip() if parts|length > 1 else parts[0].strip() %}
+                            <div class="timeline-day">
+                                <div class="day-marker">{{ day_num }}</div>
+                                <div class="day-content">
+                                    <h5 class="fw-bold mb-2">Day {{ day_num }} Events</h5>
+                                    <ul class="mb-0 list-unstyled d-flex flex-column gap-2">
+                                        {% for act in day_desc.split('.') if act.strip() %}
+                                            <li style="color: var(--text-secondary); font-size: 0.95rem;">
+                                                <i class="fa-solid fa-circle-check me-2" style="color: var(--success); font-size: 0.8rem;"></i>
+                                                {{ act.strip() }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column: Booking -->
+            <div class="col-lg-5">
+                <div class="booking-panel">
+                    <div class="mb-4 text-center">
+                        <span class="text-muted small text-uppercase fw-bold letter-spacing-1">Starts From</span>
+                        <div class="price-tag mt-1">₹{{ trip['price'] }}</div>
+                        <span class="text-muted small">per adventurer</span>
+                    </div>
+
+                    <form action="/book" method="POST" id="bookingForm">
+                        <input type="hidden" name="trip_id" value="{{ trip['id'] }}">
+                        <input type="hidden" id="base_price_val" value="{{ trip['price'] }}">
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Select Date / Batch</label>
+                            <select name="batch_date" class="form-select p-3" style="background: var(--bg-sunken);">
+                                {% for choice in batch_choices %}
+                                <option value="{{ choice.value }}">{{ choice.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Travelers</label>
+                            <div class="d-flex align-items-center justify-content-between p-2 border rounded-pill">
+                                <button type="button" class="btn btn-navy rounded-circle" style="width:40px;height:40px;" id="dec-travelers">−</button>
+                                <span id="traveler-display" class="fw-bold fs-5">1</span>
+                                <button type="button" class="btn btn-navy rounded-circle" style="width:40px;height:40px;" id="inc-travelers">+</button>
+                                <input type="hidden" name="num_travelers" id="num_travelers" value="1">
+                            </div>
+                        </div>
+
+                        {% if target_type == 'trip' %}
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Sharing Type</label>
+                            <div class="sharing-options">
+                                <div class="sharing-option active" data-type="quad">
+                                    <input type="radio" name="sharing_type" value="quad" checked class="d-none">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold">Quad Sharing</div>
+                                            <small class="text-muted">Economy (4 in a room)</small>
+                                        </div>
+                                        <div class="fw-bold text-navy">₹{{ trip['price'] }}</div>
+                                    </div>
+                                </div>
+                                <div class="sharing-option" data-type="triple">
+                                    <input type="radio" name="sharing_type" value="triple" class="d-none">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold">Triple Sharing</div>
+                                            <small class="text-muted">Standard (3 in a room)</small>
+                                        </div>
+                                        <div class="fw-bold text-navy">₹{{ (trip['price'] * 1.1) | int }}</div>
+                                    </div>
+                                </div>
+                                <div class="sharing-option" data-type="double">
+                                    <input type="radio" name="sharing_type" value="double" class="d-none">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold">Double Sharing</div>
+                                            <small class="text-muted">Premium (2 in a room)</small>
+                                        </div>
+                                        <div class="fw-bold text-navy">₹{{ (trip['price'] * 1.3) | int }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <input type="hidden" name="sharing_type" value="ticket">
+                        {% endif %}
+
+                        {% if addons %}
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Add-ons & Insurance</label>
+                            {% for addon in addons %}
+                            <div class="addon-card">
+                                <div>
+                                    <div class="fw-bold small">{{ addon.title }}</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">+ ₹{{ addon.price }}</div>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input addon-check" type="checkbox" name="addons" value="{{ addon.id }}" data-price="{{ addon.price }}">
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="bg-sunken p-4 rounded-4 mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Summary (<span id="sum-count">1</span> travelers)</span>
+                                <span class="fw-bold">₹<span id="sum-base">{{ trip['price'] }}</span></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2" id="sum-addon-row" style="display:none !important;">
+                                <span class="text-muted small">Add-ons total</span>
+                                <span class="fw-bold text-success">+ ₹<span id="sum-addons">0</span></span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Grand Total</span>
+                                <span class="price-tag text-terra" style="font-size: 1.8rem;">₹<span id="sum-total">{{ trip['price'] }}</span></span>
+                            </div>
+                        </div>
+
+                        {% if session.get('user_id') %}
+                            <button type="submit" class="btn btn-terra btn-lg w-100 rounded-pill">Book Adventure</button>
+                        {% else %}
+                            <a href="/login" class="btn btn-outline-navy btn-lg w-100 rounded-pill">Login to Book</a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block scripts %}
+<script>
+    const basePrice = {{ trip['price'] }};
+    let travelers = 1;
+    let multiplier = 1.0;
+
+    const decBtn = document.getElementById('dec-travelers');
+    const incBtn = document.getElementById('inc-travelers');
+    const travelerDisp = document.getElementById('traveler-display');
+    const travelersInput = document.getElementById('num_travelers');
+
+    const updateUI = () => {
+        travelerDisp.innerText = travelers;
+        travelersInput.value = travelers;
+        
+        let addonTotal = 0;
+        document.querySelectorAll('.addon-check:checked').forEach(chk => {
+            addonTotal += parseInt(chk.dataset.price);
+        });
+
+        const perPerson = Math.round(basePrice * multiplier);
+        const baseTotal = perPerson * travelers;
+        const finalTotal = baseTotal + addonTotal;
+
+        document.getElementById('sum-count').innerText = travelers;
+        document.getElementById('sum-base').innerText = baseTotal.toLocaleString('en-IN');
+        document.getElementById('sum-total').innerText = finalTotal.toLocaleString('en-IN');
+        
+        const addonRow = document.getElementById('sum-addon-row');
+        if(addonTotal > 0) {
+            addonRow.style.display = 'flex';
+            document.getElementById('sum-addons').innerText = addonTotal.toLocaleString('en-IN');
+        } else {
+            addonRow.style.display = 'none';
+        }
+    };
+
+    decBtn.onclick = () => { if(travelers > 1) { travelers--; updateUI(); } };
+    incBtn.onclick = () => { if(travelers < 12) { travelers++; updateUI(); } };
+
+    document.querySelectorAll('.sharing-option').forEach(opt => {
+        opt.onclick = function() {
+            document.querySelectorAll('.sharing-option').forEach(x => x.classList.remove('active'));
+            this.classList.add('active');
+            this.querySelector('input').checked = true;
+            
+            const type = this.dataset.type;
+            if(type === 'quad') multiplier = 1.0;
+            if(type === 'triple') multiplier = 1.1;
+            if(type === 'double') multiplier = 1.3;
+            updateUI();
+        }
+    });
+
+    document.querySelectorAll('.addon-check').forEach(chk => {
+        chk.onchange = updateUI;
+    });
+
+    updateUI();
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .payment-container {
+        padding: 8rem 0 5rem;
+        background: var(--bg-base);
+        min-height: calc(100vh - 80px);
+    }
+    .payment-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 3rem;
+        box-shadow: var(--shadow-lg);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .order-status-banner {
+        background: var(--warning-dim);
+        border: 1px solid rgba(217, 119, 6, 0.2);
+        border-radius: var(--r-md);
+        padding: 1rem;
+        font-size: 0.9rem;
+        color: #92400e;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+    .order-item-list {
+        margin: 2rem 0;
+    }
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    .item-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: var(--r-md);
+        border: 1px solid var(--border);
+    }
+    .item-details {
+        flex: 1;
+    }
+    .item-title {
+        font-weight: 700;
+        color: var(--navy);
+        font-size: 0.95rem;
+    }
+    .item-subtext {
+        font-size: 0.825rem;
+        color: var(--text-muted);
+    }
+    .item-amount {
+        font-weight: 700;
+        color: var(--terra);
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.25rem;
+    }
+    .total-display {
+        background: var(--bg-sunken);
+        border-radius: var(--r-lg);
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    .grand-total {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--navy);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} mb-5 text-center">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="payment-card fade-up">
+            <div class="text-center mb-4">
+                <div class="icon-box icon-terra mx-auto mb-3" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                    <i class="fa-solid fa-credit-card"></i>
+                </div>
+                <h2 class="serif h1" style="color: var(--navy);">Secure Checkout</h2>
+                <p class="text-muted">Review your provisions one last time.</p>
+            </div>
+
+            <div class="order-status-banner">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <div>Order <strong>#ORD-{{ order.id }}</strong> is reserved for 15 minutes.</div>
+            </div>
+
+            <div class="order-item-list">
+                <h5 class="serif mb-3" style="color: var(--navy);">Provision Details</h5>
+                {% for item in items %}
+                <div class="order-item">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}" class="item-img">
+                    <div class="item-details">
+                        <div class="item-title">{{ item.name }}</div>
+                        <div class="item-subtext">Quantities: {{ item.quantity }} × ₹{{ item.price_at_purchase }}</div>
+                    </div>
+                    <div class="item-amount">₹{{ item.quantity * item.price_at_purchase }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="total-display">
+                <div class="d-flex justify-content-between text-muted small mb-2">
+                    <span>Subtotal</span>
+                    <span class="fw-bold">₹{{ order.total_amount }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-muted small mb-3">
+                    <span>Logistics (Shipping)</span>
+                    <span class="text-success fw-bold">FREE HQ DROP</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="h5 serif mb-0">Total Due</span>
+                    <span class="grand-total">₹{{ order.total_amount }}</span>
+                </div>
+            </div>
+
+            <div class="mt-5">
+                <!-- Razorpay Payment Button -->
+                <button id="rzp-pay-btn" class="btn btn-terra btn-lg w-100 rounded-pill shadow-md">
+                    <i class="fa-solid fa-shield-check me-2"></i>Pay ₹{{ order.total_amount }} Securely
+                </button>
+
+                <!-- Hidden form to confirm payment -->
+                <form id="payment-confirm-form" action="/shop/payment/confirm" method="POST" style="display:none;">
+                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id_field">
+                </form>
+
+                <div class="mt-4 text-center">
+                    <form action="/cancel_order/{{ order.id }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-link text-danger text-decoration-none small" onclick="return confirm('Abort payment and cancel order?')">
+                            <i class="fa-solid fa-xmark me-2"></i>Abandon Dispatch
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <p class="text-center text-muted mt-4 small">
+                <i class="fa-solid fa-lock me-1"></i>Secure end-to-end encryption verified.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('rzp-pay-btn').onclick = function(e) {
+        var options = {
+            key: "{{ razorpay_key }}",
+            amount: Number("{{ order.total_amount }}") * 100,
+            currency: "INR",
+            name: "WanderBuddy",
+            description: "Gear Dispatch #ORD-{{ order.id }}",
+            image: "{% if settings and settings.logo_url %}{{ settings.logo_url }}{% endif %}",
+            handler: function(response) {
+                document.getElementById('razorpay_payment_id_field').value = response.razorpay_payment_id;
+                document.getElementById('payment-confirm-form').submit();
+            },
+            prefill: {
+                name: "{{ session['user_name'] if 'user_name' in session else '' }}",
+                email: "{{ session['user_email'] if 'user_email' in session else '' }}"
+            },
+            theme: { color: "#c27346" },
+            modal: {
+                ondismiss: function() {
+                    document.getElementById('rzp-pay-btn').innerHTML = '<i class="fa-solid fa-shield-check me-2"></i>Pay ₹{{ order.total_amount }} Securely';
+                }
+            }
+        };
+        var rzp = new Razorpay(options);
+        rzp.open();
+        e.preventDefault();
+    };
+</script>
+{% endblock %}

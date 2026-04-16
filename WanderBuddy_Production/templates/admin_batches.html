@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Batches | {{ trip.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        :root {
+            --primary: {{ settings.get('primary_color', '#1a1a2e') }};
+            --secondary: {{ settings.get('secondary_color', '#16213e') }};
+            --accent: {{ settings.get('accent_color', '#e8c547') }};
+        }
+        body { background-color: var(--primary); color: #fff; font-family: 'DM Sans', sans-serif; }
+        .batch-card { background: var(--secondary); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="/admin" class="btn btn-outline-light btn-sm mb-2"><i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard</a>
+                <h2 class="text-white fw-bold">Manage Batches: {{ trip.title }}</h2>
+            </div>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBatchModal">+ Add New Batch</button>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} mb-4">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row g-4">
+            {% for batch in batches %}
+            <div class="col-md-4">
+                <div class="batch-card h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="text-accent fw-bold">{{ batch.batch_date }}</h5>
+                        <span class="badge bg-{{ 'success' if batch.status=='confirmed' else 'warning' if batch.status=='pending' else 'danger' }}">{{ batch.status }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-white-50">Capacity:</small>
+                        <div class="progress bg-dark mb-1" style="height: 10px;">
+                            <div class="progress-bar bg-success" style="width: {{ (batch.current_bookings / batch.max_allowed * 100)|round }}%"></div>
+                        </div>
+                        <p class="small mb-0">{{ batch.current_bookings }} / {{ batch.max_allowed }} Booked (Min: {{ batch.min_required }})</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form action="/admin/trip/batches/delete/{{ batch.id }}" method="POST" class="w-100">
+                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Delete this batch? This will affect current bookings!')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <p class="text-white-50">No batches scheduled for this trip yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Add Batch Modal -->
+    <div class="modal fade" id="addBatchModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-0"><h5 class="modal-title">Schedule New Batch</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <form action="/admin/trip/batches/add" method="POST">
+                        <input type="hidden" name="trip_id" value="{{ trip.id }}">
+                        <label class="small text-white-50">Batch Date</label>
+                        <input type="date" name="batch_date" class="form-control bg-secondary text-white border-0 mb-3" required>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="small text-white-50">Min Group Size</label>
+                                <input type="number" name="min_required" class="form-control bg-secondary text-white border-0 mb-3" value="6" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-white-50">Max Capacity</label>
+                                <input type="number" name="max_allowed" class="form-control bg-secondary text-white border-0 mb-3" value="16" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">Save Batch</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

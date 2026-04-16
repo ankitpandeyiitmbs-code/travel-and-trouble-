@@ -1,0 +1,630 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="admin-dashboard-container" style="padding-top: 100px; min-height: 100vh;">
+    <div class="container-fluid px-4">
+        
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2 mb-0">Admin Dashboard</h1>
+            <div class="d-flex gap-2">
+                <a href="/admin#trips" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-calendar-days me-2"></i>Batch Manager</a>
+                <button class="btn btn-terra btn-sm" data-bs-toggle="modal" data-bs-target="#addTripModal"><i class="fa-solid fa-plus me-2"></i>Add Trip</button>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal"><i class="fa-solid fa-calendar-plus me-2"></i>Add Event</button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4 admin-navbar gap-2" id="adminTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="pill" data-bs-target="#overview" type="button">Overview</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="trips-tab" data-bs-toggle="pill" data-bs-target="#trips" type="button">Trips</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="events-tab" data-bs-toggle="pill" data-bs-target="#events" type="button"><i class="fa-solid fa-calendar me-2"></i>Events</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="users-tab" data-bs-toggle="pill" data-bs-target="#users" type="button"><i class="fa-solid fa-users me-2"></i>Users</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="bookings-tab" data-bs-toggle="pill" data-bs-target="#bookings_tab" type="button"><i class="fa-solid fa-calendar-check me-2"></i>Bookings</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="quests-tab" data-bs-toggle="pill" data-bs-target="#quests" type="button">Quests</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="partners-tab" data-bs-toggle="pill" data-bs-target="#partners" type="button"><i class="fa-solid fa-store me-2"></i>Partners</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="community-tab" data-bs-toggle="pill" data-bs-target="#community" type="button">Community</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="inbox-tab" data-bs-toggle="pill" data-bs-target="#inbox" type="button"><i class="fa-solid fa-envelope me-2"></i>Inbox</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button"><i class="fa-solid fa-gear me-2"></i>Settings</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="pages-tab" data-bs-toggle="pill" data-bs-target="#pages_tab" type="button"><i class="fa-solid fa-file-lines me-2"></i>Pages</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="adminTabsContent">
+            
+            <!-- ── OVERVIEW TAB ──────────────────────────────────── -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row g-4 mb-4">
+                    {% for key, val in stats.items() %}
+                    <div class="col-md-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-uppercase text-muted small mb-2">{{ key }}</h6>
+                                <h2 class="mb-0">{{ val }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card bg-navy-card text-white border-0 shadow-sm h-100">
+                            <div class="card-header border-0 bg-transparent pt-4 px-4">
+                                <h5 class="mb-0">Recent Activities</h5>
+                            </div>
+                            <div class="card-body px-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for b in bookings %}{% if loop.index <= 10 %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-sm me-3"><i class="fa-solid fa-person-hiking text-terra"></i></div>
+                                                        <div>
+                                                            <div class="fw-bold">{{ b.trip_title }}</div>
+                                                            <div class="small text-muted">{{ b.user_name }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ b.batch_date }}</td>
+                                                <td><span class="badge bg-{{ 'success' if b.status == 'confirmed' else 'warning' }}">{{ b.status }}</span></td>
+                                                <td><a href="/admin#bookings_tab" class="btn btn-sm btn-outline-light">Details</a></td>
+                                            </tr>
+                                            {% endif %}{% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card bg-navy-card text-white border-0 shadow-sm">
+                            <div class="card-header border-0 bg-transparent pt-4 px-4">
+                                <h5 class="mb-0">Quest Requests</h5>
+                            </div>
+                            <div class="card-body px-4">
+                                {% for qf in quest_feed %}{% if loop.index <= 5 %}
+                                <div class="d-flex align-items-center mb-3 p-3 bg-sunken rounded">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">{{ qf.user_name }}</div>
+                                        <div class="small text-muted">Completed {{ qf.quest_title }}</div>
+                                    </div>
+                                    <div class="d-flex gap-1">
+                                        <form action="/admin/quest/action" method="POST">
+                                            <input type="hidden" name="entry_id" value="{{ qf.id }}">
+                                            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm"><i class="fa-solid fa-check"></i></button>
+                                            <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm"><i class="fa-solid fa-xmark"></i></button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endif %}{% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TRIPS TAB ─────────────────────────────────────── -->
+            <div class="tab-pane fade" id="trips" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Trip Title</th>
+                                        <th>Price</th>
+                                        <th>Batches</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if not all_trips %}
+                                    <tr><td colspan="5" class="text-center text-muted py-4">No trips found in database.</td></tr>
+                                    {% endif %}
+                                    {% for trip in all_trips %}
+                                    <tr>
+                                        <td><code>{{ trip.id }}</code></td>
+                                        <td>{{ trip.title }}</td>
+                                        <td>₹{{ trip.price }}</td>
+                                        <td><a href="/admin/trip/batches/{{ trip.id }}" class="btn btn-sm btn-outline-primary">Manage</a></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editTripModal{{ trip.id }}"><i class="fa-solid fa-edit"></i></button>
+                                            <a href="/admin/trip/itinerary/{{ trip.id }}" class="btn btn-sm btn-outline-light">Itinerary</a>
+                                            <form action="/admin/trip/delete/{{ trip.id }}" method="POST" class="d-inline">
+                                                <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── EVENTS TAB ────────────────────────────────────── -->
+            <div class="tab-pane fade" id="events" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Date</th>
+                                        <th>Price</th>
+                                        <th>Location</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if not all_events %}
+                                    <tr><td colspan="6" class="text-center text-muted py-4">No events found in database.</td></tr>
+                                    {% endif %}
+                                    {% for event in all_events %}
+                                    <tr>
+                                        <td><code>{{ event.id }}</code></td>
+                                        <td>{{ event.title }}</td>
+                                        <td>{{ event.event_date }}</td>
+                                        <td>₹{{ event.price }}</td>
+                                        <td>{{ event.location }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editEventModal{{ event.id }}"><i class="fa-solid fa-edit"></i></button>
+                                            <a href="/admin/event/edit/{{ event.id }}" class="btn btn-sm btn-outline-light">Editor</a>
+                                            <form action="/admin/events/delete/{{ event.id }}" method="POST" class="d-inline">
+                                                <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── USERS TAB ─────────────────────────────────────── -->
+            <div class="tab-pane fade" id="users" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in all_users %}
+                                    <tr>
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.role }}</td>
+                                        <td>
+                                            <form action="/admin/user/delete/{{ user.id }}" method="POST" class="d-inline">
+                                                <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── BOOKINGS TAB ──────────────────────────────────── -->
+            <div class="tab-pane fade" id="bookings_tab" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User</th>
+                                        <th>Trip</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for b in all_bookings %}
+                                    <tr>
+                                        <td>#{{ b.id }}</td>
+                                        <td>{{ b.user_name }}</td>
+                                        <td>{{ b.trip_title }}</td>
+                                        <td>{{ b.batch_date }}</td>
+                                        <td>{{ b.status }}</td>
+                                        <td>
+                                            <form action="/admin/booking/status" method="POST" class="d-inline">
+                                                <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                                <input type="hidden" name="status" value="confirmed">
+                                                <button class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── SETTINGS TAB ──────────────────────────────────── -->
+            <div class="tab-pane fade" id="settings" role="tabpanel">
+                <form action="/admin/settings/update" method="POST" enctype="multipart/form-data">
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="card bg-navy-card text-white border-0 shadow-sm h-100">
+                                <div class="card-header border-0 bg-transparent pt-4 px-4"><h5 class="mb-0">Theme & UI</h5></div>
+                                <div class="card-body px-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-12">
+                                            <label class="form-label text-muted small">Site Title</label>
+                                            <input type="text" name="site_title" class="form-control" value="{{ settings.site_title }}">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label text-muted small">Brand Logo</label>
+                                            <input type="file" name="logo_file" class="form-control">
+                                        </div>
+                                        <div class="col-md-4"><label class="form-label text-muted small">Primary</label><input type="color" name="primary_color" class="form-control form-control-color w-100" value="{{ settings.primary_color }}"></div>
+                                        <div class="col-md-4"><label class="form-label text-muted small">Secondary</label><input type="color" name="secondary_color" class="form-control form-control-color w-100" value="{{ settings.secondary_color }}"></div>
+                                        <div class="col-md-4"><label class="form-label text-muted small">Accent</label><input type="color" name="accent_color" class="form-control form-control-color w-100" value="{{ settings.accent_color }}"></div>
+                                        <div class="col-12">
+                                            <label class="form-label text-muted small">Hero Tagline</label>
+                                            <input type="text" name="hero_tagline" class="form-control" value="{{ settings.hero_tagline }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card bg-navy-card text-white border-0 shadow-sm h-100">
+                                <div class="card-header border-0 bg-transparent pt-4 px-4"><h5 class="mb-0">Contact & Socials</h5></div>
+                                <div class="card-body px-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label text-muted small">Phone</label><input type="text" name="phone" class="form-control" value="{{ settings.phone }}"></div>
+                                        <div class="col-md-6"><label class="form-label text-muted small">Email</label><input type="email" name="email" class="form-control" value="{{ settings.email }}"></div>
+                                        <div class="col-12"><label class="form-label text-muted small">Address</label><input type="text" name="address" class="form-control" value="{{ settings.address }}"></div>
+                                        <div class="col-md-6"><label class="form-label text-muted small">Instagram</label><input type="text" name="instagram" class="form-control" value="{{ settings.instagram }}"></div>
+                                        <div class="col-md-6"><label class="form-label text-muted small">Twitter</label><input type="text" name="twitter" class="form-control" value="{{ settings.twitter }}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 text-center mb-4">
+                            <button type="submit" class="btn btn-terra px-5 py-3 shadow">Update All Site Settings</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ── PAGES TAB ────────────────────────────────────── -->
+            <div class="tab-pane fade" id="pages_tab" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header border-0 bg-transparent pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Page Content Manager</h5>
+                        <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#addPageModal">Add New Page</button>
+                    </div>
+                    <div class="card-body px-4">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr><th>Page Name</th><th>Title</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in all_pages %}
+                                    <tr>
+                                        <td><code>{{ p.page_name }}</code></td>
+                                        <td>{{ p.title }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editPageModal{{ p.id }}">Edit</button>
+                                            <a href="/admin/page/edit/{{ p.page_name }}" class="btn btn-sm btn-outline-light">Editor</a>
+                                            <form action="/admin/pages/delete/{{ p.id }}" method="POST" class="d-inline">
+                                                <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="quests" role="tabpanel"><div class="card bg-navy-card text-white p-4 text-center"><p class="text-muted">Quest approvals are available from the overview feed.</p></div></div>
+            <div class="tab-pane fade" id="partners" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        {% if vendors %}
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th>Business</th><th>Owner</th><th>Type</th><th>Status</th><th>Payout</th></tr></thead>
+                                <tbody>
+                                    {% for vendor in vendors %}
+                                    {% set payout = payouts | selectattr('business_name', 'equalto', vendor.business_name) | list | first %}
+                                    <tr>
+                                        <td>{{ vendor.business_name }}</td>
+                                        <td>{{ vendor.name }}<br><small class="text-muted">{{ vendor.email }}</small></td>
+                                        <td>{{ vendor.business_type or 'General' }}</td>
+                                        <td>{{ 'Verified' if vendor.verified else 'Pending' }}</td>
+                                        <td>INR {{ payout.total_earned if payout else 0 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">No vendor partners have signed up yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="community" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        {% if community_posts %}
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th>Author</th><th>Title</th><th>Posted</th><th>Action</th></tr></thead>
+                                <tbody>
+                                    {% for post in community_posts %}
+                                    <tr>
+                                        <td>{{ post.author }}</td>
+                                        <td>{{ post.title }}</td>
+                                        <td>{{ post.timestamp }}</td>
+                                        <td>
+                                            <form action="/admin/delete_post/{{ post.id }}" method="POST" class="d-inline">
+                                                <button class="btn btn-sm btn-danger">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">No community posts to moderate yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="inbox" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        {% if inbox %}
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th>From</th><th>Subject</th><th>Message</th><th>Received</th></tr></thead>
+                                <tbody>
+                                    {% for item in inbox %}
+                                    <tr>
+                                        <td>{{ item.name }}<br><small class="text-muted">{{ item.email }}</small></td>
+                                        <td>{{ item.subject }}</td>
+                                        <td>{{ item.message }}</td>
+                                        <td>{{ item.created_at }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">No contact messages yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODALS -->
+
+<!-- Add Page Modal -->
+<div class="modal fade" id="addPageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-navy-card text-white">
+            <div class="modal-header border-0"><h5 class="modal-title">Create CMS Page</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <form action="/admin/pages/add" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Page Name (URL slug)</label><input type="text" name="page_name" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Page Title</label><input type="text" name="title" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Content (HTML)</label><textarea name="content" class="form-control" rows="10" required></textarea></div>
+                </div>
+                <div class="modal-footer border-0"><button type="submit" class="btn btn-terra">Create Page</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Page Modals -->
+{% for p in all_pages %}
+<div class="modal fade" id="editPageModal{{ p.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-navy-card text-white">
+            <div class="modal-header border-0"><h5 class="modal-title">Edit Page: {{ p.page_name }}</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <form action="/admin/pages/edit" method="POST">
+                <input type="hidden" name="id" value="{{ p.id }}">
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Page Title</label><input type="text" name="title" class="form-control" value="{{ p.title }}"></div>
+                    <div class="mb-3"><label class="form-label">Content (HTML)</label><textarea name="content" class="form-control" rows="12" required>{{ p.content }}</textarea></div>
+                </div>
+                <div class="modal-footer border-0"><button type="submit" class="btn btn-terra">Save Changes</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Add Trip Modal -->
+<div class="modal fade" id="addTripModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-navy-card text-white">
+            <div class="modal-header border-0"><h5 class="modal-title">Create New Trip</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <form action="/admin/trip/add" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><input type="text" name="title" class="form-control" placeholder="Trip Title" required></div>
+                        <div class="col-md-3"><input type="number" name="price" class="form-control" placeholder="Price" required></div>
+                        <div class="col-md-3"><input type="text" name="duration" class="form-control" placeholder="Duration" required></div>
+                        <div class="col-md-6"><input type="text" name="location" class="form-control" placeholder="Location" required></div>
+                        <div class="col-md-6"><input type="text" name="category" class="form-control" placeholder="Category" required></div>
+                        <div class="col-md-6"><select name="difficulty" class="form-select"><option value="Easy">Easy</option><option value="Moderate" selected>Moderate</option><option value="Challenging">Challenging</option></select></div>
+                        <div class="col-md-6"><input type="file" name="trip_image_file" class="form-control"></div>
+                        <div class="col-12"><textarea name="description" class="form-control" rows="3" placeholder="Description"></textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0"><button type="submit" class="btn btn-terra">Create Trip</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Trip Modals -->
+{% for trip in all_trips %}
+<div class="modal fade" id="editTripModal{{ trip.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-navy-card text-white">
+            <div class="modal-header border-0"><h5 class="modal-title">Edit Trip: {{ trip.title }}</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <form action="/admin/trip/edit" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="trip_id" value="{{ trip.id }}">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label small text-muted">Title</label><input type="text" name="title" class="form-control" value="{{ trip.title }}" required></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Price (₹)</label><input type="number" name="price" class="form-control" value="{{ trip.price }}" required></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Duration</label><input type="text" name="duration" class="form-control" value="{{ trip.duration }}" required></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Location</label><input type="text" name="location" class="form-control" value="{{ trip.location }}" required></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Category</label><input type="text" name="category" class="form-control" value="{{ trip.category or '' }}" placeholder="e.g. Adventure Trip"></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Difficulty</label><select name="difficulty" class="form-select"><option value="Easy" {% if trip.difficulty == 'Easy' %}selected{% endif %}>Easy</option><option value="Moderate" {% if trip.difficulty == 'Moderate' %}selected{% endif %}>Moderate</option><option value="Challenging" {% if trip.difficulty == 'Challenging' %}selected{% endif %}>Challenging</option></select></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Upload New Image</label><input type="file" name="trip_image_file" class="form-control"></div>
+                        <div class="col-12"><label class="form-label small text-muted">Highlights (comma-separated)</label><input type="text" name="highlights" class="form-control" value="{{ trip.highlights or '' }}" placeholder="e.g. Sunrise views, Local cuisine, ..."></div>
+                        <div class="col-12"><label class="form-label small text-muted">Description</label><textarea name="description" class="form-control" rows="3">{{ trip.description }}</textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0"><button type="submit" class="btn btn-terra">Update Trip</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Add Event Modal -->
+<div class="modal fade" id="addEventModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-navy-card text-white">
+            <div class="modal-header border-0"><h5 class="modal-title">Add New Event</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <form action="/admin/events/add" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label small text-muted">Event ID (slug)</label><input type="text" name="id" class="form-control" placeholder="e.g. monsoon-camp-2026" required></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Title</label><input type="text" name="title" class="form-control" placeholder="Event Title" required></div>
+                        <div class="col-md-4"><label class="form-label small text-muted">Price (₹)</label><input type="number" name="price" class="form-control" placeholder="Price" required></div>
+                        <div class="col-md-4"><label class="form-label small text-muted">Duration</label><input type="text" name="duration" class="form-control" placeholder="e.g. 2 Days 1 Night"></div>
+                        <div class="col-md-4"><label class="form-label small text-muted">Category</label><input type="text" name="category" class="form-control" placeholder="e.g. Adventure Camps"></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Location</label><input type="text" name="location" class="form-control" placeholder="Location" required></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Event Date</label><input type="date" name="event_date" class="form-control" required></div>
+                        <div class="col-md-12"><label class="form-label small text-muted">Upload Image</label><input type="file" name="image_file" class="form-control"></div>
+                        <div class="col-12"><label class="form-label small text-muted">Description</label><textarea name="description" class="form-control" rows="3" placeholder="Description"></textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0"><button type="submit" class="btn btn-terra">Create Event</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Event Modals -->
+{% for event in all_events %}
+<div class="modal fade" id="editEventModal{{ event.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-navy-card text-white">
+            <div class="modal-header border-0"><h5 class="modal-title">Edit Event: {{ event.title }}</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <form action="/admin/events/edit" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="id" value="{{ event.id }}">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label small text-muted">Title</label><input type="text" name="title" class="form-control" value="{{ event.title }}" required></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Price (₹)</label><input type="number" name="price" class="form-control" value="{{ event.price }}" required></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Duration</label><input type="text" name="duration" class="form-control" value="{{ event.duration or '' }}" placeholder="e.g. 2 Days"></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Location</label><input type="text" name="location" class="form-control" value="{{ event.location }}" required></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Category</label><input type="text" name="category" class="form-control" value="{{ event.category or '' }}" placeholder="e.g. Adventure Camps"></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Event Date</label><input type="date" name="event_date" class="form-control" value="{{ event.event_date }}" required></div>
+                        <div class="col-md-6"><label class="form-label small text-muted">Upload New Image</label><input type="file" name="image_file" class="form-control"></div>
+                        <div class="col-12"><label class="form-label small text-muted">Description</label><textarea name="description" class="form-control" rows="2">{{ event.description }}</textarea></div>
+                        <div class="col-12"><label class="form-label small text-muted">Itinerary / Schedule</label><textarea name="itinerary" class="form-control" rows="3">{{ event.itinerary or '' }}</textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0"><button type="submit" class="btn btn-terra">Update Event</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        function activateTabFromHash() {
+            var hash = window.location.hash;
+            if (!hash) return;
+
+            var trigger = document.querySelector('[data-bs-target="' + hash + '"]');
+            if (!trigger) return;
+
+            bootstrap.Tab.getOrCreateInstance(trigger).show();
+        }
+
+        window.addEventListener('load', activateTabFromHash);
+        window.addEventListener('hashchange', activateTabFromHash);
+    })();
+</script>
+{% endblock %}

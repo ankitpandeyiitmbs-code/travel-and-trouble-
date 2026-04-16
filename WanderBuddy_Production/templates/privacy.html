@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Privacy Policy | Travel and Trouble</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-white pt-5">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top p-0">
+        <div class="container-fluid ps-4 pe-4">
+            <a class="navbar-brand py-0 d-flex align-items-center gap-3 text-decoration-none text-white" href="/">
+                {% if settings and settings.logo_url %}
+                <img src="{{ settings.logo_url }}" alt="Travel &amp; Trouble" style="height: 72px; object-fit: contain;">
+                {% else %}
+                <span class="fs-2"><i class="fa-solid fa-compass"></i></span>
+                <span class="fw-semibold">Travel &amp; Trouble</span>
+                {% endif %}
+            </a>
+            <ul class="navbar-nav ms-auto gap-4">
+                <li class="nav-item"><a class="nav-link fs-5" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link fs-5" href="/trips">Trips</a></li>
+                <li class="nav-item"><a class="nav-link fs-5" href="/events">Events</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+        <h1 class="display-4 fw-bold mb-4">Privacy <span class="text-accent">Policy</span></h1>
+        <p style="color: rgba(255,255,255,0.7);" class="mb-4">Last updated: April 11, 2026</p>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">1. Introduction</h4>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        Travel & Trouble ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, store, and protect your information when you use our website and services.
+                    </p>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">2. Information We Collect</h4>
+                    <h6 class="text-white mt-3">Personal Information:</h6>
+                    <ul style="color: #cbd5e1;">
+                        <li>Name, email address, phone number</li>
+                        <li>Billing and payment information</li>
+                        <li>Emergency contact details</li>
+                        <li>Government ID (for booking verification)</li>
+                    </ul>
+                    
+                    <h6 class="text-white mt-3">Travel Information:</h6>
+                    <ul style="color: #cbd5e1;">
+                        <li>Booking history and preferences</li>
+                        <li>Travel dates and destinations</li>
+                        <li>Dietary requirements and medical conditions</li>
+                        <li>Activity preferences</li>
+                    </ul>
+                    
+                    <h6 class="text-white mt-3">Technical Information:</h6>
+                    <ul style="color: #cbd5e1;">
+                        <li>IP address and browser type</li>
+                        <li>Device information</li>
+                        <li>Usage data and cookies</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">3. How We Use Your Information</h4>
+                    <ul style="color: #cbd5e1;">
+                        <li>Process your bookings and payments</li>
+                        <li>Communicate trip details and updates</li>
+                        <li>Ensure your safety during trips</li>
+                        <li>Improve our services and user experience</li>
+                        <li>Send promotional offers (with your consent)</li>
+                        <li>Comply with legal obligations</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">4. Data Sharing</h4>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        We share your information only with:
+                    </p>
+                    <ul style="color: #cbd5e1;">
+                        <li><strong>Local Partners:</strong> Verified guides and accommodation providers necessary for your trip</li>
+                        <li><strong>Payment Processors:</strong> Secure payment gateways for transactions</li>
+                        <li><strong>Legal Authorities:</strong> When required by law or for safety purposes</li>
+                    </ul>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        We do not sell your personal data to third parties.
+                    </p>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">5. Data Security</h4>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        We implement industry-standard security measures including:
+                    </p>
+                    <ul style="color: #cbd5e1;">
+                        <li>SSL encryption for data transmission</li>
+                        <li>Secure password hashing (PBKDF2)</li>
+                        <li>Regular security audits</li>
+                        <li>Limited access to personal data</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">6. Your Rights</h4>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        You have the right to:
+                    </p>
+                    <ul style="color: #cbd5e1;">
+                        <li>Access your personal data</li>
+                        <li>Request corrections to your information</li>
+                        <li>Request deletion of your account</li>
+                        <li>Opt-out of marketing communications</li>
+                        <li>Download your data</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-4">
+                    <h4 class="text-accent mb-3">7. Contact Us</h4>
+                    <p style="color: #cbd5e1; line-height: 1.7;">
+                        For privacy-related queries, contact our Data Protection Officer:
+                    </p>
+                    <p style="color: #cbd5e1;">
+                        <i class="fa-solid fa-envelope me-2 text-accent"></i> ankit.pandeyiitmbs@gmail.com<br>
+                        <i class="fa-solid fa-phone me-2 text-accent"></i> +91 8347416221
+                    </p>
+                </section>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="p-3 rounded sticky-top" style="background: rgba(30,41,59,0.8); border: 1px solid rgba(255,255,255,0.1); top: 100px;">
+                    <h5 class="fw-bold mb-3 text-accent">Quick Links</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="/about" class="text-decoration-none" style="color: #cbd5e1;"><i class="fa-solid fa-circle-info me-2"></i>About Us</a></li>
+                        <li class="mb-2"><a href="/terms" class="text-decoration-none" style="color: #cbd5e1;"><i class="fa-solid fa-file-contract me-2"></i>Terms of Service</a></li>
+                        <li class="mb-2"><a href="/contact" class="text-decoration-none" style="color: #cbd5e1;"><i class="fa-solid fa-envelope me-2"></i>Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body></html>
