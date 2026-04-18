@@ -50,7 +50,8 @@
         <div class="trip-card">
           <div class="trip-card__image-wrap">
             <img src="{{ trip.image_url or 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400' }}"
-                 alt="{{ trip.title }}" class="trip-card__img" loading="lazy">
+                 alt="{{ trip.title }}" class="trip-card__img" loading="lazy"
+                 onerror="this.src='https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400'">
             <div class="trip-card__image-overlay"></div>
             <span class="trip-card__badge trip-card__badge--category">{{ trip.category }}</span>
             {% if trip.difficulty %}
@@ -133,7 +134,8 @@
         <div class="event-card">
           <div class="event-card__image-wrap">
             <img src="{{ event.image_url or 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400' }}"
-                 alt="{{ event.title }}" class="event-card__img" loading="lazy">
+                 alt="{{ event.title }}" class="event-card__img" loading="lazy"
+                 onerror="this.src='https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400'">
             <div class="event-card__date-badge">
               <span class="event-card__date-day">{{ event.event_date[8:10] if event.event_date and event.event_date|length >= 10 else '--' }}</span>
               <span class="event-card__date-month">{{ event.event_date[5:7] if event.event_date and event.event_date|length >= 7 else '' }}</span>
@@ -171,10 +173,13 @@
     <div class="row g-4">
       {% for item in shop_items %}
       <div class="col-md-3">
-        <div class="card h-100" style="overflow:hidden">
-          <img src="{{ item.image_url or 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=300' }}"
-               alt="{{ item.name }}" style="height:180px;object-fit:cover" loading="lazy">
-          <div class="card-body">
+        <div class="card" style="overflow:hidden;height:100%;display:flex;flex-direction:column">
+          <div style="height:180px;overflow:hidden;flex-shrink:0">
+            <img src="{{ item.image_url or 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=300' }}"
+                 alt="{{ item.name }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"
+                 onerror="this.src='https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=300'">
+          </div>
+          <div class="card-body" style="flex:1">
             <h6 class="fw-bold mb-1">{{ item.name }}</h6>
             <div class="d-flex justify-content-between align-items-center mt-2">
               <span class="fw-bold" style="color:var(--terra)">₹{{ "{:,}".format(item.price) }}</span>
