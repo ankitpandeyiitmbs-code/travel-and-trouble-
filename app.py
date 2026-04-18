@@ -349,7 +349,10 @@ def trip_details(trip_id):
         conn.close()
         return render_template('404.html'), 404
     batch_choices = build_batch_choices(conn, target, target_type)
-    addons = conn.execute("SELECT a.*, u.name as vendor_name FROM addons a JOIN users u ON a.vendor_id=u.id WHERE a.trip_id=?", (trip_id,)).fetchall()
+    # Only get addons for trips, not events
+    addons = []
+    if target_type == 'trip':
+        addons = conn.execute("SELECT a.*, u.name as vendor_name FROM addons a JOIN users u ON a.vendor_id=u.id WHERE a.trip_id=?", (trip_id,)).fetchall()
     existing_booking = None
     sub_tier = None
     discount_pct = 0
@@ -363,10 +366,13 @@ def trip_details(trip_id):
             (session['user_id'],)).fetchone()
         if sub:
             sub_tier = sub['plan_name']
-    try:
-        itinerary = json.loads(target.get('itinerary', '[]') or '[]')
-    except Exception:
-        itinerary = []
+    # Only parse itinerary for trips, not events
+    itinerary = []
+    if target_type == 'trip':
+        try:
+            itinerary = json.loads(target.get('itinerary', '[]') or '[]')
+        except Exception:
+            itinerary = []
     conn.close()
     return render_template('trip_details.html', trip=target, target_type=target_type,
                            batch_choices=batch_choices, addons=addons,
