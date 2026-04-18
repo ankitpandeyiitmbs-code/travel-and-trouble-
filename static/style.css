@@ -152,7 +152,7 @@ label { color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; }
   .admin-nav { flex-wrap: wrap; gap: 0.25rem; }
 }
 
-/* ── UPGRADED TRIP CARDS ──────────────────────────────────────────── */
+/* ── UPGRADED TRIP CARDS ─────────────────────────────────────────── */
 .trip-card {
   border-radius: 16px;
   overflow: hidden;
@@ -169,7 +169,7 @@ label { color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; }
 }
 .trip-card__image-wrap {
   position: relative;
-  height: 240px;
+  aspect-ratio: 4/3;
   overflow: hidden;
 }
 .trip-card__img {
@@ -220,7 +220,7 @@ label { color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; }
 .event-card:hover {
   transform: translateY(-5px); box-shadow: 0 14px 40px rgba(0,0,0,0.15);
 }
-.event-card__image-wrap { position: relative; height: 180px; overflow: hidden; }
+.event-card__image-wrap { position: relative; aspect-ratio: 4/3; overflow: hidden; }
 .event-card__img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
 .event-card:hover .event-card__img { transform: scale(1.07); }
 .event-card__date-badge {
@@ -254,3 +254,9 @@ label { color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; }
 .badge-difficulty-easy { background:#d1fae5; color:#065f46; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
 .badge-difficulty-moderate { background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
 .badge-difficulty-challenging { background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
+
+/* ── IMAGE ASPECT RATIO CONTAINERS ─────────────────────────────────── */
+.img-container-4-3 { aspect-ratio: 4/3; overflow: hidden; }
+.img-container-1-1 { aspect-ratio: 1/1; overflow: hidden; }
+.img-container-16-9 { aspect-ratio: 16/9; overflow: hidden; }
+.img-container-fixed { width: 100%; height: 100%; object-fit: cover; }
