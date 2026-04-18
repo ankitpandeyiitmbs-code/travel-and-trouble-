@@ -210,16 +210,16 @@ label { color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; }
 
 /* ── UPGRADED EVENT CARDS ─────────────────────────────────────────── */
 .event-card {
-  display: flex; border-radius: 16px; overflow: hidden; min-height: 200px;
+  border-radius: 16px; overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,0.09);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background: #fff; border-left: 4px solid transparent;
+  background: #fff; height: 100%;
+  display: flex; flex-direction: column;
 }
 .event-card:hover {
   transform: translateY(-5px); box-shadow: 0 14px 40px rgba(0,0,0,0.15);
-  border-left-color: var(--terra, #C4622D);
 }
-.event-card__image-wrap { position: relative; width: 200px; min-width: 200px; overflow: hidden; }
+.event-card__image-wrap { position: relative; height: 180px; overflow: hidden; }
 .event-card__img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
 .event-card:hover .event-card__img { transform: scale(1.07); }
 .event-card__date-badge {
@@ -230,17 +230,17 @@ label { color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; }
 }
 .event-card__date-day { display: block; font-size: 1.6rem; font-weight: 800; }
 .event-card__date-month { display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-.event-card__body { padding: 20px 24px; flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.event-card__body { padding: 20px 24px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
 .event-card__category {
   font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--terra, #C4622D);
 }
-.event-card__title { font-size: 1.2rem; font-weight: 700; margin: 4px 0; line-height: 1.3; }
+.event-card__title { font-size: 1.15rem; font-weight: 700; margin: 0; line-height: 1.3; }
 .event-card__location, .event-card__time { font-size: 0.85rem; color: #666; margin: 0; }
-.event-card__footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; }
+.event-card__footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 16px; }
 .event-card__price { font-size: 1.25rem; font-weight: 800; color: var(--navy, #1C3144); }
 .event-card__cta {
-  padding: 9px 20px; background: var(--navy, #1C3144); color: #fff;
+  padding: 8px 18px; background: var(--navy, #1C3144); color: #fff;
   border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.875rem;
   transition: background 0.2s ease;
 }
