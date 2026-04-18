@@ -23,6 +23,8 @@ _base_dir = os.path.dirname(os.path.abspath(__file__))
 app.config['DATABASE'] = os.environ.get('DATABASE') or os.path.join(_base_dir, 'wanderbuddy.db')
 app.config['UPLOAD_FOLDER'] = os.path.join(_base_dir, 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID') or 'rzp_test_replace_me'
+IS_SIMULATION_MODE = os.environ.get('IS_SIMULATION_MODE', 'false').lower() == 'true'
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
