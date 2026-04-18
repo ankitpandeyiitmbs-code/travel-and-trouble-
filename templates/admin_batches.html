@@ -1,0 +1,172 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken); min-height:100vh;">
+  <div class="container">
+    <div class="mb-4">
+      <a href="/admin#trips" class="text-muted text-decoration-none small">
+        <i class="fa-solid fa-arrow-left me-1"></i>Back to Admin — Trips
+      </a>
+      <h3 class="mt-2 mb-0" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">
+        Batches — <span class="text-terra">{{ trip.title }}</span>
+      </h3>
+      <p class="text-muted small mb-0">Duration: {{ trip.duration }} · ₹{{ '{:,}'.format(trip.price) }} base price</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Existing Batches -->
+      <div class="col-12 col-lg-8">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="fw-bold text-navy mb-3">All Batches ({{ batches|length }})</h6>
+            {% if batches %}
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Seats Total</th>
+                    <th>Booked</th>
+                    <th>Available</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for b in batches %}
+                  <tr>
+                    <td class="fw-semibold">{{ b.start_date }}</td>
+                    <td class="text-muted small">{{ b.end_date or '—' }}</td>
+                    <td class="text-center">{{ b.total_seats }}</td>
+                    <td class="text-center">
+                      <span class="badge bg-secondary">{{ b.booked_seats or 0 }}</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge {% if (b.total_seats - (b.booked_seats or 0)) > 5 %}bg-success{% elif (b.total_seats - (b.booked_seats or 0)) > 0 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                        {{ b.total_seats - (b.booked_seats or 0) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge {% if b.status == 'active' %}bg-success{% elif b.status == 'full' %}bg-danger{% else %}bg-secondary{% endif %}">
+                        {{ b.status|capitalize }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="fillEditBatch({{ b | tojson }})">
+                          <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <form method="POST" action="/admin/batch/delete/{{ b.id }}" onsubmit="return confirm('Delete this batch?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+              <i class="fa-solid fa-calendar-xmark fa-2x mb-3" style="color:var(--border);"></i>
+              <p>No batches yet. Add the first one →</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Batch Form -->
+      <div class="col-12 col-lg-4">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="fw-bold text-navy mb-3">Add New Batch</h6>
+            <form method="POST" action="/admin/batch/add">
+              <input type="hidden" name="trip_id" value="{{ trip.id }}">
+              <div class="mb-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" name="start_date" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">End Date <small class="text-muted">(optional)</small></label>
+                <input type="date" class="form-control" name="end_date">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Total Seats</label>
+                <input type="number" class="form-control" name="total_seats" value="20" required min="1" max="500">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                  <option value="active" selected>Active</option>
+                  <option value="closed">Closed</option>
+                  <option value="full">Full</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-terra w-100">
+                <i class="fa-solid fa-plus me-2"></i>Add Batch
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Batch Modal -->
+<div class="modal fade" id="editBatchModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Batch</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/admin/batch/edit">
+        <div class="modal-body">
+          <input type="hidden" name="batch_id" id="editBatchId">
+          <div class="mb-3">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-control" name="start_date" id="editBatchStart" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">End Date</label>
+            <input type="date" class="form-control" name="end_date" id="editBatchEnd">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Total Seats</label>
+            <input type="number" class="form-control" name="total_seats" id="editBatchSeats" required min="1">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status" id="editBatchStatus">
+              <option value="active">Active</option>
+              <option value="closed">Closed</option>
+              <option value="full">Full</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-terra">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function fillEditBatch(b){
+  document.getElementById('editBatchId').value = b.id;
+  document.getElementById('editBatchStart').value = b.start_date || '';
+  document.getElementById('editBatchEnd').value = b.end_date || '';
+  document.getElementById('editBatchSeats').value = b.total_seats;
+  const sel = document.getElementById('editBatchStatus');
+  for(let opt of sel.options){ if(opt.value === b.status) sel.value = b.status; }
+  new bootstrap.Modal(document.getElementById('editBatchModal')).show();
+}
+</script>
+{% endblock %}

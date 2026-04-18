@@ -1,0 +1,222 @@
+{% extends "layout.html" %}
+{% block title %}{{ settings.site_title }} — {{ settings.hero_tagline }}{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="hero-carousel">
+    <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600');">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600');">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1510797215324-95aa89f43c33?w=1600');">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1605493652047-19286d4b7e7e?w=1600');">
+      <div class="hero-overlay"></div>
+    </div>
+  </div>
+  <div class="container text-center position-relative" style="z-index:2">
+    <span class="tag-pill mb-3 d-inline-block" style="background:rgba(196,98,45,0.25);color:var(--terra-light)">🏔 Adventure Awaits</span>
+    <h1 class="display-2 fw-bold mb-3" style="color: #E8855A">{{ settings.hero_tagline }}</h1>
+    <p class="lead mb-4" style="color:rgba(255,255,255,0.8);max-width:600px;margin:0 auto">{{ settings.hero_subtext }}</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{{ url_for('trips') }}" class="btn btn-terra btn-lg">Explore Trips</a>
+      <a href="{{ url_for('events') }}" class="btn btn-outline-light btn-lg">Events</a>
+    </div>
+    <div class="row g-3 mt-5 justify-content-center">
+      <div class="col-auto"><div class="text-center"><div class="h3 fw-bold" style="color:var(--terra-light)">5000+</div><div style="color:rgba(255,255,255,0.7);font-size:0.9rem">Happy Travelers</div></div></div>
+      <div class="col-auto px-4" style="border-left:1px solid rgba(255,255,255,0.2);border-right:1px solid rgba(255,255,255,0.2)"><div class="text-center"><div class="h3 fw-bold" style="color:var(--terra-light)">50+</div><div style="color:rgba(255,255,255,0.7);font-size:0.9rem">Unique Trips</div></div></div>
+      <div class="col-auto"><div class="text-center"><div class="h3 fw-bold" style="color:var(--terra-light)">4.9★</div><div style="color:rgba(255,255,255,0.7);font-size:0.9rem">Average Rating</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED TRIPS -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="section-title mb-1">Featured Trips</h2>
+        <p style="color:var(--text-muted)">Handpicked adventures for every explorer</p>
+      </div>
+      <a href="{{ url_for('trips') }}" class="btn btn-outline-terra">View All <i class="fa-solid fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for trip in featured_trips %}
+      <div class="col-md-6 col-lg-3">
+        <div class="trip-card">
+          <div class="trip-card__image-wrap">
+            <img src="{{ trip.image_url or 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400' }}"
+                 alt="{{ trip.title }}" class="trip-card__img" loading="lazy">
+            <div class="trip-card__image-overlay"></div>
+            <span class="trip-card__badge trip-card__badge--category">{{ trip.category }}</span>
+            {% if trip.difficulty %}
+            <span class="trip-card__badge trip-card__badge--difficulty trip-card__badge--{{ trip.difficulty|lower }}">{{ trip.difficulty }}</span>
+            {% endif %}
+          </div>
+          <div class="trip-card__body">
+            <p class="trip-card__destination">📍 {{ trip.location }}</p>
+            <h3 class="trip-card__title">{{ trip.title }}</h3>
+            <div class="trip-card__meta">
+              <span class="trip-card__duration" style="color:var(--text-secondary);font-size:0.85rem">🗓 {{ trip.duration }}</span>
+              <span class="trip-card__price">₹{{ "{:,.0f}".format(trip.price) }}</span>
+            </div>
+            <a href="{{ url_for('trip_details', trip_id=trip.id) }}" class="trip-card__cta">Explore Trip →</a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center py-5" style="color:var(--text-muted)">
+        <i class="fa-solid fa-compass fa-3x mb-3"></i>
+        <p>No trips available yet. Check back soon!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="py-5" style="background:var(--bg-sunken)">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Why Travel With Us?</h2>
+    <p class="text-center mb-5" style="color:var(--text-muted)">Everything you need for a perfect journey</p>
+    <div class="row g-4">
+      <div class="col-md-3 text-center">
+        <div class="p-4 card h-100">
+          <i class="fa-solid fa-shield-halved fa-2x mb-3" style="color:var(--terra)"></i>
+          <h6 class="fw-bold">Safety First</h6>
+          <p class="small" style="color:var(--text-secondary)">Certified guides and wilderness first-aid on every trek.</p>
+        </div>
+      </div>
+      <div class="col-md-3 text-center">
+        <div class="p-4 card h-100">
+          <i class="fa-solid fa-wallet fa-2x mb-3" style="color:var(--terra)"></i>
+          <h6 class="fw-bold">Best Value</h6>
+          <p class="small" style="color:var(--text-secondary)">Transparent pricing with no hidden charges. Ever.</p>
+        </div>
+      </div>
+      <div class="col-md-3 text-center">
+        <div class="p-4 card h-100">
+          <i class="fa-solid fa-people-group fa-2x mb-3" style="color:var(--terra)"></i>
+          <h6 class="fw-bold">Small Groups</h6>
+          <p class="small" style="color:var(--text-secondary)">Max 16 per batch for a personalized experience.</p>
+        </div>
+      </div>
+      <div class="col-md-3 text-center">
+        <div class="p-4 card h-100">
+          <i class="fa-solid fa-leaf fa-2x mb-3" style="color:var(--terra)"></i>
+          <h6 class="fw-bold">Eco Responsible</h6>
+          <p class="small" style="color:var(--text-secondary)">Leave No Trace. We give back to local communities.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- UPCOMING EVENTS -->
+{% if upcoming_events %}
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="section-title mb-1">Upcoming Events</h2>
+        <p style="color:var(--text-muted)">Special experiences, limited seats</p>
+      </div>
+      <a href="{{ url_for('events') }}" class="btn btn-outline-terra">All Events <i class="fa-solid fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for event in upcoming_events %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="event-card">
+          <div class="event-card__image-wrap">
+            <img src="{{ event.image_url or 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400' }}"
+                 alt="{{ event.title }}" class="event-card__img" loading="lazy">
+            <div class="event-card__date-badge">
+              <span class="event-card__date-day">{{ event.event_date[8:10] if event.event_date and event.event_date|length >= 10 else '--' }}</span>
+              <span class="event-card__date-month">{{ event.event_date[5:7] if event.event_date and event.event_date|length >= 7 else '' }}</span>
+            </div>
+          </div>
+          <div class="event-card__body">
+            <span class="event-card__category">{{ event.category }}</span>
+            <h3 class="event-card__title">{{ event.title }}</h3>
+            <p class="event-card__location">📍 {{ event.location }}</p>
+            <p class="event-card__time">📅 {{ event.event_date or 'TBD' }}</p>
+            <div class="event-card__footer">
+              <span class="event-card__price">₹{{ "{:,.0f}".format(event.price) }}</span>
+              <a href="{{ url_for('trip_details', trip_id=event.id) }}" class="event-card__cta">Join Event →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- SHOP PREVIEW -->
+{% if shop_items %}
+<section class="py-5" style="background:var(--bg-sunken)">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="section-title mb-1">Explorer Gear Shop</h2>
+        <p style="color:var(--text-muted)">Gear up for your next adventure</p>
+      </div>
+      <a href="{{ url_for('shop') }}" class="btn btn-outline-terra">Shop All <i class="fa-solid fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for item in shop_items %}
+      <div class="col-md-3">
+        <div class="card h-100" style="overflow:hidden">
+          <img src="{{ item.image_url or 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=300' }}"
+               alt="{{ item.name }}" style="height:180px;object-fit:cover" loading="lazy">
+          <div class="card-body">
+            <h6 class="fw-bold mb-1">{{ item.name }}</h6>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="fw-bold" style="color:var(--terra)">₹{{ "{:,}".format(item.price) }}</span>
+              <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST">
+                <button class="btn btn-terra btn-sm"><i class="fa-solid fa-cart-plus"></i></button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- EXPLORER PASS CTA -->
+<section class="py-5" style="background:var(--navy)">
+  <div class="container text-center text-white">
+    <i class="fa-solid fa-id-card fa-3x mb-3" style="color:var(--terra-light)"></i>
+    <h2 class="mb-3" style="font-family:'Cormorant Garamond',serif">Get Your Explorer Pass</h2>
+    <p class="mb-4" style="color:rgba(255,255,255,0.75);max-width:500px;margin:0 auto">Save up to 15% on all trips, get priority booking, and unlock exclusive events with an annual pass.</p>
+    <a href="{{ url_for('explorer_pass') }}" class="btn btn-terra btn-lg">Explore Plans</a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Hero Carousel Auto-Slide
+document.addEventListener('DOMContentLoaded', function() {
+  const slides = document.querySelectorAll('.hero-slide');
+  let currentSlide = 0;
+  
+  function nextSlide() {
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + 1) % slides.length;
+    slides[currentSlide].classList.add('active');
+  }
+  
+  setInterval(nextSlide, 5000); // Change slide every 5 seconds
+});
+</script>
+{% endblock %}

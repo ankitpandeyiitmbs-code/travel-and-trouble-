@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{% block title %}{% if action == 'edit' %}Edit Reward{% else %}New Reward{% endif %}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container" style="max-width:680px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--navy);margin:0">
+        {% if action == 'edit' %}Edit Reward{% else %}New Reward{% endif %}
+      </h4>
+      <a href="{{ url_for('admin_rewards') }}" class="btn btn-outline-secondary btn-sm">← Back</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        {% if action == 'edit' and reward %}
+        <div class="mb-3 p-3 rounded" style="background:var(--bg-sunken)">
+          <small class="text-muted fw-semibold">Auto-generated Coupon Code:</small>
+          <code class="d-block mt-1" style="font-size:1.1rem">{{ reward.coupon_code }}</code>
+        </div>
+        {% endif %}
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-600">Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="title" required
+              value="{{ reward.title if reward else '' }}" placeholder="e.g. 10% Off Your Next Trip">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Description</label>
+            <textarea class="form-control" name="description" rows="2"
+              placeholder="Details about this reward…">{{ reward.description if reward else '' }}</textarea>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-600">Reward Type</label>
+              <select class="form-select" name="reward_type">
+                {% for t in ['coupon','discount','gift','free_trip'] %}
+                <option value="{{ t }}" {% if reward and reward.reward_type == t %}selected{% endif %}>{{ t|replace('_',' ')|title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-600">Value</label>
+              <input type="text" class="form-control" name="value"
+                value="{{ reward.value if reward else '' }}" placeholder="e.g. ₹500, 10%, Free kit">
+            </div>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-600">Minimum Points Required</label>
+              <input type="number" class="form-control" name="min_points" min="0"
+                value="{{ reward.min_points if reward else 0 }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-600">Linked Trip (optional)</label>
+              <select class="form-select" name="trip_id">
+                <option value="">— Any Trip —</option>
+                {% for t in trips %}
+                <option value="{{ t.id }}" {% if reward and reward.trip_id == t.id %}selected{% endif %}>{{ t.title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          {% if action == 'new' %}
+          <p class="text-muted small mb-3"><i class="fa-solid fa-info-circle me-1"></i>A unique coupon code will be auto-generated on save.</p>
+          {% endif %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-terra">
+              <i class="fa-solid fa-floppy-disk me-1"></i>{% if action == 'edit' %}Save Changes{% else %}Create Reward{% endif %}
+            </button>
+            <a href="{{ url_for('admin_rewards') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

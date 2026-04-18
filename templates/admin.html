@@ -1,0 +1,1014 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken); min-height:100vh;">
+  <div class="container-fluid px-3 px-md-4">
+    <!-- Page Title -->
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <div>
+        <h3 class="mb-0" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">
+          <i class="fa-solid fa-gauge me-2 text-terra"></i>Admin Panel
+        </h3>
+        <p class="text-muted small mb-0">Travel & Trouble — Control Centre</p>
+      </div>
+      <a href="/" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-house me-1"></i>View Site</a>
+    </div>
+
+    <!-- Nav Pills -->
+    <ul class="nav nav-pills admin-nav flex-wrap mb-4 gap-1" id="adminTabs" role="tablist">
+      {% for tab_id, tab_label, tab_icon in [
+        ('overview','Overview','fa-chart-bar'),('trips','Trips','fa-mountain'),('events','Events','fa-calendar-days'),
+        ('users','Users','fa-users'),('bookings','Bookings','fa-ticket'),('quests','Quests','fa-star'),
+        ('partners','Partners','fa-handshake'),('community','Community','fa-comments'),('inbox','Inbox','fa-inbox'),
+        ('shop_items','Shop Items','fa-bag-shopping'),('shop_orders','Shop Orders','fa-receipt'),
+        ('explorer_pass','Explorer Pass','fa-id-card'),('settings','Settings','fa-sliders'),('pages','Pages','fa-file-lines')
+      ] %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-{{ tab_id }}" data-bs-toggle="pill" data-bs-target="#pane-{{ tab_id }}"
+                type="button" role="tab" data-hash="#{{ tab_id }}">
+          <i class="fa-solid {{ tab_icon }} me-1"></i>{{ tab_label }}
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Quick Links for new features -->
+    <div class="d-flex gap-2 mb-3 flex-wrap">
+      <a href="{{ url_for('admin_submissions') }}" class="btn btn-sm btn-outline-terra">
+        <i class="fa-solid fa-inbox me-1"></i>Submissions
+        {% if admin_pending_reviews > 0 %}<span class="badge bg-danger ms-1">{{ admin_pending_reviews }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('admin_rewards') }}" class="btn btn-sm btn-outline-terra">
+        <i class="fa-solid fa-gift me-1"></i>Rewards
+      </a>
+      <a href="{{ url_for('admin_reward_assign') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="fa-solid fa-user-tag me-1"></i>Assign Rewards
+      </a>
+    </div>
+    <div class="tab-content" id="adminTabContent">
+
+      <!-- ══ OVERVIEW ══ -->
+      <div class="tab-pane fade" id="pane-overview" role="tabpanel">
+        <div class="row g-3 mb-4">
+          {% for val, label, icon, bg, col in [
+            (stats.total_users,'Total Users','fa-users','var(--terra-dim)','var(--terra)'),
+            (stats.confirmed_bookings,'Confirmed Bookings','fa-ticket','#d1fae5','#065f46'),
+            ('₹' ~ '{:,}'.format(stats.total_revenue|int),'Revenue','fa-indian-rupee-sign','#dbeafe','#1d4ed8'),
+            (stats.total_vendors,'Vendors','fa-handshake','#fef3c7','#92400e')
+          ] %}
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon mb-2" style="background:{{ bg }};color:{{ col }};">
+                <i class="fa-solid {{ icon }}"></i>
+              </div>
+              <div class="stat-value">{{ val }}</div>
+              <div class="stat-label">{{ label }}</div>
+            </div>
+          </div>
+          {% endfor %}
+          <!-- New feature stats -->
+          <div class="col-6 col-lg-3">
+            <a href="{{ url_for('admin_submissions') }}?status=pending" style="text-decoration:none">
+              <div class="stat-card">
+                <div class="stat-icon mb-2" style="background:#fee2e2;color:#991b1b"><i class="fa-solid fa-inbox"></i></div>
+                <div class="stat-value">{{ admin_pending_reviews }}</div>
+                <div class="stat-label">Pending Reviews</div>
+              </div>
+            </a>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon mb-2" style="background:#fef9c3;color:#854d0e"><i class="fa-solid fa-bolt"></i></div>
+              <div class="stat-value">{{ admin_total_points }}</div>
+              <div class="stat-label">Total Pts Awarded</div>
+            </div>
+          </div>
+        </div><!-- /row stats -->
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 text-navy fw-bold">Recent Bookings</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>#</th><th>Customer</th><th>Trip</th><th>Status</th><th>Total</th></tr></thead>
+                <tbody>
+                  {% for b in bookings %}
+                  <tr>
+                    <td class="text-muted small">#{{ b.id }}</td>
+                    <td class="fw-semibold">{{ b.user_name or '—' }}</td>
+                    <td class="text-muted small">{{ b.trip_title or b.trip_id }}</td>
+                    <td><span class="badge {% if b.status=='confirmed' %}bg-success{% elif b.status=='cancelled' %}bg-danger{% elif b.status=='completed' %}bg-primary{% else %}bg-secondary{% endif %}">{{ b.status|capitalize }}</span></td>
+                    <td class="fw-bold text-terra">₹{{ '{:,}'.format(b.total_price|int) }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TRIPS ══ -->
+      <div class="tab-pane fade" id="pane-trips" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <h6 class="mb-0 fw-bold text-navy">All Trips ({{ all_trips|length }})</h6>
+              <button class="btn btn-terra btn-sm" data-bs-toggle="modal" data-bs-target="#addTripModal">
+                <i class="fa-solid fa-plus me-1"></i>Add Trip
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>ID</th><th>Title</th><th>Location</th><th>Price</th><th>Difficulty</th><th>Category</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {% for t in all_trips %}
+                  <tr>
+                    <td class="text-muted small font-monospace">{{ t.id }}</td>
+                    <td class="fw-semibold">{{ t.title }}</td>
+                    <td class="text-muted small">{{ t.location }}</td>
+                    <td class="text-terra fw-bold">₹{{ '{:,}'.format(t.price) }}</td>
+                    <td><span class="badge badge-difficulty-{{ t.difficulty|lower if t.difficulty else 'moderate' }}">{{ t.difficulty }}</span></td>
+                    <td><span class="badge-terra">{{ t.category }}</span></td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <a href="/admin/trip/{{ t.id }}/edit" class="btn btn-sm btn-outline-secondary" title="Edit">
+                          <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <a href="/admin/trip/itinerary/{{ t.id }}" class="btn btn-sm btn-outline-secondary" title="Itinerary">
+                          <i class="fa-solid fa-list-check"></i>
+                        </a>
+                        <a href="{{ url_for('admin_wb_trip_batches', trip_id=t.id) }}" class="btn btn-sm btn-outline-secondary" title="Batches">
+                          <i class="fa-solid fa-calendar-days"></i>
+                        </a>
+                        <a href="{{ url_for('admin_activities', trip_id=t.id) }}" class="btn btn-sm btn-outline-secondary" title="Activities">
+                          <i class="fa-solid fa-star"></i>
+                        </a>
+                        <form method="POST" action="/admin/trip/delete/{{ t.id }}" onsubmit="return confirm('Delete {{ t.title }}?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ EVENTS ══ -->
+      <div class="tab-pane fade" id="pane-events" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <h6 class="mb-0 fw-bold text-navy">All Events ({{ all_events|length }})</h6>
+              <button class="btn btn-terra btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                <i class="fa-solid fa-plus me-1"></i>Add Event
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>ID</th><th>Title</th><th>Location</th><th>Date</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {% for e in all_events %}
+                  <tr>
+                    <td class="text-muted small font-monospace">{{ e.id }}</td>
+                    <td class="fw-semibold">{{ e.title }}</td>
+                    <td class="text-muted small">{{ e.location }}</td>
+                    <td class="text-muted small">{{ e.event_date }}</td>
+                    <td><span class="badge-terra">{{ e.category }}</span></td>
+                    <td class="text-terra fw-bold">₹{{ '{:,}'.format(e.price) }}</td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <a href="/admin/event/{{ e.id }}/edit" class="btn btn-sm btn-outline-secondary" title="Edit">
+                          <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <form method="POST" action="/admin/events/delete/{{ e.id }}" onsubmit="return confirm('Delete event?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ USERS ══ -->
+      <div class="tab-pane fade" id="pane-users" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 fw-bold text-navy">All Users ({{ all_users|length }})</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {% for u in all_users %}
+                  <tr>
+                    <td class="fw-semibold">{{ u.name }}</td>
+                    <td class="text-muted small">{{ u.email }}</td>
+                    <td class="text-muted small">{{ u.phone or '—' }}</td>
+                    <td><span class="badge {% if u.role=='admin' %}bg-danger{% elif u.role=='vendor' %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ u.role|capitalize }}</span></td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <a href="/admin/user/{{ u.id }}/edit" class="btn btn-sm btn-outline-secondary" title="Edit">
+                          <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <form method="POST" action="/admin/user/delete/{{ u.id }}" onsubmit="return confirm('Delete user {{ u.name }}?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ BOOKINGS ══ -->
+      <div class="tab-pane fade" id="pane-bookings" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 fw-bold text-navy">All Bookings ({{ all_bookings|length }})</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>#</th><th>Customer</th><th>Trip</th><th>Travelers</th><th>Sharing</th><th>Price</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+                <tbody>
+                  {% for b in all_bookings %}
+                  <tr>
+                    <td class="text-muted small">#{{ b.id }}</td>
+                    <td class="fw-semibold">{{ b.user_name or '—' }}</td>
+                    <td class="text-muted small">{{ b.trip_title or b.trip_id }}</td>
+                    <td class="text-center">{{ b.num_travelers }}</td>
+                    <td><span class="badge-terra">{{ b.sharing_type|capitalize }}</span></td>
+                    <td class="fw-bold text-terra small">₹{{ '{:,}'.format(b.total_price|int) }}</td>
+                    <td><span class="badge {% if b.status=='confirmed' %}bg-success{% elif b.status=='cancelled' %}bg-danger{% elif b.status=='completed' %}bg-primary{% else %}bg-secondary{% endif %}">{{ b.status|capitalize }}</span></td>
+                    <td class="text-muted small">{{ b.batch_date }}</td>
+                    <td>
+                      <form method="POST" action="/admin/booking/status" class="d-flex gap-1 align-items-center">
+                        <input type="hidden" name="booking_id" value="{{ b.id }}">
+                        <select class="form-select form-select-sm" name="status" style="width:auto;">
+                          {% for s in ['pending','confirmed','cancelled','completed'] %}
+                          <option {% if b.status==s %}selected{% endif %}>{{ s }}</option>
+                          {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-terra">Set</button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ QUESTS ══ -->
+      <div class="tab-pane fade" id="pane-quests" role="tabpanel">
+        <div class="row g-4">
+          <!-- Quest List -->
+          <div class="col-12 col-lg-7">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                  <h6 class="mb-0 fw-bold text-navy">All Quests ({{ all_quests|length }})</h6>
+                  <button class="btn btn-terra btn-sm" data-bs-toggle="modal" data-bs-target="#addQuestModal">
+                    <i class="fa-solid fa-plus me-1"></i>Add Quest
+                  </button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle">
+                    <thead><tr><th>Trip</th><th>Quest</th><th>Points</th><th>Icon</th><th>Actions</th></tr></thead>
+                    <tbody>
+                      {% for q in all_quests %}
+                      <tr>
+                        <td class="text-muted small">{{ q.trip_name or q.trip_id }}</td>
+                        <td class="fw-semibold">{{ q.title }}</td>
+                        <td><span class="badge bg-warning text-dark">{{ q.points }}pts</span></td>
+                        <td><i class="{{ q.icon }}"></i></td>
+                        <td>
+                          <div class="d-flex gap-1">
+                            <a href="/admin/quest/{{ q.id }}/edit" class="btn btn-sm btn-outline-secondary" title="Edit">
+                              <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <form method="POST" action="/admin/quest/delete/{{ q.id }}" onsubmit="return confirm('Delete quest?')">
+                              <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Pending Approvals -->
+          <div class="col-12 col-lg-5">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="mb-3 fw-bold text-navy">Pending Approvals ({{ quest_feed|length }})</h6>
+                {% if quest_feed %}
+                  {% for qf in quest_feed %}
+                  <div class="p-3 rounded mb-2" style="background:var(--bg-sunken); border:1px solid var(--border);">
+                    <div class="fw-semibold small mb-1">{{ qf.user_name }} — {{ qf.quest_title }}</div>
+                    {% if qf.proof_image %}
+                    <img src="{{ qf.proof_image }}" style="max-width:80px;border-radius:6px;" class="mb-2" alt="Proof">
+                    {% endif %}
+                    <div class="d-flex gap-2">
+                      <form method="POST" action="/admin/quest/action">
+                        <input type="hidden" name="user_quest_id" value="{{ qf.id }}">
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                      </form>
+                      <form method="POST" action="/admin/quest/action">
+                        <input type="hidden" name="user_quest_id" value="{{ qf.id }}">
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                      </form>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  <p class="text-muted text-center py-3">No pending quest submissions.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PARTNERS ══ -->
+      <div class="tab-pane fade" id="pane-partners" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 fw-bold text-navy">Vendor Partners ({{ vendors|length }})</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Business Name</th><th>Owner</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {% for v in vendors %}
+                  <tr>
+                    <td class="fw-semibold">{{ v.business_name }}</td>
+                    <td class="text-muted small">{{ v.owner_name or '—' }}</td>
+                    <td class="text-muted small">{{ v.business_type or '—' }}</td>
+                    <td>
+                      {% if v.verified %}
+                      <span class="badge bg-success">Verified</span>
+                      {% else %}
+                      <span class="badge bg-warning text-dark">Pending</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if v.verified %}
+                      <form method="POST" action="/admin/vendor/unverify/{{ v.id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
+                      </form>
+                      {% else %}
+                      <form method="POST" action="/admin/vendor/verify/{{ v.id }}">
+                        <button type="submit" class="btn btn-sm btn-terra">Verify</button>
+                      </form>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ COMMUNITY ══ -->
+      <div class="tab-pane fade" id="pane-community" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 fw-bold text-navy">Community Posts ({{ community_posts|length }})</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Author</th><th>Title</th><th>Tag</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {% for p in community_posts %}
+                  <tr>
+                    <td class="fw-semibold small">{{ p.author_name or '—' }}</td>
+                    <td>{{ p.title }}</td>
+                    <td><span class="badge-terra">{{ p.tag or 'General' }}</span></td>
+                    <td class="text-muted small">{{ (p.timestamp or '')[:10] }}</td>
+                    <td>
+                      <form method="POST" action="/admin/delete_post/{{ p.id }}" onsubmit="return confirm('Delete post?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ INBOX ══ -->
+      <div class="tab-pane fade" id="pane-inbox" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 fw-bold text-navy">Contact Messages ({{ inbox|length }})</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Name</th><th>Email</th><th>Subject</th><th>Message</th><th>Date</th></tr></thead>
+                <tbody>
+                  {% for m in inbox %}
+                  <tr>
+                    <td class="fw-semibold small">{{ m.name }}</td>
+                    <td class="text-muted small">{{ m.email }}</td>
+                    <td><span class="badge-terra">{{ m.subject or 'general' }}</span></td>
+                    <td class="text-muted small">{{ m.message[:80] }}{% if m.message|length > 80 %}…{% endif %}</td>
+                    <td class="text-muted small">{{ (m.created_at or '')[:10] }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SHOP ITEMS ══ -->
+      <div class="tab-pane fade" id="pane-shop_items" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <h6 class="mb-0 fw-bold text-navy">Shop Items ({{ all_shop_items|length }})</h6>
+              <button class="btn btn-terra btn-sm" data-bs-toggle="modal" data-bs-target="#addShopItemModal">
+                <i class="fa-solid fa-plus me-1"></i>Add Item
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {% for item in all_shop_items %}
+                  <tr>
+                    <td>
+                      {% if item.image_url %}
+                      <img src="{{ item.image_url }}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;" alt="{{ item.name }}" loading="lazy">
+                      {% else %}
+                      <div style="width:40px;height:40px;background:var(--bg-sunken);border-radius:6px;" class="d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-image text-muted fa-xs"></i>
+                      </div>
+                      {% endif %}
+                    </td>
+                    <td class="fw-semibold">{{ item.name }}</td>
+                    <td class="text-muted small">{{ item.category or '—' }}</td>
+                    <td class="fw-bold text-terra">₹{{ '{:,}'.format(item.price) }}</td>
+                    <td>
+                      <span class="badge {% if item.stock > 10 %}bg-success{% elif item.stock > 0 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                        {{ item.stock }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <a href="/admin/shop/item/{{ item.id }}/edit" class="btn btn-sm btn-outline-secondary" title="Edit">
+                          <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <form method="POST" action="/admin/shop/item/delete/{{ item.id }}" onsubmit="return confirm('Delete item?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SHOP ORDERS ══ -->
+      <div class="tab-pane fade" id="pane-shop_orders" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 fw-bold text-navy">Shop Orders ({{ all_shop_orders|length }})</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>#</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+                <tbody>
+                  {% for o in all_shop_orders %}
+                  <tr>
+                    <td class="text-muted small">#{{ o.id }}</td>
+                    <td class="fw-semibold small">{{ o.customer_name or '—' }}</td>
+                    <td class="text-muted small">{{ o.items_summary or '—' }}</td>
+                    <td class="fw-bold text-terra">₹{{ '{:,}'.format(o.total_amount|int) }}</td>
+                    <td><span class="badge {% if o.status=='delivered' %}bg-success{% elif o.status=='cancelled' %}bg-danger{% elif o.status=='shipped' %}bg-info{% elif o.status=='confirmed' %}bg-primary{% else %}bg-secondary{% endif %}">{{ o.status|capitalize }}</span></td>
+                    <td class="text-muted small">{{ (o.timestamp or '')[:10] }}</td>
+                    <td>
+                      <form method="POST" action="/admin/shop/order/status" class="d-flex gap-1 align-items-center">
+                        <input type="hidden" name="order_id" value="{{ o.id }}">
+                        <select class="form-select form-select-sm" name="status" style="width:auto;">
+                          {% for s in ['pending','confirmed','shipped','delivered','cancelled'] %}
+                          <option {% if o.status==s %}selected{% endif %}>{{ s }}</option>
+                          {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-terra">Set</button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ EXPLORER PASS ══ -->
+      <div class="tab-pane fade" id="pane-explorer_pass" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 fw-bold text-navy">Explorer Pass Subscriptions ({{ all_subscriptions|length }})</h6>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>User</th><th>Email</th><th>Plan</th><th>Valid Until</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody>
+                  {% for s in all_subscriptions %}
+                  <tr>
+                    <td class="fw-semibold small">{{ s.user_name or '—' }}</td>
+                    <td class="text-muted small">{{ s.user_email or '—' }}</td>
+                    <td><span class="badge {% if s.plan_name=='elite' %}bg-warning text-dark{% elif s.plan_name=='pro' %}bg-primary{% else %}bg-secondary{% endif %}">{{ s.plan_name|capitalize }}</span></td>
+                    <td class="text-muted small">{{ (s.valid_until or '')[:10] }}</td>
+                    <td><span class="badge {% if s.status=='active' %}bg-success{% else %}bg-danger{% endif %}">{{ s.status|capitalize }}</span></td>
+                    <td>
+                      <form method="POST" action="/admin/subscription/toggle/{{ s.id }}">
+                        <button type="submit" class="btn btn-sm {% if s.status=='active' %}btn-outline-danger{% else %}btn-success{% endif %}">
+                          {% if s.status=='active' %}Deactivate{% else %}Activate{% endif %}
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SETTINGS ══ -->
+      <div class="tab-pane fade" id="pane-settings" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-4 fw-bold text-navy">Site Settings</h6>
+            <form method="POST" action="/admin/settings/update">
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Site Title</label>
+                  <input type="text" class="form-control" name="site_title" value="{{ settings.site_title or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Logo URL</label>
+                  <input type="url" class="form-control" name="logo_url" value="{{ settings.logo_url or '' }}" placeholder="https://…">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Hero Tagline</label>
+                  <input type="text" class="form-control" name="hero_tagline" value="{{ settings.hero_tagline or '' }}">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Hero Subtext</label>
+                  <input type="text" class="form-control" name="hero_subtext" value="{{ settings.hero_subtext or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Contact Email</label>
+                  <input type="email" class="form-control" name="email" value="{{ settings.email or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Phone</label>
+                  <input type="text" class="form-control" name="phone" value="{{ settings.phone or '' }}">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Address</label>
+                  <input type="text" class="form-control" name="address" value="{{ settings.address or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Instagram URL</label>
+                  <input type="url" class="form-control" name="instagram" value="{{ settings.instagram or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Twitter URL</label>
+                  <input type="url" class="form-control" name="twitter" value="{{ settings.twitter or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Facebook URL</label>
+                  <input type="url" class="form-control" name="facebook" value="{{ settings.facebook or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">YouTube URL</label>
+                  <input type="url" class="form-control" name="youtube" value="{{ settings.youtube or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Working Hours</label>
+                  <input type="text" class="form-control" name="working_hours" value="{{ settings.working_hours or '' }}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Year Established</label>
+                  <input type="number" class="form-control" name="year_established" value="{{ settings.year_established or 2020 }}">
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-terra px-4">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>Save Settings
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAGES ══ -->
+      <div class="tab-pane fade" id="pane-pages" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <h6 class="mb-0 fw-bold text-navy">CMS Pages ({{ all_pages|length }})</h6>
+              <button class="btn btn-terra btn-sm" data-bs-toggle="modal" data-bs-target="#addPageModal">
+                <i class="fa-solid fa-plus me-1"></i>Add Page
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>Page Name</th><th>Title</th><th>Updated</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {% for p in all_pages %}
+                  <tr>
+                    <td class="font-monospace text-muted small">{{ p.page_name }}</td>
+                    <td class="fw-semibold">{{ p.title or '—' }}</td>
+                    <td class="text-muted small">{{ (p.updated_at or '')[:10] }}</td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <a href="/admin/page/edit/{{ p.page_name }}" class="btn btn-sm btn-outline-secondary">
+                          <i class="fa-solid fa-pen"></i> Edit
+                        </a>
+                        <form method="POST" action="/admin/pages/delete/{{ p.id }}" onsubmit="return confirm('Delete page?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-content -->
+  </div>
+</div>
+
+<!-- ════════════ MODALS ════════════ -->
+
+<!-- Add Trip Modal -->
+<div class="modal fade" id="addTripModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add New Trip</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/trip/add">
+        <div class="modal-body"><div class="row g-3">
+          <div class="col-md-8"><label class="form-label">Title</label><input type="text" class="form-control" name="title" required></div>
+          <div class="col-md-4"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" required min="1"></div>
+          <div class="col-md-6"><label class="form-label">Duration</label><input type="text" class="form-control" name="duration" required placeholder="6 Days"></div>
+          <div class="col-md-6"><label class="form-label">Location</label><input type="text" class="form-control" name="location" value="India"></div>
+          <div class="col-md-4"><label class="form-label">Category</label><select class="form-select" name="category"><option>Trek</option><option>Chill</option><option>Adventure</option><option>Cultural</option><option>Wildlife</option></select></div>
+          <div class="col-md-4"><label class="form-label">Difficulty</label><select class="form-select" name="difficulty"><option>Easy</option><option selected>Moderate</option><option>Challenging</option></select></div>
+          <div class="col-md-4"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" rows="3"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Add Trip</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Trip Modal -->
+<div class="modal fade" id="editTripModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit Trip</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/trip/edit">
+        <div class="modal-body"><div class="row g-3">
+          <input type="hidden" name="trip_id" id="editTripId">
+          <div class="col-md-8"><label class="form-label">Title</label><input type="text" class="form-control" name="title" id="editTripTitle" required></div>
+          <div class="col-md-4"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" id="editTripPrice" required></div>
+          <div class="col-md-6"><label class="form-label">Duration</label><input type="text" class="form-control" name="duration" id="editTripDuration"></div>
+          <div class="col-md-6"><label class="form-label">Location</label><input type="text" class="form-control" name="location" id="editTripLocation"></div>
+          <div class="col-md-4"><label class="form-label">Category</label><select class="form-select" name="category" id="editTripCategory"><option>Trek</option><option>Chill</option><option>Adventure</option><option>Cultural</option><option>Wildlife</option></select></div>
+          <div class="col-md-4"><label class="form-label">Difficulty</label><select class="form-select" name="difficulty" id="editTripDifficulty"><option>Easy</option><option>Moderate</option><option>Challenging</option></select></div>
+          <div class="col-md-4"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url" id="editTripImage"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" id="editTripDesc" rows="3"></textarea></div>
+          <div class="col-12"><label class="form-label">Highlights</label><textarea class="form-control" name="highlights" id="editTripHighlights" rows="2" placeholder="Key highlights (comma separated)"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Save Changes</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Event Modal -->
+<div class="modal fade" id="addEventModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add New Event</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/events/add">
+        <div class="modal-body"><div class="row g-3">
+          <div class="col-md-8"><label class="form-label">Title</label><input type="text" class="form-control" name="title" required></div>
+          <div class="col-md-4"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" required min="1"></div>
+          <div class="col-md-4"><label class="form-label">Duration</label><input type="text" class="form-control" name="duration" placeholder="1 Day"></div>
+          <div class="col-md-4"><label class="form-label">Location</label><input type="text" class="form-control" name="location"></div>
+          <div class="col-md-4"><label class="form-label">Event Date</label><input type="date" class="form-control" name="event_date"></div>
+          <div class="col-md-6"><label class="form-label">Category</label><select class="form-select" name="category"><option>Adventure</option><option>Campside</option><option>Camping</option><option>Wellness</option><option>Cultural</option></select></div>
+          <div class="col-md-6"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" rows="3"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Add Event</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Event Modal -->
+<div class="modal fade" id="editEventModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit Event</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/events/edit">
+        <div class="modal-body"><div class="row g-3">
+          <input type="hidden" name="event_id" id="editEventId">
+          <div class="col-md-8"><label class="form-label">Title</label><input type="text" class="form-control" name="title" id="editEventTitle" required></div>
+          <div class="col-md-4"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" id="editEventPrice" required></div>
+          <div class="col-md-4"><label class="form-label">Duration</label><input type="text" class="form-control" name="duration" id="editEventDuration"></div>
+          <div class="col-md-4"><label class="form-label">Location</label><input type="text" class="form-control" name="location" id="editEventLocation"></div>
+          <div class="col-md-4"><label class="form-label">Event Date</label><input type="date" class="form-control" name="event_date" id="editEventDate"></div>
+          <div class="col-md-6"><label class="form-label">Category</label><input type="text" class="form-control" name="category" id="editEventCategory"></div>
+          <div class="col-md-6"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url" id="editEventImage"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" id="editEventDesc" rows="3"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Save Changes</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit User</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/user/edit">
+        <div class="modal-body"><div class="row g-3">
+          <input type="hidden" name="user_id" id="editUserId">
+          <div class="col-12"><label class="form-label">Name</label><input type="text" class="form-control" name="name" id="editUserName" required></div>
+          <div class="col-12"><label class="form-label">Email</label><input type="email" class="form-control" name="email" id="editUserEmail" required></div>
+          <div class="col-12"><label class="form-label">Role</label>
+            <select class="form-select" name="role" id="editUserRole">
+              <option value="traveler">Traveler</option>
+              <option value="vendor">Vendor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Save</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Quest Modal -->
+<div class="modal fade" id="addQuestModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add Quest</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/quest/add">
+        <div class="modal-body"><div class="row g-3">
+          <div class="col-12"><label class="form-label">Trip</label>
+            <select class="form-select" name="trip_id" required>
+              {% for t in all_trips %}<option value="{{ t.id }}">{{ t.title }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-12"><label class="form-label">Quest Title</label><input type="text" class="form-control" name="title" required></div>
+          <div class="col-6"><label class="form-label">Points</label><input type="number" class="form-control" name="points" value="50" required min="1"></div>
+          <div class="col-6"><label class="form-label">Icon Class</label><input type="text" class="form-control" name="icon" value="fa-solid fa-star" required></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Add Quest</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Quest Modal -->
+<div class="modal fade" id="editQuestModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit Quest</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/quest/edit">
+        <div class="modal-body"><div class="row g-3">
+          <input type="hidden" name="quest_id" id="editQuestId">
+          <div class="col-12"><label class="form-label">Quest Title</label><input type="text" class="form-control" name="title" id="editQuestTitle" required></div>
+          <div class="col-6"><label class="form-label">Points</label><input type="number" class="form-control" name="points" id="editQuestPoints" required min="1"></div>
+          <div class="col-6"><label class="form-label">Icon Class</label><input type="text" class="form-control" name="icon" id="editQuestIcon" required></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Save</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Shop Item Modal -->
+<div class="modal fade" id="addShopItemModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add Shop Item</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/shop/item/add" enctype="multipart/form-data">
+        <div class="modal-body"><div class="row g-3">
+          <div class="col-12"><label class="form-label">Name</label><input type="text" class="form-control" name="name" required></div>
+          <div class="col-6"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" required min="1"></div>
+          <div class="col-6"><label class="form-label">Stock</label><input type="number" class="form-control" name="stock" value="0" min="0"></div>
+          <div class="col-12"><label class="form-label">Category</label><select class="form-select" name="category"><option>Apparel</option><option>Gear</option><option>Accessories</option><option>Books</option><option>Other</option></select></div>
+          <div class="col-12"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url" placeholder="https://…"></div>
+          <div class="col-12"><label class="form-label">Or Upload Image</label><input type="file" class="form-control" name="image_file" accept="image/*"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" rows="2"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Add Item</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Shop Item Modal -->
+<div class="modal fade" id="editShopItemModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit Shop Item</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/shop/item/edit" enctype="multipart/form-data">
+        <div class="modal-body"><div class="row g-3">
+          <input type="hidden" name="item_id" id="editItemId">
+          <div class="col-12"><label class="form-label">Name</label><input type="text" class="form-control" name="name" id="editItemName" required></div>
+          <div class="col-6"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" id="editItemPrice" required></div>
+          <div class="col-6"><label class="form-label">Stock</label><input type="number" class="form-control" name="stock" id="editItemStock" min="0"></div>
+          <div class="col-12"><label class="form-label">Category</label><input type="text" class="form-control" name="category" id="editItemCategory"></div>
+          <div class="col-12"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url" id="editItemImage"></div>
+          <div class="col-12"><label class="form-label">Or Upload New Image</label><input type="file" class="form-control" name="image_file" accept="image/*"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" id="editItemDesc" rows="2"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Save Changes</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Page Modal -->
+<div class="modal fade" id="addPageModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add CMS Page</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/pages/add">
+        <div class="modal-body"><div class="row g-3">
+          <div class="col-12"><label class="form-label">Page Name (slug)</label><input type="text" class="form-control" name="page_name" required placeholder="e.g. faq, blog-post-1"></div>
+          <div class="col-12"><label class="form-label">Title</label><input type="text" class="form-control" name="title"></div>
+          <div class="col-12"><label class="form-label">Content (HTML allowed)</label><textarea class="form-control" name="content" rows="5" required></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Create Page</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+// Activate tab based on URL hash
+function activateTabFromHash(){
+  const hash = window.location.hash;
+  if(hash){
+    const tabId = hash.slice(1);
+    const btn = document.getElementById('tab-' + tabId);
+    if(btn) { new bootstrap.Tab(btn).show(); return; }
+  }
+  // default: overview
+  const first = document.getElementById('tab-overview');
+  if(first) new bootstrap.Tab(first).show();
+}
+document.addEventListener('DOMContentLoaded', activateTabFromHash);
+window.addEventListener('hashchange', activateTabFromHash);
+
+// Update hash when switching tabs
+document.querySelectorAll('[data-bs-toggle="pill"]').forEach(btn => {
+  btn.addEventListener('shown.bs.tab', function(){
+    const hash = this.dataset.hash;
+    if(hash) history.replaceState(null, '', hash);
+  });
+});
+
+// Fill edit modals
+function fillEditTrip(t){
+  document.getElementById('editTripId').value = t.id;
+  document.getElementById('editTripTitle').value = t.title;
+  document.getElementById('editTripPrice').value = t.price;
+  document.getElementById('editTripDuration').value = t.duration;
+  document.getElementById('editTripLocation').value = t.location||'';
+  document.getElementById('editTripImage').value = t.image_url||'';
+  document.getElementById('editTripDesc').value = t.description||'';
+  document.getElementById('editTripHighlights').value = t.highlights||'';
+  setSelect('editTripCategory', t.category);
+  setSelect('editTripDifficulty', t.difficulty);
+  new bootstrap.Modal(document.getElementById('editTripModal')).show();
+}
+
+// Event listeners for edit buttons
+document.querySelectorAll('.edit-trip-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const tripData = JSON.parse(this.dataset.trip);
+    fillEditTrip(tripData);
+  });
+});
+
+document.querySelectorAll('.edit-event-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const eventData = JSON.parse(this.dataset.event);
+    fillEditEvent(eventData);
+  });
+});
+
+document.querySelectorAll('.edit-user-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const userData = JSON.parse(this.dataset.user);
+    fillEditUser(userData);
+  });
+});
+
+document.querySelectorAll('.edit-quest-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const questData = JSON.parse(this.dataset.quest);
+    fillEditQuest(questData);
+  });
+});
+
+document.querySelectorAll('.edit-shop-item-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const itemData = JSON.parse(this.dataset.item);
+    fillEditShopItem(itemData);
+  });
+});
+function fillEditEvent(e){
+  document.getElementById('editEventId').value = e.id;
+  document.getElementById('editEventTitle').value = e.title;
+  document.getElementById('editEventPrice').value = e.price;
+  document.getElementById('editEventDuration').value = e.duration||'';
+  document.getElementById('editEventLocation').value = e.location||'';
+  document.getElementById('editEventDate').value = e.event_date||'';
+  document.getElementById('editEventCategory').value = e.category||'';
+  document.getElementById('editEventImage').value = e.image_url||'';
+  document.getElementById('editEventDesc').value = e.description||'';
+  new bootstrap.Modal(document.getElementById('editEventModal')).show();
+}
+function fillEditUser(u){
+  document.getElementById('editUserId').value = u.id;
+  document.getElementById('editUserName').value = u.name;
+  document.getElementById('editUserEmail').value = u.email;
+  setSelect('editUserRole', u.role);
+  new bootstrap.Modal(document.getElementById('editUserModal')).show();
+}
+function fillEditQuest(q){
+  document.getElementById('editQuestId').value = q.id;
+  document.getElementById('editQuestTitle').value = q.title;
+  document.getElementById('editQuestPoints').value = q.points;
+  document.getElementById('editQuestIcon').value = q.icon||'fa-solid fa-star';
+  new bootstrap.Modal(document.getElementById('editQuestModal')).show();
+}
+function fillEditShopItem(item){
+  document.getElementById('editItemId').value = item.id;
+  document.getElementById('editItemName').value = item.name;
+  document.getElementById('editItemPrice').value = item.price;
+  document.getElementById('editItemStock').value = item.stock;
+  document.getElementById('editItemCategory').value = item.category||'';
+  document.getElementById('editItemImage').value = item.image_url||'';
+  document.getElementById('editItemDesc').value = item.description||'';
+  new bootstrap.Modal(document.getElementById('editShopItemModal')).show();
+}
+function setSelect(id, val){
+  const sel = document.getElementById(id);
+  if(!sel || !val) return;
+  for(let opt of sel.options){ if(opt.value===val || opt.text===val){ sel.value=opt.value; break; } }
+}
+</script>
+{% endblock %}

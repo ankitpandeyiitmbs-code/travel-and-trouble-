@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block title %}Edit Quest — {{ quest.title }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container" style="max-width:560px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--navy);margin:0">
+        <i class="fa-solid fa-pen me-2" style="color:var(--terra)"></i>Edit Quest
+      </h4>
+      <a href="{{ url_for('admin_panel') }}#quests" class="btn btn-outline-secondary btn-sm">← Back to Admin</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="mb-3 p-3 rounded" style="background:var(--bg-sunken);font-size:0.85rem">
+          <i class="fa-solid fa-mountain me-1" style="color:var(--terra)"></i>
+          Trip: <strong>{{ quest.trip_name or quest.trip_id }}</strong>
+        </div>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-600">Quest Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="title" required value="{{ quest.title }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Points</label>
+            <input type="number" class="form-control" name="points" min="1" value="{{ quest.points }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Icon <span class="text-muted small">(FontAwesome class)</span></label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="{{ quest.icon or 'fa-solid fa-star' }}" id="iconPreview"></i></span>
+              <input type="text" class="form-control" name="icon" id="iconInput"
+                value="{{ quest.icon or 'fa-solid fa-star' }}"
+                placeholder="fa-solid fa-star"
+                oninput="document.getElementById('iconPreview').className=this.value">
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-terra px-4">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Save Changes
+            </button>
+            <a href="{{ url_for('admin_panel') }}#quests" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

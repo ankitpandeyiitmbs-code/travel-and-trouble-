@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken); min-height:calc(100vh - 60px);">
+  <div class="container" style="max-width:800px;">
+    <div class="card overflow-hidden">
+      <!-- Header -->
+      <div class="card-header d-flex align-items-center gap-3 py-3" style="background:var(--navy);">
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white"
+             style="width:38px;height:38px;background:var(--terra);">
+          <i class="fa-solid fa-users fa-sm"></i>
+        </div>
+        <div>
+          <div class="fw-bold text-white">Community Chat</div>
+          <div class="text-white-50 small">General · Open to all adventurers</div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-messages" id="chatMessages">
+        {% for msg in messages %}
+        <div class="d-flex flex-column {{ 'align-items-end' if msg.user_id == session.user_id else 'align-items-start' }} mb-2"
+             data-msg-id="{{ msg.id }}">
+          {% if msg.user_id != session.user_id %}
+          <div class="chat-sender">{{ msg.sender }}</div>
+          {% endif %}
+          <div class="chat-bubble {{ 'mine' if msg.user_id == session.user_id else 'theirs' }}">
+            {% if msg.msg_type == 'image' %}
+            <img src="{{ msg.content }}" style="max-width:200px;border-radius:8px;" alt="Image">
+            {% else %}
+            {{ msg.content }}
+            {% endif %}
+          </div>
+          <div class="text-muted" style="font-size:0.7rem;">{{ msg.timestamp[:16] if msg.timestamp else '' }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Input -->
+      <div class="card-footer p-3" style="background:var(--bg-elevated); border-top:1px solid var(--border);">
+        <form id="chatForm" class="d-flex gap-2 align-items-center">
+          <input type="text" id="msgInput" class="form-control" placeholder="Type a message…" autocomplete="off" maxlength="500">
+          <label class="btn btn-outline-secondary mb-0" title="Send image" style="cursor:pointer;">
+            <i class="fa-solid fa-image"></i>
+            <input type="file" id="imageUpload" accept="image/*" style="display:none;">
+          </label>
+          <button type="submit" class="btn btn-terra px-3">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const currentUserId = {{ session.user_id or 'null' }};
+const chatEl = document.getElementById('chatMessages');
+
+function scrollBottom(){ chatEl.scrollTop = chatEl.scrollHeight; }
+scrollBottom();
+
+// Send text message
+document.getElementById('chatForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const inp = document.getElementById('msgInput');
+  const content = inp.value.trim();
+  if(!content) return;
+  inp.value = '';
+  try {
+    await fetch('/send_message', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({content})
+    });
+    await fetchMessages();
+  } catch(err){ console.error(err); }
+});
+
+// Image upload
+document.getElementById('imageUpload').addEventListener('change', async function(){
+  const file = this.files[0];
+  if(!file) return;
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    await fetch('/upload_chat_image', {method:'POST', body:fd});
+    await fetchMessages();
+  } catch(err){ console.error(err); }
+  this.value = '';
+});
+
+let lastId = 0;
+async function fetchMessages(){
+  try {
+    const res = await fetch('/get_messages/general');
+    const msgs = await res.json();
+    if(!msgs.length) return;
+    const latest = msgs[msgs.length-1].id;
+    if(latest === lastId) return;
+    lastId = latest;
+    chatEl.innerHTML = '';
+    msgs.forEach(msg => {
+      const isMe = msg.user_id === currentUserId;
+      const wrap = document.createElement('div');
+      wrap.className = `d-flex flex-column ${isMe ? 'align-items-end' : 'align-items-start'} mb-2`;
+      wrap.dataset.msgId = msg.id;
+      let inner = '';
+      if(!isMe) inner += `<div class="chat-sender">${msg.sender}</div>`;
+      if(msg.msg_type === 'image'){
+        inner += `<div class="chat-bubble ${isMe?'mine':'theirs'}"><img src="${msg.content}" style="max-width:200px;border-radius:8px;" alt="Image"></div>`;
+      } else {
+        inner += `<div class="chat-bubble ${isMe?'mine':'theirs'}">${escHtml(msg.content)}</div>`;
+      }
+      inner += `<div class="text-muted" style="font-size:0.7rem;">${(msg.timestamp||'').slice(0,16)}</div>`;
+      wrap.innerHTML = inner;
+      chatEl.appendChild(wrap);
+    });
+    scrollBottom();
+  } catch(e){}
+}
+
+function escHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// Poll every 3s
+setInterval(fetchMessages, 3000);
+</script>
+{% endblock %}

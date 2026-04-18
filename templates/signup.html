@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center py-5" style="background: var(--bg-sunken);">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+        <div class="card p-4 p-md-5 shadow-sm">
+          <div class="text-center mb-4">
+            <div class="mb-3" style="font-size:2.5rem; color:var(--terra);"><i class="fa-solid fa-compass"></i></div>
+            <h2 class="mb-1" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Create Account</h2>
+            <p class="text-muted mb-0">Join thousands of adventurers</p>
+          </div>
+          <form method="POST" action="/signup">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" name="name" required placeholder="Rahul Sharma">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" name="email" required placeholder="you@example.com">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Phone (optional)</label>
+                <input type="tel" class="form-control" name="phone" placeholder="+91 98765 43210">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                  <input type="password" class="form-control" id="password" name="password" required placeholder="Min 6 chars" minlength="6">
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePwd(this)" tabindex="-1">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-check p-3 rounded" style="background:var(--bg-sunken); border: 1px solid var(--border);">
+                  <input class="form-check-input" type="checkbox" id="is_vendor" name="is_vendor">
+                  <label class="form-check-label fw-semibold" for="is_vendor">
+                    <i class="fa-solid fa-store me-1 text-terra"></i>Register as a Vendor Partner
+                    <span class="d-block small text-muted fw-normal">Offer hotels, transport & activities on trips</span>
+                  </label>
+                </div>
+              </div>
+              <div id="vendorFields" class="col-12" style="display:none;">
+                <div class="row g-2">
+                  <div class="col-12 col-md-7">
+                    <label class="form-label">Business Name</label>
+                    <input type="text" class="form-control" name="business_name" placeholder="Mountain Gear Co">
+                  </div>
+                  <div class="col-12 col-md-5">
+                    <label class="form-label">Business Type</label>
+                    <select class="form-select" name="business_type">
+                      <option>Equipment</option>
+                      <option>Hotel</option>
+                      <option>Transport</option>
+                      <option>Activity</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-terra btn-lg">Create Account</button>
+                </div>
+              </div>
+            </div>
+          </form>
+          <hr class="my-4">
+          <p class="text-center mb-0 text-muted">
+            Already have an account? <a href="/login" class="text-terra fw-semibold">Sign In</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePwd(btn){
+  const inp = btn.closest('.input-group').querySelector('input');
+  const icon = btn.querySelector('i');
+  if(inp.type==='password'){ inp.type='text'; icon.className='fa-solid fa-eye-slash'; }
+  else { inp.type='password'; icon.className='fa-solid fa-eye'; }
+}
+document.getElementById('is_vendor').addEventListener('change', function(){
+  document.getElementById('vendorFields').style.display = this.checked ? 'block' : 'none';
+});
+</script>
+{% endblock %}

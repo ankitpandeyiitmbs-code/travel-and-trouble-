@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block title %}Rewards{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container-fluid px-4">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <h4 class="mb-0" style="font-family:'Cormorant Garamond',serif;color:var(--navy)">
+        <i class="fa-solid fa-gift me-2" style="color:var(--terra)"></i>Rewards
+      </h4>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('admin_reward_new') }}" class="btn btn-terra btn-sm">
+          <i class="fa-solid fa-plus me-1"></i>New Reward
+        </a>
+        <a href="{{ url_for('admin_reward_assign') }}" class="btn btn-outline-secondary btn-sm">
+          <i class="fa-solid fa-user-tag me-1"></i>Assign Rewards
+        </a>
+        <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-secondary btn-sm">← Admin</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        {% if not rewards %}
+        <div class="text-center py-5 text-muted">
+          <i class="fa-solid fa-gift fa-3x mb-3" style="color:var(--border)"></i>
+          <p>No rewards yet. <a href="{{ url_for('admin_reward_new') }}">Create one</a>.</p>
+        </div>
+        {% else %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr><th>Title</th><th>Type</th><th>Value</th><th>Coupon Code</th><th>Min Pts</th><th>Active</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {% for r in rewards %}
+              <tr>
+                <td class="fw-semibold">{{ r.title }}</td>
+                <td><span class="badge-terra" style="text-transform:capitalize">{{ r.reward_type }}</span></td>
+                <td class="text-terra fw-bold">{{ r.value or '—' }}</td>
+                <td><code class="small">{{ r.coupon_code or '—' }}</code></td>
+                <td>{{ r.min_points }}</td>
+                <td>
+                  {% if r.is_active %}<span class="badge bg-success">Active</span>
+                  {% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+                </td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="{{ url_for('admin_reward_edit', reward_id=r.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                      <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('admin_reward_toggle', reward_id=r.id) }}">
+                      <button type="submit" class="btn btn-sm {% if r.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="Toggle">
+                        <i class="fa-solid fa-rotate"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

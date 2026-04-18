@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+{% block head_extra %}
+<!-- Quill rich text editor -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken); min-height:100vh;">
+  <div class="container" style="max-width:900px;">
+    <div class="mb-4">
+      <a href="/admin#pages" class="text-muted text-decoration-none small">
+        <i class="fa-solid fa-arrow-left me-1"></i>Back to Admin — Pages
+      </a>
+      <h3 class="mt-2 mb-0" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">
+        {% if page %}Edit Page — <span class="text-terra">{{ page.page_name }}</span>{% else %}New CMS Page{% endif %}
+      </h3>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST" action="/admin/page/update" id="pageForm">
+          <input type="hidden" name="page_name" value="{{ page.page_name if page else '' }}">
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Page Name (slug) <span class="text-muted small">— used in URL</span></label>
+              <input type="text" class="form-control font-monospace" name="page_slug"
+                     value="{{ page.page_name if page else '' }}"
+                     {% if page %}readonly{% else %}required{% endif %}
+                     placeholder="about / privacy / terms">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Page Title</label>
+              <input type="text" class="form-control" name="title" value="{{ page.title if page else '' }}" required>
+            </div>
+          </div>
+
+          <!-- Rich Text Editor -->
+          <div class="mb-3">
+            <label class="form-label">Content</label>
+            <div id="quillEditor" style="min-height:400px; background:var(--bg-elevated); border-radius:0 0 var(--r-md) var(--r-md);"></div>
+            <textarea name="content" id="hiddenContent" class="d-none">{{ page.content if page else '' }}</textarea>
+          </div>
+
+          <div class="d-flex gap-3 align-items-center">
+            <button type="submit" class="btn btn-terra px-4">
+              <i class="fa-solid fa-floppy-disk me-2"></i>Save Page
+            </button>
+            <a href="/admin#pages" class="btn btn-outline-secondary px-4">Cancel</a>
+            {% if page %}
+            <a href="/{{ page.page_name }}" target="_blank" class="ms-auto text-muted small">
+              <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Preview
+            </a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
+<script>
+// Initialize Quill
+const quill = new Quill('#quillEditor', {
+  theme: 'snow',
+  placeholder: 'Write page content here…',
+  modules: {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ color: [] }, { background: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ align: [] }],
+      ['link', 'image'],
+      ['blockquote', 'code-block'],
+      ['clean']
+    ]
+  }
+});
+
+// Load existing content
+const existing = document.getElementById('hiddenContent').value;
+if(existing && existing.trim()){
+  quill.clipboard.dangerouslyPasteHTML(0, existing);
+}
+
+// On submit, copy Quill HTML into hidden textarea
+document.getElementById('pageForm').addEventListener('submit', function(){
+  document.getElementById('hiddenContent').value = quill.root.innerHTML;
+});
+</script>
+{% endblock %}

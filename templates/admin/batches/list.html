@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block title %}Batches — {{ trip.title }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container-fluid px-4">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <div>
+        <h4 class="mb-0" style="font-family:'Cormorant Garamond',serif;color:var(--navy)">
+          <i class="fa-solid fa-calendar-days me-2" style="color:var(--terra)"></i>Batches
+        </h4>
+        <p class="text-muted small mb-0">Trip: <strong>{{ trip.title }}</strong></p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('admin_wb_batch_new', trip_id=trip.id) }}" class="btn btn-terra btn-sm">
+          <i class="fa-solid fa-plus me-1"></i>Add Batch
+        </a>
+        <a href="{{ url_for('admin_activities', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">
+          <i class="fa-solid fa-star me-1"></i>Activities
+        </a>
+        <a href="{{ url_for('admin_panel') }}#trips" class="btn btn-outline-secondary btn-sm">
+          ← Back to Admin
+        </a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        {% if not batches %}
+        <div class="text-center py-5 text-muted">
+          <i class="fa-solid fa-calendar-xmark fa-3x mb-3" style="color:var(--border)"></i>
+          <p>No batches yet. <a href="{{ url_for('admin_wb_batch_new', trip_id=trip.id) }}">Add the first one</a>.</p>
+        </div>
+        {% else %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Batch Name</th><th>Start Date</th><th>End Date</th>
+                <th>Seats</th><th>Price Override</th><th>Active</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in batches %}
+              <tr>
+                <td class="fw-semibold">{{ b.batch_name }}</td>
+                <td class="text-muted small">{{ b.start_date or '—' }}</td>
+                <td class="text-muted small">{{ b.end_date or '—' }}</td>
+                <td>{{ b.max_seats }}</td>
+                <td class="text-terra fw-bold">
+                  {% if b.price_override %}₹{{ '{:,.0f}'.format(b.price_override) }}{% else %}<span class="text-muted">Trip price</span>{% endif %}
+                </td>
+                <td>
+                  {% if b.is_active %}
+                  <span class="badge bg-success">Active</span>
+                  {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="{{ url_for('admin_wb_batch_edit', batch_id=b.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                      <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <a href="{{ url_for('batch_chat', batch_id=b.id) }}" class="btn btn-sm btn-outline-secondary" title="Chat">
+                      <i class="fa-solid fa-comments"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('admin_wb_batch_delete', batch_id=b.id) }}" onsubmit="return confirm('Delete this batch?')">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

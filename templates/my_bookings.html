@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% block title %}My Bookings — {{ settings.site_title }}{% endblock %}
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--navy)" class="mb-4">
+      <i class="fa-solid fa-ticket me-2" style="color:var(--terra)"></i>My Bookings
+    </h2>
+    {% if not bookings %}
+    <div class="card text-center py-5">
+      <div class="card-body">
+        <i class="fa-solid fa-suitcase fa-3x mb-3" style="color:var(--border)"></i>
+        <h5 style="color:var(--navy)">No bookings yet</h5>
+        <p class="text-muted">Your trips and events will appear here after booking.</p>
+        <a href="{{ url_for('trips') }}" class="btn btn-terra">Explore Trips</a>
+      </div>
+    </div>
+    {% else %}
+    <div class="d-flex flex-column gap-3">
+      {% for b in bookings %}
+      <div class="card">
+        <div class="card-body">
+          <div class="row g-3 align-items-center">
+            {% if b.trip_image %}
+            <div class="col-auto">
+              <img src="{{ b.trip_image }}" alt="" style="width:100px;height:80px;object-fit:cover;border-radius:var(--r-md)">
+            </div>
+            {% endif %}
+            <div class="col">
+              <div class="d-flex flex-wrap gap-2 mb-1">
+                <span class="badge {% if b.status=='confirmed' %}bg-success{% elif b.status=='cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">{{ b.status|capitalize }}</span>
+                <span class="badge-terra">{{ b.booking_type|capitalize }}</span>
+              </div>
+              <h6 class="fw-bold mb-1" style="color:var(--navy)">{{ b.trip_title or b.trip_id }}</h6>
+              {% if b.batch_name %}
+              <p class="text-muted small mb-1">📅 {{ b.batch_name }}{% if b.start_date %} ({{ b.start_date }} → {{ b.end_date or 'TBD' }}){% endif %}</p>
+              {% elif b.batch_date %}
+              <p class="text-muted small mb-1">📅 {{ b.batch_date }}</p>
+              {% endif %}
+              <p class="text-muted small mb-0">
+                {{ b.num_travelers }} traveler{{ 's' if b.num_travelers != 1 else '' }} ·
+                ₹{{ '{:,}'.format(b.total_price|int) }} total
+              </p>
+            </div>
+            <div class="col-auto d-flex flex-column gap-2">
+              {% if b.booking_type == 'trip' %}
+              <a href="{{ url_for('trip_details', trip_id=b.trip_id) }}" class="btn btn-sm btn-outline-terra">View Trip</a>
+              {% if b.status == 'confirmed' %}
+              <a href="{{ url_for('adventure_dashboard', trip_id=b.trip_id) }}" class="btn btn-sm btn-terra">🎮 Adventure</a>
+              {% endif %}
+              {% if b.wb_batch_id and b.status == 'confirmed' %}
+              <a href="{{ url_for('batch_chat', batch_id=b.wb_batch_id) }}" class="btn btn-sm btn-outline-secondary">💬 Squad Chat</a>
+              {% endif %}
+              {% elif b.booking_type == 'event' %}
+              <a href="{{ url_for('trip_details', trip_id=b.trip_id) }}" class="btn btn-sm btn-outline-terra">View Event</a>
+              {% if b.status == 'confirmed' %}
+              <a href="{{ url_for('event_chat', event_id=b.trip_id) }}" class="btn btn-sm btn-outline-secondary">💬 Event Chat</a>
+              {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

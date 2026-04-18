@@ -1,0 +1,255 @@
+/* WanderBuddy — Shared Stylesheet */
+/* CSS variables are defined in layout.html :root */
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5, .display-font { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+/* ── Utility ── */
+.bg-base     { background: var(--bg-base) !important; }
+.bg-elevated { background: var(--bg-elevated) !important; }
+.bg-sunken   { background: var(--bg-sunken) !important; }
+.text-terra  { color: var(--terra) !important; }
+.text-navy   { color: var(--navy) !important; }
+.border-warm { border-color: var(--border) !important; }
+
+/* ── Buttons ── */
+.btn-terra {
+  background: var(--terra);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  transition: background 0.2s var(--ease);
+  cursor: pointer;
+}
+.btn-terra:hover, .btn-terra:focus { background: var(--terra-light); color: #fff; }
+
+.btn-outline-terra {
+  background: transparent;
+  color: var(--terra);
+  border: 1.5px solid var(--terra);
+  border-radius: var(--r-md);
+  padding: 0.45rem 1.2rem;
+  font-weight: 600;
+  transition: all 0.2s var(--ease);
+}
+.btn-outline-terra:hover { background: var(--terra); color: #fff; }
+
+/* ── Navbar ── */
+.navbar { background: var(--bg-elevated) !important; border-bottom: 1px solid var(--border); }
+.navbar-brand { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; color: var(--navy) !important; }
+.nav-link { color: var(--text-secondary) !important; font-weight: 500; transition: color 0.15s; }
+.nav-link:hover, .nav-link.active { color: var(--terra) !important; }
+
+/* ── Cards ── */
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.card:hover { box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+.card-img-top { border-radius: var(--r-lg) var(--r-lg) 0 0; object-fit: cover; }
+
+/* ── Trip/Event Cards ── */
+.trip-card { overflow: hidden; }
+.trip-card img { height: 200px; object-fit: cover; transition: transform 0.4s var(--ease); }
+.trip-card:hover img { transform: scale(1.05); }
+
+/* ── Hero Section ── */
+.hero-section {
+  background: linear-gradient(135deg, var(--navy) 0%, #2a4a6b 100%);
+  color: #fff;
+  padding: 5rem 0 4rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path d="M0 10 Q25 0 50 10 Q75 20 100 10 L100 20 L0 20Z" fill="rgba(255,255,255,0.03)"/></svg>') bottom/100% auto no-repeat;
+}
+
+/* ── Section headings ── */
+.section-title { font-size: 2rem; color: var(--navy); margin-bottom: 0.25rem; }
+.section-subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
+
+/* ── Badge ── */
+.badge-terra { background: var(--terra-dim); color: var(--terra); border-radius: var(--r-sm); padding: 0.2em 0.6em; font-size: 0.8em; font-weight: 600; }
+.badge-difficulty-easy { background: #d1fae5; color: #065f46; }
+.badge-difficulty-moderate { background: #fef3c7; color: #92400e; }
+.badge-difficulty-challenging { background: #fee2e2; color: #991b1b; }
+
+/* ── Footer ── */
+.footer { background: var(--navy); color: rgba(255,255,255,0.85); padding: 3rem 0 1.5rem; }
+.footer h5, .footer h6 { color: #fff; font-family: 'Cormorant Garamond', serif; }
+.footer a { color: rgba(255,255,255,0.7); text-decoration: none; transition: color 0.15s; }
+.footer a:hover { color: var(--terra-light); }
+.footer-divider { border-color: rgba(255,255,255,0.1); margin: 1.5rem 0; }
+
+/* ── Forms ── */
+.form-control, .form-select {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--terra);
+  box-shadow: 0 0 0 3px var(--terra-dim);
+  background: var(--bg-elevated);
+}
+label { color: var(--text-secondary); font-weight: 500; font-size: 0.9rem; }
+
+/* ── Alerts & Flash ── */
+.alert { border-radius: var(--r-md); border: none; }
+
+/* ── Tables ── */
+.table { --bs-table-bg: var(--bg-elevated); }
+.table thead th { background: var(--bg-sunken); color: var(--navy); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; border: none; }
+.table td { vertical-align: middle; border-color: var(--border); }
+
+/* ── Stat Cards ── */
+.stat-card { border-radius: var(--r-lg); padding: 1.5rem; background: var(--bg-elevated); border: 1px solid var(--border); }
+.stat-card .stat-icon { width: 48px; height: 48px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+.stat-card .stat-value { font-size: 2rem; font-weight: 700; color: var(--navy); line-height: 1; }
+.stat-card .stat-label { color: var(--text-muted); font-size: 0.85rem; }
+
+/* ── Admin pills nav ── */
+.admin-nav .nav-link { color: var(--text-secondary); border-radius: var(--r-md); font-weight: 500; padding: 0.4rem 0.9rem; transition: all 0.15s; }
+.admin-nav .nav-link:hover { background: var(--bg-sunken); color: var(--terra); }
+.admin-nav .nav-link.active { background: var(--terra); color: #fff !important; }
+
+/* ── Chat ── */
+.chat-messages { height: 420px; overflow-y: auto; padding: 1rem; background: var(--bg-sunken); border-radius: var(--r-md); }
+.chat-bubble { max-width: 70%; padding: 0.6rem 1rem; border-radius: var(--r-lg); margin-bottom: 0.5rem; font-size: 0.92rem; }
+.chat-bubble.mine { background: var(--terra); color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
+.chat-bubble.theirs { background: var(--bg-elevated); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.chat-sender { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.2rem; }
+
+/* ── Explorer Pass ── */
+.pass-card { border-radius: var(--r-xl); transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+.pass-card.featured { border: 2px solid var(--terra); transform: scale(1.03); }
+.pass-card:hover { transform: scale(1.04); box-shadow: var(--shadow-lg); }
+
+/* ── Quest Badge ── */
+.quest-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: var(--r-md); background: var(--bg-sunken); margin-bottom: 0.5rem; }
+.quest-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--terra-dim); color: var(--terra); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* ── Skeleton placeholder ── */
+.skeleton { background: linear-gradient(90deg, var(--bg-sunken) 25%, var(--border) 50%, var(--bg-sunken) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--r-md); }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── Responsive tweaks ── */
+@media (max-width: 768px) {
+  .hero-section { padding: 3rem 0 2.5rem; }
+  .section-title { font-size: 1.5rem; }
+  .admin-nav { flex-wrap: wrap; gap: 0.25rem; }
+}
+
+/* ── UPGRADED TRIP CARDS ──────────────────────────────────────────── */
+.trip-card {
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #fff;
+}
+.trip-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+}
+.trip-card__image-wrap {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+}
+.trip-card__img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.trip-card:hover .trip-card__img { transform: scale(1.07); }
+.trip-card__image-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 100%);
+}
+.trip-card__badge {
+  position: absolute; top: 14px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.trip-card__badge--category { left: 14px; background: var(--terra, #C4622D); color: #fff; }
+.trip-card__badge--difficulty { right: 14px; }
+.trip-card__badge--easy { background: #2ecc71; color: #fff; }
+.trip-card__badge--medium, .trip-card__badge--moderate { background: #f39c12; color: #fff; }
+.trip-card__badge--hard, .trip-card__badge--challenging { background: #e74c3c; color: #fff; }
+.trip-card__spots {
+  position: absolute; bottom: 12px; right: 14px;
+  background: rgba(0,0,0,0.55); color: #fff;
+  font-size: 0.75rem; padding: 3px 10px; border-radius: 12px;
+}
+.trip-card__body { padding: 20px 22px 24px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.trip-card__destination { font-size: 0.8rem; color: #888; margin: 0; }
+.trip-card__title { font-size: 1.25rem; font-weight: 700; margin: 0; line-height: 1.3; }
+.trip-card__meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.trip-card__price { font-size: 1.3rem; font-weight: 800; color: var(--navy, #1C3144); }
+.trip-card__cta {
+  display: block; margin-top: 14px; padding: 11px 0; text-align: center;
+  background: var(--navy, #1C3144); color: #fff; border-radius: 10px;
+  font-weight: 600; text-decoration: none; letter-spacing: 0.03em;
+  transition: background 0.2s ease;
+}
+.trip-card__cta:hover { background: var(--terra, #C4622D); color: #fff; }
+
+/* ── UPGRADED EVENT CARDS ─────────────────────────────────────────── */
+.event-card {
+  display: flex; border-radius: 16px; overflow: hidden; min-height: 200px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #fff; border-left: 4px solid transparent;
+}
+.event-card:hover {
+  transform: translateY(-5px); box-shadow: 0 14px 40px rgba(0,0,0,0.15);
+  border-left-color: var(--terra, #C4622D);
+}
+.event-card__image-wrap { position: relative; width: 200px; min-width: 200px; overflow: hidden; }
+.event-card__img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.event-card:hover .event-card__img { transform: scale(1.07); }
+.event-card__date-badge {
+  position: absolute; top: 14px; left: 14px;
+  background: var(--terra, #C4622D); color: #fff; border-radius: 10px;
+  padding: 8px 12px; text-align: center; line-height: 1;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+}
+.event-card__date-day { display: block; font-size: 1.6rem; font-weight: 800; }
+.event-card__date-month { display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+.event-card__body { padding: 20px 24px; flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.event-card__category {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--terra, #C4622D);
+}
+.event-card__title { font-size: 1.2rem; font-weight: 700; margin: 4px 0; line-height: 1.3; }
+.event-card__location, .event-card__time { font-size: 0.85rem; color: #666; margin: 0; }
+.event-card__footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; }
+.event-card__price { font-size: 1.25rem; font-weight: 800; color: var(--navy, #1C3144); }
+.event-card__cta {
+  padding: 9px 20px; background: var(--navy, #1C3144); color: #fff;
+  border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.875rem;
+  transition: background 0.2s ease;
+}
+.event-card__cta:hover { background: var(--terra, #C4622D); color: #fff; }
+
+/* ── ADMIN UTILITIES ─────────────────────────────────────────────── */
+.text-navy { color: var(--navy) !important; }
+.text-terra { color: var(--terra) !important; }
+.fw-600 { font-weight: 600; }
+.badge-difficulty-easy { background:#d1fae5; color:#065f46; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
+.badge-difficulty-moderate { background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
+.badge-difficulty-challenging { background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }

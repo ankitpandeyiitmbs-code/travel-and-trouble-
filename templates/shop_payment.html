@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block title %}Order Payment — {{ settings.site_title }}{% endblock %}
+{% block content %}
+<section class="py-5">
+  <div class="container" style="max-width:600px">
+    <h1 class="section-title mb-4">Complete Your Order</h1>
+    <div class="card p-4 mb-4">
+      <h5 class="fw-bold mb-3" style="color:var(--navy)">Order Summary</h5>
+      {% for item in items %}
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <img src="{{ item.image_url or 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=60' }}"
+             style="width:50px;height:50px;object-fit:cover;border-radius:var(--r-sm)" alt="{{ item.name }}">
+        <div class="flex-grow-1">
+          <div class="fw-600">{{ item.name }}</div>
+          <div class="text-muted small">Qty: {{ item.quantity }} × ₹{{ "{:,}".format(item.price_at_purchase|int) }}</div>
+        </div>
+        <div class="fw-bold" style="color:var(--terra)">₹{{ "{:,}".format((item.quantity * item.price_at_purchase)|int) }}</div>
+      </div>
+      {% endfor %}
+      <hr>
+      <div class="d-flex justify-content-between">
+        <span class="h5 fw-bold">Total</span>
+        <span class="h5 fw-bold" style="color:var(--terra)">₹{{ "{:,}".format(order.total_amount|int) }}</span>
+      </div>
+    </div>
+    {% if is_simulation %}
+    <div class="card p-4">
+      <div class="alert alert-info mb-3"><i class="fa-solid fa-flask me-1"></i><strong>Test Mode</strong></div>
+      <form action="{{ url_for('confirm_shop_payment') }}" method="POST">
+        <input type="hidden" name="order_id" value="{{ order.id }}">
+        <button class="btn btn-terra w-100 btn-lg">Simulate Payment</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="card p-4">
+      <button id="rzp-button" class="btn btn-terra w-100 btn-lg">Pay ₹{{ "{:,}".format(order.total_amount|int) }}</button>
+      <form id="rzp-form" action="{{ url_for('confirm_shop_payment') }}" method="POST">
+        <input type="hidden" name="order_id" value="{{ order.id }}">
+        <input type="hidden" name="razorpay_payment_id" id="payment_id">
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+{% if not is_simulation %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('rzp-button').onclick=function(e){
+  e.preventDefault();
+  var rzp=new Razorpay({key:"{{ razorpay_key }}",amount:{{ order.total_amount|int*100 }},currency:"INR",name:"{{ settings.site_title }}",
+  handler:function(r){document.getElementById('payment_id').value=r.razorpay_payment_id;document.getElementById('rzp-form').submit();}});
+  rzp.open();
+};
+</script>
+{% endif %}
+{% endblock %}

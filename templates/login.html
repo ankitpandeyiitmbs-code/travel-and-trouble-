@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center py-5" style="background: var(--bg-sunken);">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+        <div class="card p-4 p-md-5 shadow-sm">
+          <div class="text-center mb-4">
+            <div class="mb-3" style="font-size:2.5rem; color:var(--terra);"><i class="fa-solid fa-compass"></i></div>
+            <h2 class="mb-1" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Welcome Back</h2>
+            <p class="text-muted mb-0">Sign in to continue your adventure</p>
+          </div>
+          <form method="POST" action="/login">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="email" name="email" required autofocus placeholder="you@example.com">
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label d-flex justify-content-between">
+                Password
+                <a href="/forgot-password" class="text-terra small" style="font-weight:500;">Forgot password?</a>
+              </label>
+              <div class="input-group">
+                <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+                <button class="btn btn-outline-secondary" type="button" onclick="togglePwd(this)" tabindex="-1">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-terra btn-lg">Sign In</button>
+            </div>
+          </form>
+          <hr class="my-4">
+          <p class="text-center mb-0 text-muted">
+            Don't have an account? <a href="/signup" class="text-terra fw-semibold">Sign Up</a>
+          </p>
+        </div>
+        <p class="text-center mt-3 text-muted small">
+          <i class="fa-solid fa-lock fa-xs me-1"></i>Your data is secure and never shared.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePwd(btn){
+  const inp = btn.closest('.input-group').querySelector('input');
+  const icon = btn.querySelector('i');
+  if(inp.type==='password'){ inp.type='text'; icon.className='fa-solid fa-eye-slash'; }
+  else { inp.type='password'; icon.className='fa-solid fa-eye'; }
+}
+</script>
+{% endblock %}

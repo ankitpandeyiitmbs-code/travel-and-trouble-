@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}Cart — {{ settings.site_title }}{% endblock %}
+{% block content %}
+<section class="py-5">
+  <div class="container" style="max-width:800px">
+    <h1 class="section-title mb-4">Your Cart</h1>
+    {% if items %}
+    <div class="card mb-4">
+      <div class="card-body p-0">
+        {% for row in items %}
+        <div class="d-flex align-items-center gap-3 p-3" style="border-bottom:1px solid var(--border)">
+          <img src="{{ row.item.image_url or 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=80' }}"
+               alt="{{ row.item.name }}" style="width:70px;height:70px;object-fit:cover;border-radius:var(--r-md)">
+          <div class="flex-grow-1">
+            <div class="fw-bold">{{ row.item.name }}</div>
+            <div class="text-muted small">₹{{ "{:,}".format(row.item.price) }} each</div>
+          </div>
+          <form action="{{ url_for('update_cart', item_id=row.item.id) }}" method="POST" class="d-flex align-items-center gap-2">
+            <input type="number" name="quantity" value="{{ row.qty }}" min="0" max="{{ row.item.stock }}" class="form-control form-control-sm" style="width:70px">
+            <button class="btn btn-sm btn-outline-terra">Update</button>
+          </form>
+          <div class="fw-bold" style="color:var(--terra);min-width:80px;text-align:right">₹{{ "{:,}".format(row.subtotal) }}</div>
+          <form action="{{ url_for('remove_from_cart', item_id=row.item.id) }}" method="POST">
+            <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card p-4">
+      <div class="d-flex justify-content-between mb-3">
+        <span class="h5 fw-bold">Total</span>
+        <span class="h5 fw-bold" style="color:var(--terra)">₹{{ "{:,}".format(total) }}</span>
+      </div>
+      {% if session.user_id %}
+      <form action="{{ url_for('checkout_shop') }}" method="POST">
+        <button class="btn btn-terra w-100 btn-lg">Proceed to Checkout</button>
+      </form>
+      {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-terra w-100 btn-lg">Login to Checkout</a>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="text-center py-5" style="color:var(--text-muted)">
+      <i class="fa-solid fa-cart-shopping fa-3x mb-3"></i>
+      <p>Your cart is empty.</p>
+      <a href="{{ url_for('shop') }}" class="btn btn-terra">Browse Shop</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

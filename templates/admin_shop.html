@@ -1,0 +1,137 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken); min-height:100vh;">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+      <div>
+        <a href="/admin#shop_items" class="text-muted text-decoration-none small">
+          <i class="fa-solid fa-arrow-left me-1"></i>Back to Admin
+        </a>
+        <h3 class="mt-1 mb-0" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">
+          Shop Manager
+        </h3>
+      </div>
+      <button class="btn btn-terra" data-bs-toggle="modal" data-bs-target="#addItemModal">
+        <i class="fa-solid fa-plus me-2"></i>Add Item
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th class="ps-4">Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th class="pe-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+              <tr>
+                <td class="ps-4">
+                  {% if item.image_url %}
+                  <img src="{{ item.image_url }}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;" loading="lazy" alt="{{ item.name }}">
+                  {% else %}
+                  <div style="width:44px;height:44px;background:var(--bg-sunken);border-radius:8px;" class="d-flex align-items-center justify-content-center">
+                    <i class="fa-solid fa-image text-muted fa-sm"></i>
+                  </div>
+                  {% endif %}
+                </td>
+                <td class="fw-semibold">{{ item.name }}</td>
+                <td class="text-muted small">{{ item.category or '—' }}</td>
+                <td class="fw-bold text-terra">₹{{ '{:,}'.format(item.price) }}</td>
+                <td>
+                  <span class="badge {% if item.stock > 10 %}bg-success{% elif item.stock > 0 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                    {{ item.stock }}
+                  </span>
+                </td>
+                <td class="pe-4">
+                  <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="fillEdit({{ item | tojson }})">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <form method="POST" action="/admin/shop/item/delete/{{ item.id }}" onsubmit="return confirm('Delete item?')">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if not items %}
+        <div class="text-center py-5 text-muted">
+          <i class="fa-solid fa-box-open fa-3x mb-3" style="color:var(--border);"></i>
+          <p>No shop items yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add Shop Item</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/shop/item/add" enctype="multipart/form-data">
+        <div class="modal-body"><div class="row g-3">
+          <div class="col-12"><label class="form-label">Name</label><input type="text" class="form-control" name="name" required></div>
+          <div class="col-6"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" required min="1"></div>
+          <div class="col-6"><label class="form-label">Stock</label><input type="number" class="form-control" name="stock" value="0" min="0"></div>
+          <div class="col-12"><label class="form-label">Category</label><select class="form-select" name="category"><option>Apparel</option><option>Gear</option><option>Accessories</option><option>Books</option><option>Other</option></select></div>
+          <div class="col-12"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url"></div>
+          <div class="col-12"><label class="form-label">Or Upload Image</label><input type="file" class="form-control" name="image_file" accept="image/*"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" rows="3"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Add Item</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Item Modal -->
+<div class="modal fade" id="editItemModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit Item</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/shop/item/edit" enctype="multipart/form-data">
+        <div class="modal-body"><div class="row g-3">
+          <input type="hidden" name="item_id" id="eId">
+          <div class="col-12"><label class="form-label">Name</label><input type="text" class="form-control" name="name" id="eName" required></div>
+          <div class="col-6"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" id="ePrice" required></div>
+          <div class="col-6"><label class="form-label">Stock</label><input type="number" class="form-control" name="stock" id="eStock" min="0"></div>
+          <div class="col-12"><label class="form-label">Category</label><input type="text" class="form-control" name="category" id="eCat"></div>
+          <div class="col-12"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url" id="eImg"></div>
+          <div class="col-12"><label class="form-label">Or Upload New Image</label><input type="file" class="form-control" name="image_file" accept="image/*"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" id="eDesc" rows="2"></textarea></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Save</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function fillEdit(item){
+  document.getElementById('eId').value = item.id;
+  document.getElementById('eName').value = item.name;
+  document.getElementById('ePrice').value = item.price;
+  document.getElementById('eStock').value = item.stock;
+  document.getElementById('eCat').value = item.category || '';
+  document.getElementById('eImg').value = item.image_url || '';
+  document.getElementById('eDesc').value = item.description || '';
+  new bootstrap.Modal(document.getElementById('editItemModal')).show();
+}
+</script>
+{% endblock %}

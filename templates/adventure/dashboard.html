@@ -1,0 +1,167 @@
+{% extends "layout.html" %}
+{% block title %}Adventure Mode 🎮 — {{ trip.title }}{% endblock %}
+{% block head %}
+<style>
+.adv-wrap { background:#0d1117; min-height:100vh; color:#e6edf3; padding:0; }
+.adv-header { background:linear-gradient(135deg,#1a2a1e 0%,#0d1117 100%); border-bottom:1px solid #30363d; padding:1.5rem 2rem; }
+.adv-header h2 { color:#e6edf3; font-family:'Cormorant Garamond',serif; margin:0; }
+.adv-badge { background:#238636; color:#fff; border-radius:20px; padding:4px 14px; font-size:0.8rem; font-weight:700; display:inline-block; }
+.adv-pts { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:0.6rem 1.2rem; font-size:1.1rem; font-weight:700; color:#ffa657; display:inline-block; }
+.adv-body { display:flex; gap:1.5rem; padding:1.5rem 2rem; }
+.adv-grid { flex:1; }
+.adv-sidebar { width:300px; min-width:300px; }
+.act-card { background:#161b22; border:1px solid #30363d; border-radius:14px; padding:1.25rem; margin-bottom:1rem; position:relative; transition:transform 0.2s,box-shadow 0.2s; }
+.act-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.4); border-color:#388bfd; }
+.act-type-icon { font-size:1.8rem; margin-bottom:0.5rem; }
+.act-card h6 { color:#e6edf3; font-weight:700; margin:0.2rem 0; }
+.act-card .loc { color:#8b949e; font-size:0.82rem; }
+.pts-badge { background:#388bfd22; color:#388bfd; border:1px solid #388bfd55; border-radius:20px; padding:3px 10px; font-size:0.78rem; font-weight:700; display:inline-block; }
+.bonus-note { color:#ffa657; font-size:0.75rem; }
+.status-pending { background:#b88009; color:#fff; border-radius:20px; padding:5px 14px; font-size:0.8rem; font-weight:700; display:inline-block; }
+.status-approved { background:#238636; color:#fff; border-radius:20px; padding:5px 14px; font-size:0.8rem; font-weight:700; display:inline-block; }
+.status-rejected { background:#da3633; color:#fff; border-radius:20px; padding:5px 14px; font-size:0.8rem; font-weight:700; display:inline-block; }
+.submit-btn { background:#238636; color:#fff; border:none; border-radius:8px; padding:8px 18px; font-weight:600; font-size:0.875rem; cursor:pointer; transition:background 0.2s; }
+.submit-btn:hover { background:#2ea043; }
+.upload-form { background:#0d1117; border:1px solid #30363d; border-radius:10px; padding:1rem; margin-top:0.75rem; display:none; }
+.upload-form label { color:#8b949e; font-size:0.82rem; font-weight:600; display:block; margin-bottom:0.3rem; }
+.upload-form input, .upload-form textarea { background:#161b22; border:1px solid #30363d; color:#e6edf3; border-radius:6px; padding:0.45rem 0.7rem; width:100%; font-size:0.85rem; }
+.upload-form input:focus, .upload-form textarea:focus { outline:none; border-color:#388bfd; }
+.upload-form textarea { resize:vertical; min-height:60px; }
+/* Leaderboard */
+.lb-card { background:#161b22; border:1px solid #30363d; border-radius:14px; overflow:hidden; }
+.lb-header { padding:1rem 1.25rem; border-bottom:1px solid #30363d; }
+.lb-header h6 { color:#e6edf3; font-weight:700; margin:0; }
+.lb-row { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1.25rem; border-bottom:1px solid #21262d; }
+.lb-row:last-child { border-bottom:none; }
+.lb-row.me { background:#1f2d3d; }
+.lb-rank { width:28px; text-align:center; font-weight:700; font-size:0.95rem; }
+.lb-name { flex:1; font-size:0.88rem; color:#e6edf3; font-weight:500; }
+.lb-pts { color:#ffa657; font-weight:700; font-size:0.9rem; }
+@media(max-width:768px) { .adv-body { flex-direction:column; padding:1rem; } .adv-sidebar { width:100%; min-width:0; } .adv-header { padding:1rem; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="adv-wrap">
+  <div class="adv-header">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <h2>{{ trip.title }}</h2>
+          <span class="adv-badge">🎮 Adventure Mode</span>
+        </div>
+        <p style="color:#8b949e;margin:0.25rem 0 0">Complete activities, earn points, and top the leaderboard!</p>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="adv-pts">⚡ {{ user_total_points }} pts</span>
+        {% if my_batch_id %}
+        <a href="{{ url_for('batch_chat', batch_id=my_batch_id) }}" class="btn btn-sm" style="background:#238636;color:#fff;border:none">💬 Squad Chat</a>
+        {% endif %}
+        <a href="{{ url_for('trip_details', trip_id=trip.id) }}" class="btn btn-sm btn-outline-secondary">← Trip</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="adv-body">
+    <!-- Activities Grid -->
+    <div class="adv-grid">
+      <p style="color:#8b949e;font-size:0.85rem;margin-bottom:1rem">{{ activities|length }} activit{{ 'ies' if activities|length != 1 else 'y' }}</p>
+      {% if not activities %}
+      <div style="text-align:center;padding:3rem;color:#8b949e">
+        <div style="font-size:3rem">🗺️</div>
+        <p>No activities added yet. Check back soon!</p>
+      </div>
+      {% endif %}
+      {% for act in activities %}
+      {% set sub = my_submissions.get(act.id) %}
+      <div class="act-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="act-type-icon">
+            {% if act.activity_type == 'photo' %}📸
+            {% elif act.activity_type == 'reel' %}🎬
+            {% elif act.activity_type == 'food' %}🍜
+            {% elif act.activity_type == 'challenge' %}🏆
+            {% else %}🎨{% endif %}
+          </div>
+          <span class="pts-badge">{{ act.points }} pts</span>
+        </div>
+        <h6>{{ act.title }}</h6>
+        {% if act.location_hint %}<p class="loc">📍 {{ act.location_hint }}</p>{% endif %}
+        {% if act.description %}<p style="color:#8b949e;font-size:0.82rem;margin-bottom:0.5rem">{{ act.description }}</p>{% endif %}
+        <div class="bonus-note">🥇 +{{ act.bonus_points }} bonus for first submission!</div>
+
+        <div class="mt-3">
+          {% if not sub %}
+          <button class="submit-btn" onclick="toggleForm('form-{{ act.id }}', this)">📤 Submit Proof</button>
+          <div class="upload-form" id="form-{{ act.id }}">
+            <form method="POST" action="{{ url_for('submit_activity', activity_id=act.id) }}" enctype="multipart/form-data">
+              {% if my_batch_id %}<input type="hidden" name="batch_id" value="{{ my_batch_id }}">{% endif %}
+              <label>📎 Photo/Video</label>
+              <input type="file" name="photo" accept="image/*,video/mp4" required style="margin-bottom:0.6rem">
+              <label>✏️ Caption</label>
+              <textarea name="caption" placeholder="Describe your experience…" style="margin-bottom:0.75rem"></textarea>
+              <button type="submit" class="submit-btn w-100">Submit 🚀</button>
+            </form>
+          </div>
+          {% elif sub.status == 'pending' %}
+          <span class="status-pending">⏳ Awaiting Review</span>
+          {% elif sub.status == 'approved' %}
+          <span class="status-approved">✅ Completed! +{{ sub.points_awarded }}pts</span>
+          {% elif sub.status == 'rejected' %}
+          <div>
+            <span class="status-rejected">❌ Rejected — try again</span>
+            {% if sub.admin_note %}<p style="color:#8b949e;font-size:0.78rem;margin:0.4rem 0 0">Note: {{ sub.admin_note }}</p>{% endif %}
+            <button class="submit-btn mt-2" onclick="toggleForm('resubmit-{{ act.id }}', this)">🔄 Resubmit</button>
+            <div class="upload-form" id="resubmit-{{ act.id }}">
+              <form method="POST" action="{{ url_for('submit_activity', activity_id=act.id) }}" enctype="multipart/form-data">
+                {% if my_batch_id %}<input type="hidden" name="batch_id" value="{{ my_batch_id }}">{% endif %}
+                <label>📎 New Photo/Video</label>
+                <input type="file" name="photo" accept="image/*,video/mp4" required style="margin-bottom:0.6rem">
+                <label>✏️ Caption</label>
+                <textarea name="caption" style="margin-bottom:0.75rem"></textarea>
+                <button type="submit" class="submit-btn w-100">Submit Again 🚀</button>
+              </form>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Leaderboard Sidebar -->
+    <div class="adv-sidebar">
+      <div class="lb-card">
+        <div class="lb-header"><h6>🏆 Batch Leaderboard</h6></div>
+        {% if not leaderboard %}
+        <div style="padding:1.5rem;text-align:center;color:#8b949e;font-size:0.85rem">
+          Complete activities to appear here!
+        </div>
+        {% endif %}
+        {% for entry in leaderboard %}
+        <div class="lb-row {% if entry.user_id == current_user_id %}me{% endif %}">
+          <span class="lb-rank">
+            {% if loop.index == 1 %}👑
+            {% elif loop.index == 2 %}🥈
+            {% elif loop.index == 3 %}🥉
+            {% else %}{{ loop.index }}{% endif %}
+          </span>
+          <span class="lb-name">{{ entry.name }}{% if entry.user_id == current_user_id %} <span style="color:#388bfd;font-size:0.75rem">(you)</span>{% endif %}</span>
+          <span class="lb-pts">{{ entry.points }} pts</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function toggleForm(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const visible = el.style.display === 'block';
+  el.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? '📤 Submit Proof' : '✖ Cancel';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% block title %}Edit Trip — {{ trip.title }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container" style="max-width:780px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--navy);margin:0">
+        <i class="fa-solid fa-pen me-2" style="color:var(--terra)"></i>Edit Trip
+      </h4>
+      <a href="{{ url_for('admin_panel') }}#trips" class="btn btn-outline-secondary btn-sm">← Back to Admin</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-600">Title <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="title" required value="{{ trip.title }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-600">Price (₹) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" name="price" required value="{{ trip.price }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-600">Duration</label>
+              <input type="text" class="form-control" name="duration" value="{{ trip.duration or '' }}" placeholder="e.g. 5 Days">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-600">Difficulty</label>
+              <select class="form-select" name="difficulty">
+                {% for d in ['Easy','Moderate','Challenging'] %}
+                <option value="{{ d }}" {% if trip.difficulty == d %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-600">Location</label>
+              <input type="text" class="form-control" name="location" value="{{ trip.location or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-600">Category</label>
+              <input type="text" class="form-control" name="category" value="{{ trip.category or '' }}" placeholder="Trek / Adventure / Chill…">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600">Image URL</label>
+              <input type="url" class="form-control" name="image_url" value="{{ trip.image_url or '' }}" placeholder="https://…">
+              {% if trip.image_url %}
+              <img src="{{ trip.image_url }}" alt="" style="max-height:120px;border-radius:8px;margin-top:8px;object-fit:cover">
+              {% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600">Description</label>
+              <textarea class="form-control" name="description" rows="4">{{ trip.description or '' }}</textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600">Highlights <span class="text-muted small">(comma-separated)</span></label>
+              <input type="text" class="form-control" name="highlights" value="{{ trip.highlights or '' }}" placeholder="Snow summit, Forest trails, …">
+            </div>
+            <div class="col-12 d-flex gap-2 pt-2">
+              <button type="submit" class="btn btn-terra px-4">
+                <i class="fa-solid fa-floppy-disk me-1"></i>Save Changes
+              </button>
+              <a href="{{ url_for('admin_panel') }}#trips" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

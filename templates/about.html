@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="py-5 text-white" style="background: linear-gradient(135deg, var(--navy) 0%, #2a4a6b 100%);">
+  <div class="container text-center">
+    <h1 class="display-5 fw-bold mb-2" style="font-family:'Cormorant Garamond',serif;">
+      {{ page.title if page else 'About Us' }}
+    </h1>
+    <p class="mb-0 opacity-75">Our story, values, and mission</p>
+  </div>
+</section>
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-9">
+        <div class="card p-4 p-md-5">
+          {% if page %}
+            <div class="cms-content" style="line-height:1.8; color:var(--text-primary);">
+              {{ page.content|safe }}
+            </div>
+          {% else %}
+            <p class="text-muted">Content coming soon.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

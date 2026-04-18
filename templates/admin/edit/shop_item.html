@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block title %}Edit Shop Item — {{ item.name }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container" style="max-width:640px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--navy);margin:0">
+        <i class="fa-solid fa-pen me-2" style="color:var(--terra)"></i>Edit Shop Item
+      </h4>
+      <a href="{{ url_for('admin_panel') }}#shop_items" class="btn btn-outline-secondary btn-sm">← Back to Admin</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-600">Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="name" required value="{{ item.name }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-600">Price (₹) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" name="price" required value="{{ item.price }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-600">Stock</label>
+              <input type="number" class="form-control" name="stock" min="0" value="{{ item.stock }}">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600">Category</label>
+              <input type="text" class="form-control" name="category" value="{{ item.category or '' }}" placeholder="Gear / Apparel / Accessories…">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600">Current Image</label>
+              {% if item.image_url %}
+              <div class="mb-2">
+                <img src="{{ item.image_url }}" alt="{{ item.name }}" style="max-height:120px;border-radius:8px;object-fit:cover">
+              </div>
+              {% endif %}
+              <label class="form-label fw-600">Image URL</label>
+              <input type="url" class="form-control mb-2" name="image_url" value="{{ item.image_url or '' }}" placeholder="https://…">
+              <label class="form-label fw-600">Or Upload New Image</label>
+              <input type="file" class="form-control" name="image" accept="image/*">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600">Description</label>
+              <textarea class="form-control" name="description" rows="3">{{ item.description or '' }}</textarea>
+            </div>
+            <div class="col-12 d-flex gap-2 pt-2">
+              <button type="submit" class="btn btn-terra px-4">
+                <i class="fa-solid fa-floppy-disk me-1"></i>Save Changes
+              </button>
+              <a href="{{ url_for('admin_panel') }}#shop_items" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

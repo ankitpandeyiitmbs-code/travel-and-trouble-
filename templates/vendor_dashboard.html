@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="py-5" style="background:var(--bg-sunken); min-height:100vh;">
+  <div class="container">
+    <!-- Header -->
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+      <div>
+        <h2 style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Vendor Dashboard</h2>
+        <p class="text-muted mb-0">
+          {{ profile.business_name if profile else 'Your Business' }}
+          {% if profile and profile.verified %}
+          <span class="badge bg-success ms-2">Verified</span>
+          {% else %}
+          <span class="badge bg-warning text-dark ms-2">Pending Verification</span>
+          {% endif %}
+        </p>
+      </div>
+      <a href="/vendor/addons" class="btn btn-terra">
+        <i class="fa-solid fa-plus me-2"></i>Manage Add-ons
+      </a>
+    </div>
+
+    {% if not profile or not profile.verified %}
+    <div class="alert alert-warning mb-4">
+      <i class="fa-solid fa-triangle-exclamation me-2"></i>
+      Your account is pending admin verification. You can view your dashboard, but add-on creation is disabled until verified.
+    </div>
+    {% endif %}
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon mb-2" style="background:var(--terra-dim); color:var(--terra);">
+            <i class="fa-solid fa-plug"></i>
+          </div>
+          <div class="stat-value">{{ addons|length }}</div>
+          <div class="stat-label">Active Add-ons</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon mb-2" style="background:#d1fae5; color:#065f46;">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+          <div class="stat-value">₹{{ '{:,}'.format(earnings|int) }}</div>
+          <div class="stat-label">Total Earnings</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon mb-2" style="background:#dbeafe; color:#1d4ed8;">
+            <i class="fa-solid fa-ticket"></i>
+          </div>
+          <div class="stat-value">{{ bookings|length }}</div>
+          <div class="stat-label">Bookings with Add-on</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon mb-2" style="background:#fef3c7; color:#92400e;">
+            <i class="fa-solid fa-building"></i>
+          </div>
+          <div class="stat-value">{{ profile.business_type if profile else '—' }}</div>
+          <div class="stat-label">Business Type</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Add-ons -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="mb-3" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">My Add-ons</h5>
+        {% if addons %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr>
+              <th>Title</th><th>Type</th><th>Trip</th><th>Price</th>
+            </tr></thead>
+            <tbody>
+              {% for a in addons %}
+              <tr>
+                <td class="fw-semibold">{{ a.title }}</td>
+                <td><span class="badge-terra">{{ a.addon_type|capitalize }}</span></td>
+                <td class="text-muted small">{{ a.trip_id }}</td>
+                <td class="fw-bold text-terra">₹{{ '{:,}'.format(a.price) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-3">No add-ons yet. <a href="/vendor/addons" class="text-terra">Add your first</a>.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="card">
+      <div class="card-body">
+        <h5 class="mb-3" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Bookings with Your Add-ons</h5>
+        {% if bookings %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr>
+              <th>#</th><th>Customer</th><th>Trip</th><th>Status</th><th>Amount</th>
+            </tr></thead>
+            <tbody>
+              {% for b in bookings %}
+              <tr>
+                <td class="text-muted small">#{{ b.id }}</td>
+                <td class="fw-semibold">{{ b.customer_name or '—' }}</td>
+                <td class="text-muted small">{{ b.trip_id }}</td>
+                <td>
+                  <span class="badge {% if b.status=='confirmed' %}bg-success{% elif b.status=='cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
+                    {{ b.status|capitalize }}
+                  </span>
+                </td>
+                <td class="fw-bold text-terra">₹{{ '{:,}'.format(b.total_price|int) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-3">No bookings include your add-ons yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

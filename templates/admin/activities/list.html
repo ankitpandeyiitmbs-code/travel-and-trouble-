@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block title %}Activities — {{ trip.title }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container-fluid px-4">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <div>
+        <h4 class="mb-0" style="font-family:'Cormorant Garamond',serif;color:var(--navy)">
+          <i class="fa-solid fa-star me-2" style="color:var(--terra)"></i>Adventure Activities
+        </h4>
+        <p class="text-muted small mb-0">Trip: <strong>{{ trip.title }}</strong></p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('admin_activity_new', trip_id=trip.id) }}" class="btn btn-terra btn-sm">
+          <i class="fa-solid fa-plus me-1"></i>Add Activity
+        </a>
+        <a href="{{ url_for('admin_submissions') }}" class="btn btn-outline-secondary btn-sm">
+          <i class="fa-solid fa-inbox me-1"></i>Submissions
+        </a>
+        <a href="{{ url_for('admin_wb_trip_batches', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">
+          <i class="fa-solid fa-calendar-days me-1"></i>Batches
+        </a>
+        <a href="{{ url_for('admin_panel') }}#trips" class="btn btn-outline-secondary btn-sm">← Admin</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        {% if not activities %}
+        <div class="text-center py-5 text-muted">
+          <div style="font-size:3rem">🎮</div>
+          <p>No activities yet. <a href="{{ url_for('admin_activity_new', trip_id=trip.id) }}">Add the first one</a>.</p>
+        </div>
+        {% else %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr><th>#</th><th>Title</th><th>Type</th><th>Points</th><th>Bonus</th><th>Active</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {% for a in activities %}
+              <tr>
+                <td class="text-muted small">{{ a.order_num }}</td>
+                <td class="fw-semibold">{{ a.title }}</td>
+                <td>
+                  <span class="badge-terra" style="text-transform:capitalize">
+                    {% if a.activity_type == 'photo' %}📸
+                    {% elif a.activity_type == 'reel' %}🎬
+                    {% elif a.activity_type == 'food' %}🍜
+                    {% elif a.activity_type == 'challenge' %}🏆
+                    {% else %}🎨{% endif %}
+                    {{ a.activity_type }}
+                  </span>
+                </td>
+                <td class="text-terra fw-bold">{{ a.points }}</td>
+                <td class="text-muted">+{{ a.bonus_points }}</td>
+                <td>
+                  {% if a.is_active %}<span class="badge bg-success">Yes</span>
+                  {% else %}<span class="badge bg-secondary">No</span>{% endif %}
+                </td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="{{ url_for('admin_activity_edit', activity_id=a.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                      <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('admin_activity_delete', activity_id=a.id) }}" onsubmit="return confirm('Delete this activity?')">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

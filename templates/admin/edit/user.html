@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}Edit User — {{ user.name }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container" style="max-width:560px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--navy);margin:0">
+        <i class="fa-solid fa-pen me-2" style="color:var(--terra)"></i>Edit User
+      </h4>
+      <a href="{{ url_for('admin_panel') }}#users" class="btn btn-outline-secondary btn-sm">← Back to Admin</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-600">Full Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" required value="{{ user.name }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" name="email" required value="{{ user.email }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Phone</label>
+            <input type="text" class="form-control" name="phone" value="{{ user.phone or '' }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Role</label>
+            <select class="form-select" name="role">
+              {% for r in ['traveler','vendor','admin'] %}
+              <option value="{{ r }}" {% if user.role == r %}selected{% endif %}>{{ r|capitalize }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="p-3 rounded mb-3" style="background:var(--bg-sunken);font-size:0.85rem;color:var(--text-muted)">
+            <i class="fa-solid fa-circle-info me-1"></i>
+            User ID: <strong>{{ user.id }}</strong> &nbsp;·&nbsp;
+            Points: <strong>{{ user.points or 0 }}</strong>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-terra px-4">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Save Changes
+            </button>
+            <a href="{{ url_for('admin_panel') }}#users" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

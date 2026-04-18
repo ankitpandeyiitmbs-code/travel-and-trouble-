@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Events — {{ settings.site_title }}{% endblock %}
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <h1 class="section-title mb-1">Upcoming Events</h1>
+    <p style="color:var(--text-muted)" class="mb-4">Special experiences, limited seats</p>
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+      <a href="{{ url_for('events') }}" class="btn {% if not category %}btn-terra{% else %}btn-outline-terra{% endif %} btn-sm">All</a>
+      {% for cat in categories %}
+      <a href="{{ url_for('events', category=cat) }}" class="btn {% if category == cat %}btn-terra{% else %}btn-outline-terra{% endif %} btn-sm">{{ cat }}</a>
+      {% endfor %}
+    </div>
+    <div class="row g-4">
+      {% for event in all_events %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card trip-card h-100" style="overflow:hidden">
+          <div style="height:200px;overflow:hidden">
+            <img src="{{ event.image_url or 'https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400' }}"
+                 class="img-cover" style="height:200px" alt="{{ event.title }}" loading="lazy">
+          </div>
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="tag-pill">{{ event.category }}</span>
+              <span class="fw-bold" style="color:var(--terra)">₹{{ "{:,}".format(event.price) }}</span>
+            </div>
+            <h6 class="fw-bold mb-1">{{ event.title }}</h6>
+            <div class="text-muted small mb-2">
+              <i class="fa-solid fa-calendar me-1"></i>{{ event.event_date }}
+              <span class="ms-2"><i class="fa-solid fa-location-dot me-1"></i>{{ event.location }}</span>
+            </div>
+            <p class="small flex-grow-1" style="color:var(--text-secondary)">{{ (event.description or '')|truncate(90) }}</p>
+            <a href="{{ url_for('trip_details', trip_id=event.id) }}" class="btn btn-terra btn-sm mt-auto">Book Event</a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center py-5" style="color:var(--text-muted)">
+        <i class="fa-solid fa-calendar-xmark fa-3x mb-3"></i>
+        <p>No events found.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

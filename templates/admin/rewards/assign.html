@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block title %}Assign Rewards{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container-fluid px-4">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <h4 class="mb-0" style="font-family:'Cormorant Garamond',serif;color:var(--navy)">
+        <i class="fa-solid fa-user-tag me-2" style="color:var(--terra)"></i>Assign Rewards
+      </h4>
+      <a href="{{ url_for('admin_rewards') }}" class="btn btn-outline-secondary btn-sm">← Rewards</a>
+    </div>
+
+    <!-- Batch Selector -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h6 class="fw-bold text-navy mb-3">1. Select a Batch to View Leaderboard</h6>
+        <form method="GET">
+          <div class="d-flex gap-3 align-items-end flex-wrap">
+            <div>
+              <label class="form-label fw-600">Batch</label>
+              <select class="form-select" name="batch_id" style="min-width:280px">
+                <option value="">— Choose a batch —</option>
+                {% for b in all_batches %}
+                <option value="{{ b.id }}" {% if batch_id == b.id %}selected{% endif %}>
+                  {{ b.trip_title }} — {{ b.batch_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-terra">View Leaderboard</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% if selected_batch %}
+    <!-- Leaderboard -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h6 class="fw-bold text-navy mb-3">🏆 Leaderboard — {{ selected_batch.trip_title }}: {{ selected_batch.batch_name }}</h6>
+        {% if not leaderboard %}
+        <p class="text-muted small">No approved submissions yet for this batch.</p>
+        {% else %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>Rank</th><th>Name</th><th>Points</th></tr></thead>
+            <tbody>
+              {% for entry in leaderboard %}
+              <tr>
+                <td class="fw-bold text-terra">
+                  {% if loop.index == 1 %}👑 1st{% elif loop.index == 2 %}🥈 2nd{% elif loop.index == 3 %}🥉 3rd{% else %}#{{ loop.index }}{% endif %}
+                </td>
+                <td class="fw-semibold">{{ entry.name }}</td>
+                <td class="text-terra fw-bold">{{ entry.points }} pts</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Assign Reward Form -->
+    <div class="card">
+      <div class="card-body">
+        <h6 class="fw-bold text-navy mb-3">2. Assign a Reward</h6>
+        {% if not rewards %}
+        <p class="text-muted">No active rewards. <a href="{{ url_for('admin_reward_new') }}">Create one first</a>.</p>
+        {% elif not batch_members %}
+        <p class="text-muted small">No confirmed members in this batch yet.</p>
+        {% else %}
+        <form method="POST">
+          <input type="hidden" name="batch_id" value="{{ batch_id }}">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-600">User</label>
+              <select class="form-select" name="user_id" required>
+                {% for m in batch_members %}
+                <option value="{{ m.user_id }}">{{ m.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-600">Reward</label>
+              <select class="form-select" name="reward_id" required>
+                {% for r in rewards %}
+                <option value="{{ r.id }}">{{ r.title }} ({{ r.coupon_code }})</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Reason</label>
+            <input type="text" class="form-control" name="reason" placeholder="e.g. Top of batch leaderboard">
+          </div>
+          <button type="submit" class="btn btn-terra">
+            <i class="fa-solid fa-paper-plane me-1"></i>Assign Reward
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

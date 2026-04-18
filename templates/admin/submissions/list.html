@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% block title %}Submissions Review{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container-fluid px-4">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <h4 class="mb-0" style="font-family:'Cormorant Garamond',serif;color:var(--navy)">
+        <i class="fa-solid fa-inbox me-2" style="color:var(--terra)"></i>Adventure Submissions
+      </h4>
+      <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-secondary btn-sm">← Admin</a>
+    </div>
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-pills mb-4 gap-1">
+      {% for s, label, icon in [('pending','Pending','fa-clock'),('approved','Approved','fa-check'),('rejected','Rejected','fa-xmark')] %}
+      <li class="nav-item">
+        <a class="nav-link {% if status_filter == s %}active{% endif %}" href="{{ url_for('admin_submissions') }}?status={{ s }}">
+          <i class="fa-solid {{ icon }} me-1"></i>{{ label }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% if not submissions %}
+    <div class="card">
+      <div class="card-body text-center py-5 text-muted">
+        <i class="fa-solid fa-inbox fa-3x mb-3" style="color:var(--border)"></i>
+        <p>No {{ status_filter }} submissions.</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="d-flex flex-column gap-3">
+    {% for sub in submissions %}
+    <div class="card">
+      <div class="card-body">
+        <div class="row g-3 align-items-start">
+          <!-- Thumbnail -->
+          <div class="col-auto">
+            {% if sub.image_path %}
+              {% if sub.image_path.endswith('.mp4') %}
+              <video width="150" height="150" style="object-fit:cover;border-radius:var(--r-md)" controls>
+                <source src="{{ url_for('static', filename=sub.image_path) }}" type="video/mp4">
+              </video>
+              {% else %}
+              <img src="{{ url_for('static', filename=sub.image_path) }}"
+                   alt="submission" width="150" height="150"
+                   style="object-fit:cover;border-radius:var(--r-md)">
+              {% endif %}
+            {% else %}
+            <div style="width:150px;height:150px;background:var(--bg-sunken);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;color:var(--text-muted)">
+              <i class="fa-solid fa-image fa-2x"></i>
+            </div>
+            {% endif %}
+          </div>
+          <!-- Info -->
+          <div class="col">
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <span class="badge {% if sub.status=='approved' %}bg-success{% elif sub.status=='rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                {{ sub.status|capitalize }}
+              </span>
+              <span class="badge-terra">{{ sub.activity_title }}</span>
+              <span class="text-muted small">{{ sub.trip_title }}</span>
+              {% if sub.batch_name %}<span class="text-muted small">— {{ sub.batch_name }}</span>{% endif %}
+            </div>
+            <p class="fw-semibold mb-1">{{ sub.user_name }}</p>
+            {% if sub.caption %}<p class="text-muted small mb-1">"{{ sub.caption }}"</p>{% endif %}
+            <p class="text-muted small mb-0">
+              <i class="fa-solid fa-clock me-1"></i>{{ (sub.submitted_at or '')[:16] }}
+              {% if sub.points_awarded and sub.status == 'approved' %}
+              &nbsp;·&nbsp;<span class="text-success fw-bold">+{{ sub.points_awarded }} pts awarded</span>
+              {% endif %}
+            </p>
+            {% if sub.admin_note %}<p class="text-muted small mt-1"><em>Admin note: {{ sub.admin_note }}</em></p>{% endif %}
+          </div>
+          <!-- Review Actions (pending only) -->
+          {% if status_filter == 'pending' %}
+          <div class="col-md-4 col-12">
+            <form method="POST" action="{{ url_for('admin_submission_review', sub_id=sub.id) }}">
+              <div class="mb-2">
+                <textarea class="form-control form-control-sm" name="admin_note" rows="2"
+                  placeholder="Optional note for traveler…"></textarea>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm flex-fill">
+                  ✅ Approve
+                </button>
+                <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm flex-fill">
+                  ❌ Reject
+                </button>
+              </div>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

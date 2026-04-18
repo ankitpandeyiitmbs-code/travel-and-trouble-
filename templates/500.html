@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center text-center py-5"
+     style="background: linear-gradient(135deg, var(--navy) 0%, #2a4a6b 100%);">
+  <div class="text-white">
+    <div style="font-size:6rem; font-family:'Cormorant Garamond',serif; font-weight:700; opacity:0.3; line-height:1;">500</div>
+    <div class="mb-3" style="font-size:3rem; color:var(--terra-light);">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h2 class="fw-bold mb-2" style="font-family:'Cormorant Garamond',serif;">Server Error</h2>
+    <p class="mb-4 opacity-75">Something went wrong on our end. We're on it — please try again in a moment.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="/" class="btn btn-terra px-4">
+        <i class="fa-solid fa-house me-2"></i>Go Home
+      </a>
+      <a href="/contact" class="btn btn-outline-light px-4">Contact Support</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

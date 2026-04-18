@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="py-5" style="background:var(--bg-sunken); min-height:100vh;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-7">
+        <div class="mb-4">
+          <a href="/community" class="text-muted text-decoration-none small">
+            <i class="fa-solid fa-arrow-left me-1"></i>Back to Community
+          </a>
+        </div>
+        <div class="card p-4 p-md-5">
+          <h3 class="mb-1" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Share Your Story</h3>
+          <p class="text-muted mb-4">Inspire fellow adventurers with your experience</p>
+          <form method="POST" action="/create_post">
+            <div class="mb-3">
+              <label class="form-label">Post Title</label>
+              <input type="text" class="form-control" name="title" required maxlength="120"
+                     placeholder="e.g. My Kedarkantha trek in winter">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Your Story</label>
+              <textarea class="form-control" name="content" rows="8" required
+                        placeholder="Share the highlights, moments, tips and memories…"></textarea>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Tag</label>
+                <select class="form-select" name="tag">
+                  <option>General</option>
+                  <option>Trip Report</option>
+                  <option>Tips & Advice</option>
+                  <option>Photography</option>
+                  <option>Food</option>
+                  <option>Gear Review</option>
+                  <option>Question</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Image URL (optional)</label>
+                <input type="url" class="form-control" name="image_url" placeholder="https://…">
+              </div>
+            </div>
+            <div class="d-flex gap-3 mt-4">
+              <button type="submit" class="btn btn-terra px-4">
+                <i class="fa-solid fa-paper-plane me-2"></i>Publish Post
+              </button>
+              <a href="/community" class="btn btn-outline-secondary px-4">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

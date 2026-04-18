@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="py-5" style="background:var(--bg-sunken); min-height:100vh;">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+      <div>
+        <a href="/vendor/dashboard" class="text-muted text-decoration-none small">
+          <i class="fa-solid fa-arrow-left me-1"></i>Back to Dashboard
+        </a>
+        <h3 class="mt-1 mb-0" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Manage Add-ons</h3>
+      </div>
+      {% if verified %}
+      <button class="btn btn-terra" data-bs-toggle="modal" data-bs-target="#addAddonModal">
+        <i class="fa-solid fa-plus me-2"></i>Add New
+      </button>
+      {% endif %}
+    </div>
+
+    {% if not verified %}
+    <div class="alert alert-warning">
+      <i class="fa-solid fa-lock me-2"></i>
+      Your vendor account is not yet verified. An admin must verify your account before you can create add-ons.
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-body p-0">
+        {% if addons %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead><tr>
+              <th class="ps-4">Title</th><th>Type</th><th>Trip</th><th>Price</th><th>Description</th><th class="pe-4">Actions</th>
+            </tr></thead>
+            <tbody>
+              {% for a in addons %}
+              <tr>
+                <td class="ps-4 fw-semibold">{{ a.title }}</td>
+                <td><span class="badge-terra">{{ a.addon_type|capitalize }}</span></td>
+                <td class="text-muted small">{{ a.trip_id }}</td>
+                <td class="fw-bold text-terra">₹{{ '{:,}'.format(a.price) }}</td>
+                <td class="text-muted small">{{ (a.description or '')[:60] }}{% if (a.description or '')|length > 60 %}…{% endif %}</td>
+                <td class="pe-4">
+                  <form method="POST" action="/vendor/addons/delete/{{ a.id }}" onsubmit="return confirm('Delete this add-on?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <i class="fa-solid fa-plug fa-3x mb-3" style="color:var(--border);"></i>
+          <p>No add-ons yet. {% if verified %}Create your first add-on above.{% endif %}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Addon Modal -->
+{% if verified %}
+<div class="modal fade" id="addAddonModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="border-bottom:1px solid var(--border);">
+        <h5 class="modal-title" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Add New Add-on</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/vendor/addons/add">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Title</label>
+              <input type="text" class="form-control" name="title" required placeholder="e.g. Hotel Upgrade">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Type</label>
+              <select class="form-select" name="addon_type" required>
+                <option value="hotel">Hotel</option>
+                <option value="transport">Transport</option>
+                <option value="activity">Activity</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Price (₹)</label>
+              <input type="number" class="form-control" name="price" required min="1">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Trip</label>
+              <select class="form-select" name="trip_id" required>
+                {% for t in trips %}
+                <option value="{{ t.id }}">{{ t.title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" name="description" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top:1px solid var(--border);">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-terra">Add Add-on</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

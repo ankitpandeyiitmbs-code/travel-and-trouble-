@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}Edit Event — {{ event.title }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container" style="max-width:780px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--navy);margin:0">
+        <i class="fa-solid fa-pen me-2" style="color:var(--terra)"></i>Edit Event
+      </h4>
+      <a href="{{ url_for('admin_panel') }}#events" class="btn btn-outline-secondary btn-sm">← Back to Admin</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-600">Title <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="title" required value="{{ event.title }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-600">Price (₹) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" name="price" required value="{{ event.price }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-600">Duration</label>
+              <input type="text" class="form-control" name="duration" value="{{ event.duration or '' }}" placeholder="e.g. 1 Night">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-600">Event Date</label>
+              <input type="date" class="form-control" name="event_date" value="{{ event.event_date or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-600">Location</label>
+              <input type="text" class="form-control" name="location" value="{{ event.location or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-600">Category</label>
+              <input type="text" class="form-control" name="category" value="{{ event.category or '' }}" placeholder="Adventure / Camping / Wellness…">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600">Image URL</label>
+              <input type="url" class="form-control" name="image_url" value="{{ event.image_url or '' }}" placeholder="https://…">
+              {% if event.image_url %}
+              <img src="{{ event.image_url }}" alt="" style="max-height:120px;border-radius:8px;margin-top:8px;object-fit:cover">
+              {% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-600">Description</label>
+              <textarea class="form-control" name="description" rows="4">{{ event.description or '' }}</textarea>
+            </div>
+            <div class="col-12 d-flex gap-2 pt-2">
+              <button type="submit" class="btn btn-terra px-4">
+                <i class="fa-solid fa-floppy-disk me-1"></i>Save Changes
+              </button>
+              <a href="{{ url_for('admin_panel') }}#events" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

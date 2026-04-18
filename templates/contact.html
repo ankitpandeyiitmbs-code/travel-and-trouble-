@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- Hero -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, var(--navy) 0%, #2a4a6b 100%);">
+  <div class="container text-center">
+    <h1 class="display-5 fw-bold mb-2" style="font-family:'Cormorant Garamond',serif;">Get In Touch</h1>
+    <p class="mb-0 opacity-75">We're here to help plan your perfect adventure</p>
+  </div>
+</section>
+
+<section class="py-5" style="background:var(--bg-sunken);">
+  <div class="container">
+    <div class="row g-4 justify-content-center">
+      <!-- Contact Info -->
+      <div class="col-12 col-lg-4">
+        <div class="card p-4 h-100">
+          <h5 class="mb-4" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Contact Information</h5>
+          {% if settings.phone %}
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div class="stat-icon" style="background:var(--terra-dim); color:var(--terra); width:40px;height:40px; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <i class="fa-solid fa-phone"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-navy small">Phone</div>
+              <div class="text-muted">{{ settings.phone }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% if settings.email %}
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div style="width:40px;height:40px; background:var(--terra-dim); color:var(--terra); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-navy small">Email</div>
+              <div class="text-muted">{{ settings.email }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% if settings.address %}
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div style="width:40px;height:40px; background:var(--terra-dim); color:var(--terra); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-navy small">Address</div>
+              <div class="text-muted">{{ settings.address }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% if settings.working_hours %}
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div style="width:40px;height:40px; background:var(--terra-dim); color:var(--terra); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-navy small">Hours</div>
+              <div class="text-muted">{{ settings.working_hours }}</div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Social Links -->
+          <hr class="my-3">
+          <div class="d-flex gap-3">
+            {% if settings.instagram %}<a href="{{ settings.instagram }}" target="_blank" class="text-terra fs-5"><i class="fab fa-instagram"></i></a>{% endif %}
+            {% if settings.twitter %}<a href="{{ settings.twitter }}" target="_blank" class="text-terra fs-5"><i class="fab fa-twitter"></i></a>{% endif %}
+            {% if settings.facebook %}<a href="{{ settings.facebook }}" target="_blank" class="text-terra fs-5"><i class="fab fa-facebook"></i></a>{% endif %}
+            {% if settings.youtube %}<a href="{{ settings.youtube }}" target="_blank" class="text-terra fs-5"><i class="fab fa-youtube"></i></a>{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="col-12 col-lg-7">
+        <div class="card p-4">
+          <h5 class="mb-4" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Send Us a Message</h5>
+          <form method="POST" action="/contact">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Your Name</label>
+                <input type="text" class="form-control" name="name" required placeholder="Rahul Sharma">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" name="email" required placeholder="you@example.com">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Subject</label>
+                <select class="form-select" name="subject">
+                  <option value="general">General Inquiry</option>
+                  <option value="booking">Booking Question</option>
+                  <option value="payment">Payment Issue</option>
+                  <option value="group">Group Booking</option>
+                  <option value="vendor">Vendor Partnership</option>
+                  <option value="feedback">Feedback</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Message</label>
+                <textarea class="form-control" name="message" rows="5" required placeholder="Tell us how we can help…"></textarea>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-terra px-4">
+                  <i class="fa-solid fa-paper-plane me-2"></i>Send Message
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

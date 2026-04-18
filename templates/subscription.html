@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}Explorer Pass — {{ settings.site_title }}{% endblock %}
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <i class="fa-solid fa-id-card fa-3x mb-3" style="color:var(--terra)"></i>
+      <h1 class="section-title">Explorer Pass</h1>
+      <p style="color:var(--text-muted)">Save on every trip, unlock exclusive benefits</p>
+    </div>
+    {% if current_sub %}
+    <div class="alert text-center mb-4 p-4" style="background:var(--terra-dim);border:1px solid var(--terra);border-radius:var(--r-lg);color:var(--terra)">
+      <i class="fa-solid fa-circle-check fa-2x mb-2"></i>
+      <h5 class="fw-bold">You have an active {{ current_sub.plan_name|title }} Pass!</h5>
+      <p class="mb-0">Valid until: {{ current_sub.valid_until[:10] }}</p>
+    </div>
+    {% endif %}
+    <div class="row g-4 justify-content-center">
+      {% for plan in plans %}
+      <div class="col-md-4">
+        <div class="card p-4 h-100 text-center {% if plan.name == 'pro' %}border-2{% endif %}" style="{% if plan.name == 'pro' %}border-color:var(--terra) !important{% endif %}">
+          {% if plan.name == 'pro' %}
+          <div class="mb-2"><span class="badge" style="background:var(--terra)">Most Popular</span></div>
+          {% endif %}
+          <i class="fa-solid {% if plan.name == 'basic' %}fa-seedling{% elif plan.name == 'pro' %}fa-bolt{% else %}fa-crown{% endif %} fa-2x mb-3" style="color:var(--terra)"></i>
+          <h4 class="fw-bold mb-1" style="color:var(--navy)">{{ plan.label }}</h4>
+          <div class="display-6 fw-bold mb-1" style="color:var(--terra)">₹{{ "{:,}".format(plan.price) }}</div>
+          <div class="text-muted mb-3">per year</div>
+          <div class="mb-3"><span class="tag-pill">{{ plan.discount }} off all trips</span></div>
+          <ul class="list-unstyled text-start mb-4">
+            {% for feature in plan.features %}
+            <li class="mb-2"><i class="fa-solid fa-check me-2" style="color:var(--terra)"></i>{{ feature }}</li>
+            {% endfor %}
+          </ul>
+          {% if session.user_id %}
+          <form action="{{ url_for('subscribe_pass') }}" method="POST" class="mt-auto">
+            <input type="hidden" name="tier" value="{{ plan.name }}">
+            <button class="btn {% if plan.name == 'pro' %}btn-terra{% else %}btn-outline-terra{% endif %} w-100">
+              {% if current_sub and current_sub.plan_name == plan.name %}Renew{% elif current_sub %}Switch Plan{% else %}Get {{ plan.label }}{% endif %}
+            </button>
+          </form>
+          {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline-terra w-100 mt-auto">Login to Subscribe</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

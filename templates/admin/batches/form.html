@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block title %}{% if action == 'edit' %}Edit Batch{% else %}New Batch{% endif %} — {{ trip.title }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container" style="max-width:640px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--navy);margin:0">
+        {% if action == 'edit' %}Edit Batch{% else %}New Batch{% endif %}
+      </h4>
+      <a href="{{ url_for('admin_wb_trip_batches', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">← Back</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <p class="text-muted small mb-3">Trip: <strong>{{ trip.title }}</strong></p>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-600">Batch Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="batch_name" required
+              value="{{ batch.batch_name if batch else '' }}" placeholder="e.g. Batch 1 – Jan 2026">
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-600">Start Date</label>
+              <input type="date" class="form-control" name="start_date"
+                value="{{ batch.start_date if batch else '' }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-600">End Date</label>
+              <input type="date" class="form-control" name="end_date"
+                value="{{ batch.end_date if batch else '' }}">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Max Seats</label>
+            <input type="number" class="form-control" name="max_seats" min="1"
+              value="{{ batch.max_seats if batch else 20 }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Price Override (₹)</label>
+            <input type="number" class="form-control" name="price_override" step="0.01" min="0"
+              value="{{ batch.price_override if batch and batch.price_override else '' }}"
+              placeholder="Leave blank to use trip price">
+          </div>
+          {% if action == 'edit' %}
+          <div class="mb-3 form-check">
+            <input class="form-check-input" type="checkbox" name="is_active" id="isActive"
+              {% if batch and batch.is_active %}checked{% endif %}>
+            <label class="form-check-label" for="isActive">Active</label>
+          </div>
+          {% endif %}
+          {% if batch %}
+          <div class="mb-3 p-3 rounded" style="background:var(--bg-sunken)">
+            <small class="text-muted">
+              <strong>Chat link:</strong>
+              <a href="{{ url_for('batch_chat', batch_id=batch.id) }}" target="_blank">View Group Chat</a>
+            </small>
+          </div>
+          {% endif %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-terra">
+              <i class="fa-solid fa-floppy-disk me-1"></i>{% if action == 'edit' %}Save Changes{% else %}Create Batch{% endif %}
+            </button>
+            <a href="{{ url_for('admin_wb_trip_batches', trip_id=trip.id) }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

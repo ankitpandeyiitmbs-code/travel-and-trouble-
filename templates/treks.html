@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+{% block title %}Explore Treks — {{ settings.site_title }}{% endblock %}
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <h1 class="section-title mb-1">Explore Treks</h1>
+    <p style="color:var(--text-muted)" class="mb-4">Discover all our trekking adventures</p>
+    <form method="GET" class="row g-2 mb-4 p-3 rounded-3" style="background:var(--bg-sunken)">
+      <div class="col-md-3">
+        <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ search }}">
+      </div>
+      <div class="col-md-2">
+        <select name="location" class="form-select">
+          <option value="">All Locations</option>
+          {% for loc in all_locations %}
+          <option value="{{ loc }}" {% if location == loc %}selected{% endif %}>{{ loc }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="difficulty" class="form-select">
+          <option value="">All Difficulty</option>
+          <option value="Easy" {% if difficulty=='Easy' %}selected{% endif %}>Easy</option>
+          <option value="Moderate" {% if difficulty=='Moderate' %}selected{% endif %}>Moderate</option>
+          <option value="Challenging" {% if difficulty=='Challenging' %}selected{% endif %}>Challenging</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="category" class="form-select">
+          <option value="">All Types</option>
+          {% for cat in all_categories %}
+          <option value="{{ cat }}" {% if category==cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-terra w-100">Filter</button>
+      </div>
+      <div class="col-md-1">
+        <a href="{{ url_for('treks') }}" class="btn btn-outline-terra w-100"><i class="fa-solid fa-xmark"></i></a>
+      </div>
+    </form>
+    <div class="row g-4">
+      {% for trip in trips %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card trip-card h-100" style="overflow:hidden">
+          <div style="position:relative;height:220px;overflow:hidden">
+            <img src="{{ trip.image_url or 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400' }}"
+                 class="img-cover" style="height:220px" alt="{{ trip.title }}" loading="lazy">
+            <span class="position-absolute top-0 end-0 m-2 px-2 py-1 rounded-2 small fw-bold
+              {% if trip.difficulty == 'Easy' %}difficulty-easy{% elif trip.difficulty == 'Challenging' %}difficulty-challenging{% else %}difficulty-moderate{% endif %}">{{ trip.difficulty }}</span>
+          </div>
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="tag-pill">{{ trip.category }}</span>
+              <span class="fw-bold" style="color:var(--terra)">₹{{ "{:,}".format(trip.price) }}</span>
+            </div>
+            <h6 class="fw-bold mt-2 mb-1">{{ trip.title }}</h6>
+            <div class="d-flex gap-3 text-muted small mb-2">
+              <span><i class="fa-solid fa-location-dot me-1"></i>{{ trip.location }}</span>
+              <span><i class="fa-solid fa-clock me-1"></i>{{ trip.duration }}</span>
+            </div>
+            <a href="{{ url_for('trip_details', trip_id=trip.id) }}" class="btn btn-terra btn-sm mt-auto">View Details</a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center py-5" style="color:var(--text-muted)">
+        <i class="fa-solid fa-mountain fa-3x mb-3"></i><p>No trips found.</p>
+      </div>
+      {% endfor %}
+    </div>
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if has_prev %}
+        <li class="page-item"><a class="page-link" href="?page={{ page-1 }}&search={{ search }}&location={{ location }}&difficulty={{ difficulty }}&category={{ category }}">Previous</a></li>
+        {% endif %}
+        {% for p in range(1, total_pages+1) %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+          <a class="page-link" href="?page={{ p }}&search={{ search }}&location={{ location }}&difficulty={{ difficulty }}&category={{ category }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+        {% if has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page+1 }}&search={{ search }}&location={{ location }}&difficulty={{ difficulty }}&category={{ category }}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

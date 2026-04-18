@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="py-4 text-white" style="background: linear-gradient(135deg, var(--navy) 0%, #2a4a6b 100%);">
+  <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="mb-1" style="font-family:'Cormorant Garamond',serif;">Community</h1>
+      <p class="mb-0 opacity-75">Stories, tips, and memories from fellow adventurers</p>
+    </div>
+    {% if session.user_id %}
+    <a href="/create_post" class="btn btn-terra">
+      <i class="fa-solid fa-pen me-2"></i>Share Your Story
+    </a>
+    {% else %}
+    <a href="/login" class="btn btn-terra">
+      <i class="fa-solid fa-right-to-bracket me-2"></i>Join to Post
+    </a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="py-5" style="background:var(--bg-sunken);">
+  <div class="container">
+    <div class="row g-4">
+      {% if posts %}
+        {% for post in posts %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100">
+            {% if post.image_url %}
+            <img src="{{ post.image_url }}" class="card-img-top" style="height:200px;object-fit:cover;" alt="{{ post.title }}" loading="lazy">
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                     style="width:32px;height:32px;font-size:0.8rem;background:var(--terra);flex-shrink:0;">
+                  {{ post.author[0].upper() if post.author else 'U' }}
+                </div>
+                <div>
+                  <div class="fw-semibold small">{{ post.author or 'Traveller' }}</div>
+                  <div class="text-muted" style="font-size:0.75rem;">{{ post.timestamp[:10] if post.timestamp else '' }}</div>
+                </div>
+                {% if post.tag %}
+                <span class="badge-terra ms-auto">{{ post.tag }}</span>
+                {% endif %}
+              </div>
+              <h6 class="fw-bold mb-2">{{ post.title }}</h6>
+              <p class="text-muted small mb-3 flex-grow-1">
+                {{ post.content[:160] }}{% if post.content|length > 160 %}…{% endif %}
+              </p>
+              <div class="d-flex justify-content-between align-items-center">
+                <button class="btn btn-sm btn-outline-secondary like-btn" data-post-id="{{ post.id }}">
+                  <i class="fa-regular fa-heart"></i> <span class="like-count">{{ post.likes if post.likes is defined else 0 }}</span>
+                </button>
+                {% if session.user_id and (session.user_id == post.user_id or session.user_role == 'admin') %}
+                <form method="POST" action="/admin/delete_post/{{ post.id }}" onsubmit="return confirm('Delete this post?')">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="col-12 text-center py-5">
+          <div style="font-size:4rem;color:var(--border);" class="mb-3"><i class="fa-solid fa-comments"></i></div>
+          <h4 style="color:var(--text-secondary);">No posts yet</h4>
+          <p class="text-muted">Be the first to share your adventure story!</p>
+          {% if session.user_id %}
+          <a href="/create_post" class="btn btn-terra">Write First Post</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.like-btn').forEach(btn => {
+  btn.addEventListener('click', async function(){
+    const postId = this.dataset.postId;
+    try {
+      const res = await fetch(`/post/like/${postId}`, {method:'POST'});
+      const data = await res.json();
+      if(data.likes !== undefined){
+        this.querySelector('.like-count').textContent = data.likes;
+        const icon = this.querySelector('i');
+        icon.className = 'fa-solid fa-heart text-danger';
+      }
+    } catch(e){}
+  });
+});
+</script>
+{% endblock %}

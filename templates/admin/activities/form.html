@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block title %}{% if action == 'edit' %}Edit Activity{% else %}New Activity{% endif %} — {{ trip.title }}{% endblock %}
+{% block content %}
+<div class="py-4" style="background:var(--bg-sunken);min-height:100vh">
+  <div class="container" style="max-width:700px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--navy);margin:0">
+        {% if action == 'edit' %}Edit Activity{% else %}New Activity{% endif %}
+      </h4>
+      <a href="{{ url_for('admin_activities', trip_id=trip.id) }}" class="btn btn-outline-secondary btn-sm">← Back</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <p class="text-muted small mb-3">Trip: <strong>{{ trip.title }}</strong></p>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-600">Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="title" required
+              value="{{ activity.title if activity else '' }}" placeholder="e.g. Sunrise Summit Shot">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Description</label>
+            <textarea class="form-control" name="description" rows="3"
+              placeholder="Describe what participants need to do…">{{ activity.description if activity else '' }}</textarea>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-600">Activity Type</label>
+              <select class="form-select" name="activity_type">
+                {% for t in ['photo','reel','food','challenge','creative'] %}
+                <option value="{{ t }}" {% if activity and activity.activity_type == t %}selected{% endif %}>
+                  {% if t=='photo' %}📸 {% elif t=='reel' %}🎬 {% elif t=='food' %}🍜 {% elif t=='challenge' %}🏆 {% else %}🎨 {% endif %}{{ t|title }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-600">Order #</label>
+              <input type="number" class="form-control" name="order_num" min="0"
+                value="{{ activity.order_num if activity else 0 }}">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Location Hint</label>
+            <input type="text" class="form-control" name="location_hint"
+              value="{{ activity.location_hint if activity else '' }}"
+              placeholder="e.g. Near the main waterfall viewpoint">
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-600">Points</label>
+              <input type="number" class="form-control" name="points" min="0"
+                value="{{ activity.points if activity else 10 }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-600">Bonus Points (1st submission)</label>
+              <input type="number" class="form-control" name="bonus_points" min="0"
+                value="{{ activity.bonus_points if activity else 5 }}">
+            </div>
+          </div>
+          {% if action == 'edit' %}
+          <div class="mb-3 form-check">
+            <input class="form-check-input" type="checkbox" name="is_active" id="isActive"
+              {% if activity and activity.is_active %}checked{% endif %}>
+            <label class="form-check-label" for="isActive">Active (visible to users)</label>
+          </div>
+          {% endif %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-terra">
+              <i class="fa-solid fa-floppy-disk me-1"></i>{% if action == 'edit' %}Save Changes{% else %}Create Activity{% endif %}
+            </button>
+            <a href="{{ url_for('admin_activities', trip_id=trip.id) }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

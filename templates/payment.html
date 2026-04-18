@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block title %}Payment — {{ settings.site_title }}{% endblock %}
+{% block content %}
+<section class="py-5">
+  <div class="container" style="max-width:700px">
+    <h1 class="section-title mb-4">Complete Your Booking</h1>
+    <div class="card mb-4 p-4">
+      <h5 class="fw-bold mb-3" style="color:var(--navy)">Booking Summary</h5>
+      <div class="d-flex justify-content-between mb-2">
+        <span>{{ target.title if target else 'Trip' }}</span>
+        <span class="fw-bold">{{ booking.batch_date }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span>Travelers</span>
+        <span>{{ booking.num_travelers }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span>Sharing Type</span>
+        <span>{{ booking.sharing_type|title }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span>Price per Person</span>
+        <span>₹{{ "{:,}".format(booking.price_per_person) }}</span>
+      </div>
+      {% if addons %}
+      <div class="d-flex justify-content-between mb-2 text-muted">
+        <span>Add-ons</span>
+        <span>+₹{{ "{:,}".format(addon_total) }}</span>
+      </div>
+      {% endif %}
+      <hr>
+      <div class="d-flex justify-content-between">
+        <span class="h5 fw-bold">Total</span>
+        <span class="h5 fw-bold" style="color:var(--terra)">₹{{ "{:,}".format(final_total) }}</span>
+      </div>
+      {% if membership_tier %}
+      <div class="mt-2 small" style="color:var(--terra)"><i class="fa-solid fa-id-card me-1"></i>Explorer Pass ({{ membership_tier|title }}) discount applied!</div>
+      {% endif %}
+    </div>
+    {% if batch_info %}
+    <div class="card mb-4 p-3" style="background:var(--bg-sunken)">
+      <div class="d-flex align-items-center gap-2">
+        {% if batch_info.confirmed %}
+        <i class="fa-solid fa-circle-check" style="color:#198754"></i>
+        <span style="color:#198754">Batch confirmed! {{ batch_info.current }}/{{ batch_info.max_allowed }} booked.</span>
+        {% else %}
+        <i class="fa-solid fa-clock" style="color:#856404"></i>
+        <span style="color:#856404">{{ batch_info.current }}/{{ batch_info.min_required }} minimum needed to confirm batch.</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+    <!-- Payment -->
+    {% if is_simulation %}
+    <div class="card p-4">
+      <div class="alert alert-info mb-3"><i class="fa-solid fa-flask me-1"></i><strong>Test Mode:</strong> No real payment is processed.</div>
+      <form action="{{ url_for('process_payment', booking_id=booking.id) }}" method="POST">
+        <button class="btn btn-terra w-100 btn-lg"><i class="fa-solid fa-check-circle me-2"></i>Simulate Payment (₹{{ "{:,}".format(final_total) }})</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="card p-4">
+      <button id="rzp-button" class="btn btn-terra w-100 btn-lg"><i class="fa-solid fa-lock me-2"></i>Pay ₹{{ "{:,}".format(final_total) }} Securely</button>
+      <form id="rzp-form" action="{{ url_for('process_payment', booking_id=booking.id) }}" method="POST">
+        <input type="hidden" name="razorpay_payment_id" id="payment_id">
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+{% if not is_simulation %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('rzp-button').onclick = function(e){
+  e.preventDefault();
+  var options = {
+    key: "{{ razorpay_key }}",
+    amount: {{ final_total * 100 }},
+    currency: "INR",
+    name: "{{ settings.site_title }}",
+    description: "Trip Booking",
+    handler: function(response){
+      document.getElementById('payment_id').value = response.razorpay_payment_id;
+      document.getElementById('rzp-form').submit();
+    }
+  };
+  var rzp = new Razorpay(options);
+  rzp.open();
+};
+</script>
+{% endif %}
+{% endblock %}
