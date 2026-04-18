@@ -143,28 +143,36 @@ def load_cms_page(conn, page_name):
 
 
 def get_booking_target(conn, target_id):
-    trip = conn.execute("SELECT * FROM trips WHERE id=?", (target_id,)).fetchone()
-    if trip:
-        return dict(trip), 'trip'
-    event = conn.execute("SELECT * FROM events WHERE id=?", (target_id,)).fetchone()
-    if event:
-        return dict(event), 'event'
-    return None, None
+    try:
+        trip = conn.execute("SELECT * FROM trips WHERE id=?", (target_id,)).fetchone()
+        if trip:
+            return dict(trip), 'trip'
+        event = conn.execute("SELECT * FROM events WHERE id=?", (target_id,)).fetchone()
+        if event:
+            return dict(event), 'event'
+        return None, None
+    except Exception as e:
+        print(f"Error in get_booking_target for {target_id}: {e}")
+        return None, None
 
 
 def build_batch_choices(conn, target, target_type):
-    if target_type == 'event':
-        ed = target.get('event_date', 'TBC')
-        return [{'value': ed, 'label': ed, 'status': 'pending'}]
-    batches = conn.execute(
-        "SELECT * FROM trip_batches WHERE trip_id=? ORDER BY batch_date", (target['id'],)).fetchall()
-    if not batches:
+    try:
+        if target_type == 'event':
+            ed = target.get('event_date', 'TBC')
+            return [{'value': ed, 'label': ed, 'status': 'pending'}]
+        batches = conn.execute(
+            "SELECT * FROM trip_batches WHERE trip_id=? ORDER BY batch_date", (target['id'],)).fetchall()
+        if not batches:
+            return [{'value': 'TBC', 'label': 'Dates to be confirmed', 'status': 'pending'}]
+        choices = []
+        for b in batches:
+            label = f"{b['batch_date']} ({b['current_bookings']}/{b['max_allowed']} booked)"
+            choices.append({'value': b['batch_date'], 'label': label, 'status': b['status']})
+        return choices
+    except Exception as e:
+        print(f"Error in build_batch_choices: {e}")
         return [{'value': 'TBC', 'label': 'Dates to be confirmed', 'status': 'pending'}]
-    choices = []
-    for b in batches:
-        label = f"{b['batch_date']} ({b['current_bookings']}/{b['max_allowed']} booked)"
-        choices.append({'value': b['batch_date'], 'label': label, 'status': b['status']})
-    return choices
 
 
 def get_membership_discount(user_id):
@@ -343,42 +351,55 @@ def events():
 
 @app.route('/trip/<trip_id>')
 def trip_details(trip_id):
-    conn = get_db_connection()
-    target, target_type = get_booking_target(conn, trip_id)
-    if not target:
+    try:
+        conn = get_db_connection()
+        target, target_type = get_booking_target(conn, trip_id)
+        if not target:
+            conn.close()
+            return render_template('404.html'), 404
+        batch_choices = build_batch_choices(conn, target, target_type)
+        # Only get addons for trips, not events
+        addons = []
+        if target_type == 'trip':
+            try:
+                addons = conn.execute("SELECT a.*, u.name as vendor_name FROM addons a JOIN users u ON a.vendor_id=u.id WHERE a.trip_id=?", (trip_id,)).fetchall()
+            except Exception as e:
+                print(f"Error fetching addons: {e}")
+                addons = []
+        existing_booking = None
+        sub_tier = None
+        discount_pct = 0
+        if session.get('user_id'):
+            try:
+                existing_booking = conn.execute(
+                    "SELECT * FROM bookings WHERE user_id=? AND trip_id=? AND status NOT IN ('cancelled')",
+                    (session['user_id'], trip_id)).fetchone()
+                discount_pct = get_membership_discount(session['user_id'])
+                sub = conn.execute(
+                    "SELECT plan_name FROM subscriptions WHERE user_id=? AND status='active' AND valid_until > date('now')",
+                    (session['user_id'],)).fetchone()
+                if sub:
+                    sub_tier = sub['plan_name']
+            except Exception as e:
+                print(f"Error fetching booking info: {e}")
+        # Only parse itinerary for trips, not events
+        itinerary = []
+        if target_type == 'trip':
+            try:
+                itinerary = json.loads(target.get('itinerary', '[]') or '[]')
+            except Exception:
+                itinerary = []
         conn.close()
+        return render_template('trip_details.html', trip=target, target_type=target_type,
+                               batch_choices=batch_choices, addons=addons,
+                               existing_booking=existing_booking, sub_tier=sub_tier,
+                               discount_pct=discount_pct, itinerary=itinerary,
+                               razorpay_key=RAZORPAY_KEY_ID)
+    except Exception as e:
+        print(f"Error in trip_details for {trip_id}: {e}")
+        import traceback
+        traceback.print_exc()
         return render_template('404.html'), 404
-    batch_choices = build_batch_choices(conn, target, target_type)
-    # Only get addons for trips, not events
-    addons = []
-    if target_type == 'trip':
-        addons = conn.execute("SELECT a.*, u.name as vendor_name FROM addons a JOIN users u ON a.vendor_id=u.id WHERE a.trip_id=?", (trip_id,)).fetchall()
-    existing_booking = None
-    sub_tier = None
-    discount_pct = 0
-    if session.get('user_id'):
-        existing_booking = conn.execute(
-            "SELECT * FROM bookings WHERE user_id=? AND trip_id=? AND status NOT IN ('cancelled')",
-            (session['user_id'], trip_id)).fetchone()
-        discount_pct = get_membership_discount(session['user_id'])
-        sub = conn.execute(
-            "SELECT plan_name FROM subscriptions WHERE user_id=? AND status='active' AND valid_until > date('now')",
-            (session['user_id'],)).fetchone()
-        if sub:
-            sub_tier = sub['plan_name']
-    # Only parse itinerary for trips, not events
-    itinerary = []
-    if target_type == 'trip':
-        try:
-            itinerary = json.loads(target.get('itinerary', '[]') or '[]')
-        except Exception:
-            itinerary = []
-    conn.close()
-    return render_template('trip_details.html', trip=target, target_type=target_type,
-                           batch_choices=batch_choices, addons=addons,
-                           existing_booking=existing_booking, sub_tier=sub_tier,
-                           discount_pct=discount_pct, itinerary=itinerary,
-                           razorpay_key=RAZORPAY_KEY_ID)
 
 
 @app.route('/shop')
