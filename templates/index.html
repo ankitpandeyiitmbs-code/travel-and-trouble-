@@ -22,10 +22,17 @@
     <span class="tag-pill mb-3 d-inline-block" style="background:rgba(196,98,45,0.25);color:var(--terra-light)">🏔 Adventure Awaits</span>
     <h1 class="display-2 fw-bold mb-3" style="color: #E8855A">{{ settings.hero_tagline }}</h1>
     <p class="lead mb-4" style="color:rgba(255,255,255,0.8);max-width:600px;margin:0 auto">{{ settings.hero_subtext }}</p>
-    <div class="d-flex gap-3 justify-content-center flex-wrap">
-      <a href="{{ url_for('trips') }}" class="btn btn-terra btn-lg">Explore Trips</a>
-      <a href="{{ url_for('events') }}" class="btn btn-outline-light btn-lg">Events</a>
+    <div class="d-flex gap-3 justify-content-center flex-wrap mb-4">
+      <a href="{{ url_for('trips') }}" class="btn btn-lg" style="background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:0.75rem 2rem;font-size:1.15rem;text-shadow:0 1px 3px rgba(0,0,0,0.3);transition:all 0.3s ease;">Explore Trips</a>
+      <a href="{{ url_for('events') }}" class="btn btn-lg" style="background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:0.75rem 2rem;font-size:1.15rem;text-shadow:0 1px 3px rgba(0,0,0,0.3);transition:all 0.3s ease;">Events</a>
     </div>
+    <style>
+      .hero-section .btn:hover {
+        background:rgba(255,255,255,0.25);
+        border-color:rgba(255,255,255,0.6);
+        box-shadow:0 0 20px rgba(255,255,255,0.3);
+      }
+    </style>
     <div class="row g-3 mt-5 justify-content-center">
       <div class="col-auto"><div class="text-center"><div class="h3 fw-bold" style="color:var(--terra-light)">5000+</div><div style="color:rgba(255,255,255,0.7);font-size:0.9rem">Happy Travelers</div></div></div>
       <div class="col-auto px-4" style="border-left:1px solid rgba(255,255,255,0.2);border-right:1px solid rgba(255,255,255,0.2)"><div class="text-center"><div class="h3 fw-bold" style="color:var(--terra-light)">50+</div><div style="color:rgba(255,255,255,0.7);font-size:0.9rem">Unique Trips</div></div></div>
@@ -33,6 +40,63 @@
     </div>
   </div>
 </section>
+
+<!-- UPCOMING EVENTS -->
+<section class="py-5" style="background:var(--bg-sunken)">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <h2 class="section-title mb-0">Upcoming Events</h2>
+          <span style="width:10px;height:10px;background:#ff4757;border-radius:50%;animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></span>
+        </div>
+        <p style="color:var(--text-muted)">Specially curated experiences, limited seats</p>
+      </div>
+    </div>
+    {% if upcoming_events %}
+      {% set unique_dates = upcoming_events|map(attribute='event_date')|unique|list %}
+      {% for date in unique_dates %}
+        <div class="mb-5">
+          <h5 class="fw-bold mb-3" style="color:var(--navy);">Day {{ loop.index }} — {{ date }}</h5>
+          <div class="row g-4">
+            {% for event in upcoming_events if event.event_date == date %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card event-card">
+                <div class="event-card__image-wrap">
+                  <img src="{{ event.image_url or 'https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400' }}"
+                       alt="{{ event.title }}" class="event-card__img" loading="lazy"
+                       onerror="this.src='https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400'">
+                </div>
+                <div class="event-card__body">
+                  <span class="event-card__category">{{ event.category }}</span>
+                  <h6 class="event-card__title">{{ event.title }}</h6>
+                  <div class="event-card__location">📍 {{ event.location }}</div>
+                  <div class="event-card__footer">
+                    <span class="event-card__price">₹{{ "{:,}".format(event.price) }}</span>
+                    <a href="{{ url_for('trip_details', trip_id=event.id) }}" class="event-card__cta">Join Event →</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center py-5" style="color:var(--text-muted)">
+        <p>No upcoming events scheduled yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+<style>
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+</style>
 
 <!-- FEATURED TRIPS -->
 <section class="py-5">
@@ -117,19 +181,19 @@
   </div>
 </section>
 
-<!-- UPCOMING EVENTS -->
-{% if upcoming_events %}
+<!-- FEATURED EVENTS -->
+{% if events %}
 <section class="py-5">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="section-title mb-1">Upcoming Events</h2>
+        <h2 class="section-title mb-1">Featured Events</h2>
         <p style="color:var(--text-muted)">Special experiences, limited seats</p>
       </div>
       <a href="{{ url_for('events') }}" class="btn btn-outline-terra">All Events <i class="fa-solid fa-arrow-right ms-1"></i></a>
     </div>
     <div class="row g-4">
-      {% for event in upcoming_events %}
+      {% for event in events %}
       <div class="col-12 col-md-6 col-lg-4">
         <div class="event-card">
           <div class="event-card__image-wrap">

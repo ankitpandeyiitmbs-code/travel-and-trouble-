@@ -50,6 +50,17 @@ CREATE TABLE IF NOT EXISTS events (
     itinerary TEXT
 );
 
+CREATE TABLE IF NOT EXISTS upcoming_events (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    image_url TEXT,
+    event_date TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    location TEXT,
+    category TEXT
+);
+
 CREATE TABLE IF NOT EXISTS bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,

@@ -17,7 +17,7 @@
     <ul class="nav nav-pills admin-nav flex-wrap mb-4 gap-1" id="adminTabs" role="tablist">
       {% for tab_id, tab_label, tab_icon in [
         ('overview','Overview','fa-chart-bar'),('trips','Trips','fa-mountain'),('events','Events','fa-calendar-days'),
-        ('users','Users','fa-users'),('bookings','Bookings','fa-ticket'),('quests','Quests','fa-star'),
+        ('upcoming_events','Upcoming Events','fa-clock'),('users','Users','fa-users'),('bookings','Bookings','fa-ticket'),('quests','Quests','fa-star'),
         ('partners','Partners','fa-handshake'),('community','Community','fa-comments'),('inbox','Inbox','fa-inbox'),
         ('shop_items','Shop Items','fa-bag-shopping'),('shop_orders','Shop Orders','fa-receipt'),
         ('explorer_pass','Explorer Pass','fa-id-card'),('settings','Settings','fa-sliders'),('pages','Pages','fa-file-lines')
@@ -186,6 +186,47 @@
                           <i class="fa-solid fa-pen"></i>
                         </a>
                         <form method="POST" action="/admin/events/delete/{{ e.id }}" onsubmit="return confirm('Delete event?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ UPCOMING EVENTS ══ -->
+      <div class="tab-pane fade" id="pane-upcoming_events" role="tabpanel">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <h6 class="mb-0 fw-bold text-navy">Upcoming Events ({{ all_upcoming_events|length }})</h6>
+              <button class="btn btn-terra btn-sm" data-bs-toggle="modal" data-bs-target="#addUpcomingEventModal">
+                <i class="fa-solid fa-plus me-1"></i>Add Upcoming Event
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead><tr><th>ID</th><th>Title</th><th>Location</th><th>Date</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {% for e in all_upcoming_events %}
+                  <tr>
+                    <td class="text-muted small font-monospace">{{ e.id }}</td>
+                    <td class="fw-semibold">{{ e.title }}</td>
+                    <td class="text-muted small">{{ e.location }}</td>
+                    <td class="text-muted small">{{ e.event_date }}</td>
+                    <td><span class="badge-terra">{{ e.category }}</span></td>
+                    <td class="text-terra fw-bold">₹{{ '{:,}'.format(e.price) }}</td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <a href="/admin/upcoming_event/{{ e.id }}/edit" class="btn btn-sm btn-outline-secondary" title="Edit">
+                          <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <form method="POST" action="/admin/upcoming_events/delete/{{ e.id }}" onsubmit="return confirm('Delete upcoming event?')">
                           <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
                         </form>
                       </div>
@@ -888,6 +929,28 @@
           <div class="col-12"><label class="form-label">Content (HTML allowed)</label><textarea class="form-control" name="content" rows="5" required></textarea></div>
         </div></div>
         <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Create Page</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Upcoming Event Modal -->
+<div class="modal fade" id="addUpcomingEventModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Add Upcoming Event</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/admin/upcoming_events/add" enctype="multipart/form-data">
+        <div class="modal-body"><div class="row g-3">
+          <div class="col-12"><label class="form-label">Title</label><input type="text" class="form-control" name="title" required></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" name="description" rows="3"></textarea></div>
+          <div class="col-12"><label class="form-label">Image URL</label><input type="url" class="form-control" name="image_url" placeholder="https://..."></div>
+          <div class="col-12"><label class="form-label">Or Upload Image</label><input type="file" class="form-control" name="image_file" accept="image/*"></div>
+          <div class="col-6"><label class="form-label">Event Date</label><input type="date" class="form-control" name="event_date" required></div>
+          <div class="col-6"><label class="form-label">Price (₹)</label><input type="number" class="form-control" name="price" required min="0"></div>
+          <div class="col-6"><label class="form-label">Location</label><input type="text" class="form-control" name="location"></div>
+          <div class="col-6"><label class="form-label">Category</label><input type="text" class="form-control" name="category" required></div>
+        </div></div>
+        <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-terra">Add Event</button></div>
       </form>
     </div>
   </div>

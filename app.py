@@ -260,12 +260,14 @@ def test_route():
 def index():
     conn = get_db_connection()
     featured_trips = conn.execute("SELECT * FROM trips ORDER BY ROWID DESC LIMIT 4").fetchall()
-    upcoming_events = conn.execute("SELECT * FROM events ORDER BY event_date LIMIT 3").fetchall()
+    events = conn.execute("SELECT * FROM events ORDER BY event_date LIMIT 3").fetchall()
+    upcoming_events = conn.execute("SELECT * FROM upcoming_events ORDER BY event_date ASC").fetchall()
     shop_items = conn.execute("SELECT * FROM merchandise WHERE stock > 0 LIMIT 4").fetchall()
     home_content = conn.execute("SELECT content FROM page_content WHERE page_name='home'").fetchone()
     conn.close()
     return render_template('index.html',
                            featured_trips=featured_trips,
+                           events=events,
                            upcoming_events=upcoming_events,
                            shop_items=shop_items,
                            home_content=home_content['content'] if home_content else '')
@@ -1330,6 +1332,7 @@ def admin_panel():
     }
     all_trips = [dict(row) for row in conn.execute("SELECT * FROM trips").fetchall()]
     all_events = [dict(row) for row in conn.execute("SELECT * FROM events").fetchall()]
+    all_upcoming_events = [dict(row) for row in conn.execute("SELECT * FROM upcoming_events ORDER BY event_date ASC").fetchall()]
     all_users = [dict(row) for row in conn.execute("SELECT * FROM users ORDER BY id DESC").fetchall()]
     all_bookings = [dict(row) for row in conn.execute(
         """SELECT b.*, u.name as user_name, u.email as user_email,
@@ -1373,6 +1376,7 @@ def admin_panel():
     admin_total_points = conn.execute("SELECT COALESCE(SUM(points_awarded),0) FROM activity_submission WHERE status='approved'").fetchone()[0]
     conn.close()
     return render_template('admin.html', stats=stats, all_trips=all_trips, all_events=all_events,
+                           all_upcoming_events=all_upcoming_events,
                            all_users=all_users, all_bookings=all_bookings, bookings=bookings,
                            all_quests=all_quests, quest_feed=quest_feed, vendors=vendors,
                            community_posts=community_posts, inbox=inbox, all_pages=all_pages,
@@ -1724,6 +1728,85 @@ def admin_delete_event(event_id):
     conn.close()
     flash('Event deleted.', 'success')
     return redirect(url_for('admin_panel') + '#events')
+
+
+# ── UPCOMING EVENTS CRUD ───────────────────────────────────────────
+@app.route('/admin/upcoming_events/add', methods=['POST'])
+@login_required
+@admin_required
+def admin_add_upcoming_event():
+    title = request.form.get('title', '').strip()
+    event_id = slugify(title)
+    conn = get_db_connection()
+    existing = conn.execute("SELECT id FROM upcoming_events WHERE id=?", (event_id,)).fetchone()
+    if existing:
+        event_id = f"{event_id}-{uuid.uuid4().hex[:4]}"
+    
+    # Handle image upload
+    image_url = request.form.get('image_url', '')
+    if 'image_file' in request.files and request.files['image_file'].filename:
+        file = request.files['image_file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(f"{event_id}_{file.filename}")
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image_url = f"/static/uploads/{filename}"
+    
+    conn.execute(
+        "INSERT INTO upcoming_events (id,title,description,image_url,event_date,price,location,category) VALUES (?,?,?,?,?,?,?,?)",
+        (event_id, title, request.form.get('description', ''), image_url,
+         request.form.get('event_date', ''), int(request.form.get('price', 0)),
+         request.form.get('location', ''), request.form.get('category', '')))
+    conn.commit()
+    conn.close()
+    flash('Upcoming event added!', 'success')
+    return redirect(url_for('admin_panel') + '#upcoming_events')
+
+
+@app.route('/admin/upcoming_event/<event_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_upcoming_event_page(event_id):
+    conn = get_db_connection()
+    event = conn.execute("SELECT * FROM upcoming_events WHERE id=?", (event_id,)).fetchone()
+    conn.close()
+    if not event:
+        flash('Event not found.', 'danger')
+        return redirect(url_for('admin_panel') + '#upcoming_events')
+    
+    if request.method == 'POST':
+        # Handle image upload
+        image_url = request.form.get('image_url', event['image_url'])
+        if 'image_file' in request.files and request.files['image_file'].filename:
+            file = request.files['image_file']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(f"{event_id}_{file.filename}")
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                image_url = f"/static/uploads/{filename}"
+        
+        conn = get_db_connection()
+        conn.execute(
+            "UPDATE upcoming_events SET title=?,description=?,image_url=?,event_date=?,price=?,location=?,category=? WHERE id=?",
+            (request.form.get('title'), request.form.get('description'), image_url,
+             request.form.get('event_date'), int(request.form.get('price', 0)),
+             request.form.get('location'), request.form.get('category'), event_id))
+        conn.commit()
+        conn.close()
+        flash('Upcoming event updated!', 'success')
+        return redirect(url_for('admin_panel') + '#upcoming_events')
+    
+    return render_template('admin/edit/upcoming_event.html', event=dict(event))
+
+
+@app.route('/admin/upcoming_events/delete/<event_id>', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_upcoming_event(event_id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM upcoming_events WHERE id=?", (event_id,))
+    conn.commit()
+    conn.close()
+    flash('Upcoming event deleted.', 'success')
+    return redirect(url_for('admin_panel') + '#upcoming_events')
 
 
 @app.route('/admin/event/<event_id>/edit', methods=['GET', 'POST'])
