@@ -56,7 +56,7 @@ h1, h2, h3, h4, h5, .display-font { font-family: 'Cormorant Garamond', Georgia, 
 
 /* ── Trip/Event Cards ── */
 .trip-card { overflow: hidden; }
-.trip-card img { height: 200px; object-fit: cover; transition: transform 0.4s var(--ease); }
+.trip-card img { transition: transform 0.4s var(--ease); }
 .trip-card:hover img { transform: scale(1.05); }
 
 /* ── Hero Section ── */
