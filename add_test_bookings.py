@@ -43,7 +43,21 @@ def add_test_data():
     
     trip_id = trip['id']
     
-    # Get a batch for this trip
+    # Get or create a WanderBuddy batch for this trip (for chat feature)
+    wb_batch = conn.execute("SELECT * FROM trip_batch WHERE trip_id=? LIMIT 1", (trip_id,)).fetchone()
+    if not wb_batch:
+        # Create a WanderBuddy batch if none exists
+        start_date = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')
+        end_date = (datetime.now() + timedelta(days=35)).strftime('%Y-%m-%d')
+        conn.execute(
+            "INSERT INTO trip_batch (trip_id, batch_name, start_date, end_date, max_seats, is_active) VALUES (?, ?, ?, ?, ?, 1)",
+            (trip_id, 'Test Batch for Chat', start_date, end_date, 20))
+        conn.commit()
+        wb_batch = conn.execute("SELECT * FROM trip_batch WHERE trip_id=? LIMIT 1", (trip_id,)).fetchone()
+    
+    wb_batch_id = wb_batch['id']
+    
+    # Get a batch date for old system compatibility
     batch = conn.execute("SELECT * FROM trip_batches WHERE trip_id=? LIMIT 1", (trip_id,)).fetchone()
     if not batch:
         # Create a test batch if none exists
@@ -56,15 +70,15 @@ def add_test_data():
     
     batch_date = batch['batch_date']
     
-    # Create bookings for both users on the same batch
+    # Create bookings for both users on the same batch with wb_batch_id for chat
     bookings = [
-        (user1['id'], trip_id, 'trip', batch_date, 'confirmed', None, 2),
-        (user2['id'], trip_id, 'trip', batch_date, 'confirmed', None, 2),
+        (user1['id'], trip_id, 'trip', batch_date, 'confirmed', None, 2, wb_batch_id),
+        (user2['id'], trip_id, 'trip', batch_date, 'confirmed', None, 2, wb_batch_id),
     ]
     
     for booking in bookings:
         conn.execute(
-            "INSERT OR IGNORE INTO bookings (user_id, trip_id, booking_type, batch_date, status, payment_id, num_travelers) VALUES (?,?,?,?,?,?,?)",
+            "INSERT OR IGNORE INTO bookings (user_id, trip_id, booking_type, batch_date, status, payment_id, num_travelers, wb_batch_id) VALUES (?,?,?,?,?,?,?,?)",
             booking)
     
     # Update batch current_bookings
