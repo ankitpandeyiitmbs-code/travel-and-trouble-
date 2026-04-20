@@ -152,6 +152,9 @@ def get_booking_target(conn, target_id):
         event = conn.execute("SELECT * FROM events WHERE id=?", (target_id,)).fetchone()
         if event:
             return dict(event), 'event'
+        upcoming_event = conn.execute("SELECT * FROM upcoming_events WHERE id=?", (target_id,)).fetchone()
+        if upcoming_event:
+            return dict(upcoming_event), 'upcoming_event'
         return None, None
     except Exception as e:
         print(f"Error in get_booking_target for {target_id}: {e}")
@@ -160,7 +163,7 @@ def get_booking_target(conn, target_id):
 
 def build_batch_choices(conn, target, target_type):
     try:
-        if target_type == 'event':
+        if target_type == 'event' or target_type == 'upcoming_event':
             ed = target.get('event_date', 'TBC')
             return [{'value': ed, 'label': ed, 'status': 'pending'}]
         batches = conn.execute(
