@@ -22,7 +22,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
 _base_dir = os.path.dirname(os.path.abspath(__file__))
 app.config['DATABASE'] = os.environ.get('DATABASE') or os.path.join(_base_dir, 'wanderbuddy.db')
-app.config['UPLOAD_FOLDER'] = os.path.join(_base_dir, 'uploads')
+app.config['UPLOAD_FOLDER'] = os.path.join(_base_dir, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID') or 'rzp_test_replace_me'
 IS_SIMULATION_MODE = os.environ.get('IS_SIMULATION_MODE', 'false').lower() == 'true'

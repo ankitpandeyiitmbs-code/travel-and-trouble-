@@ -24,11 +24,12 @@
       {% if posts %}
         {% for post in posts %}
         <div class="col-12 col-md-6 col-lg-4">
-          <div class="card" style="overflow:hidden;height:100%;display:flex;flex-direction:column">
+          <div class="card post-card h-100" 
+               onclick="viewPost('{{ post.title|e }}', '{{ post.author|e }}', '{{ post.timestamp[:10] if post.timestamp else '' }}', '{{ post.tag or '' }}', '{{ post.image_url or '' }}', `{{ post.content|e }}`)">
             {% if post.image_url %}
             <div class="img-container-4-3">
               <img src="{{ post.image_url }}" class="img-container-fixed" alt="{{ post.title }}" loading="lazy"
-                   onerror="this.style.display='none'">
+                   onerror="this.parentElement.style.display='none'">
             </div>
             {% endif %}
             <div class="card-body d-flex flex-column" style="flex:1">
@@ -50,11 +51,11 @@
                 {{ post.content[:200] }}{% if post.content|length > 200 %}…{% endif %}
               </p>
               <div class="d-flex justify-content-between align-items-center mt-auto">
-                <button class="btn btn-sm btn-outline-secondary like-btn" data-post-id="{{ post.id }}">
+                <button class="btn btn-sm btn-outline-secondary like-btn" data-post-id="{{ post.id }}" onclick="event.stopPropagation()">
                   <i class="fa-regular fa-heart"></i> <span class="like-count">{{ post.likes if post.likes is defined else 0 }}</span>
                 </button>
                 {% if session.user_id and (session.user_id == post.user_id or session.user_role == 'admin') %}
-                <form method="POST" action="/admin/delete_post/{{ post.id }}" onsubmit="return confirm('Delete this post?')">
+                <form method="POST" action="/admin/delete_post/{{ post.id }}" onsubmit="return confirm('Delete this post?')" onclick="event.stopPropagation()">
                   <button type="submit" class="btn btn-sm btn-outline-danger">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -78,10 +79,60 @@
     </div>
   </div>
 </section>
+
+<!-- Post View Modal -->
+<div class="modal fade" id="postModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="border:none; border-radius:var(--r-lg);">
+      <div class="modal-header border-0 pb-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4 p-md-5 pt-0">
+        <div id="modal-img-wrap" class="mb-4 rounded-3 overflow-hidden" style="display:none;">
+          <img id="modal-img" src="" class="w-100" style="max-height:450px; object-fit:cover;">
+        </div>
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span id="modal-tag" class="badge-terra">Tag</span>
+          <span id="modal-date" class="text-muted small">Date</span>
+        </div>
+        <h2 id="modal-title" class="fw-bold text-navy mb-3" style="font-family:'Cormorant Garamond',serif;">Title</h2>
+        <div class="d-flex align-items-center gap-2 mb-4">
+          <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:40px;height:40px;background:var(--terra);">A</div>
+          <div class="fw-semibold" id="modal-author">Author Name</div>
+        </div>
+        <div id="modal-content" class="text-secondary" style="line-height:1.7; white-space:pre-wrap;">
+          Content...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 {% block scripts %}
 <script>
+function viewPost(title, author, date, tag, img, content){
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-author').textContent = author;
+  document.getElementById('modal-date').textContent = date;
+  document.getElementById('modal-tag').textContent = tag || 'General';
+  document.getElementById('modal-tag').style.display = tag ? 'inline-block' : 'none';
+  document.getElementById('modal-content').textContent = content;
+  
+  const imgWrap = document.getElementById('modal-img-wrap');
+  const modalImg = document.getElementById('modal-img');
+  if(img){
+    modalImg.src = img;
+    imgWrap.style.display = 'block';
+  } else {
+    imgWrap.style.display = 'none';
+  }
+  
+  new bootstrap.Modal(document.getElementById('postModal')).show();
+}
+
 document.querySelectorAll('.like-btn').forEach(btn => {
+// ... existing like logic ...
   btn.addEventListener('click', async function(){
     const postId = this.dataset.postId;
     try {
