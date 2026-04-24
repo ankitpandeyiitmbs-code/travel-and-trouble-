@@ -86,11 +86,17 @@
     <div class="row g-3 mb-5">
       {% for uq in user_quests %}
       <div class="col-md-4">
-        <div class="card p-3 text-center">
-          <i class="{{ uq.icon }} fa-2x mb-2" style="color:var(--terra)"></i>
-          <div class="fw-bold">{{ uq.quest_title }}</div>
-          <div class="small text-muted mb-2">{{ uq.points }} points</div>
-          <span class="badge {% if uq.status == 'approved' %}bg-success{% elif uq.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ uq.status|title }}</span>
+        <div class="card p-3 text-center" style="{% if not uq.is_active %}opacity:0.7; border-style:dashed;{% endif %}">
+          {% if uq.is_active %}
+            <i class="{{ uq.icon }} fa-2x mb-2" style="color:var(--terra)"></i>
+            <div class="fw-bold">{{ uq.quest_title }}</div>
+            <div class="small text-muted mb-2">{{ uq.points }} points</div>
+            <span class="badge {% if uq.status == 'approved' %}bg-success{% elif uq.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ uq.status|title }}</span>
+          {% else %}
+            <i class="fa-solid fa-lock fa-2x mb-2 text-muted"></i>
+            <div class="fw-bold text-muted">Revealing Soon</div>
+            <div class="small text-muted">A new task awaits your arrival!</div>
+          {% endif %}
         </div>
       </div>
       {% endfor %}

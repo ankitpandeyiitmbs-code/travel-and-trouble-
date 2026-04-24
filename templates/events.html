@@ -4,6 +4,11 @@
 <section class="py-5">
   <div class="container">
     <h1 class="section-title mb-1">Upcoming Events</h1>
+    {% if cms_content %}
+    <div class="cms-page-content mb-4" style="color:var(--text-secondary)">
+      {{ cms_content|safe }}
+    </div>
+    {% endif %}
     <p style="color:var(--text-muted)" class="mb-4">Special experiences, limited seats</p>
     <div class="d-flex gap-2 mb-4 flex-wrap">
       <a href="{{ url_for('events') }}" class="btn {% if not category %}btn-terra{% else %}btn-outline-terra{% endif %} btn-sm">All</a>

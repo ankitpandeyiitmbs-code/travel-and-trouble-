@@ -338,6 +338,11 @@
                         <td><i class="{{ q.icon }}"></i></td>
                         <td>
                           <div class="d-flex gap-1">
+                            <form method="POST" action="/admin/quest/toggle/{{ q.id }}">
+                              <button type="submit" class="btn btn-sm {% if q.is_active %}btn-outline-success{% else %}btn-outline-warning{% endif %}" title="Toggle Visibility">
+                                <i class="fa-solid {% if q.is_active %}fa-eye{% else %}fa-eye-slash{% endif %}"></i>
+                              </button>
+                            </form>
                             <a href="/admin/quest/{{ q.id }}/edit" class="btn btn-sm btn-outline-secondary" title="Edit">
                               <i class="fa-solid fa-pen"></i>
                             </a>
@@ -663,6 +668,21 @@
                 <div class="col-12 col-md-6">
                   <label class="form-label">Year Established</label>
                   <input type="number" class="form-control" name="year_established" value="{{ settings.year_established or 2020 }}">
+                </div>
+                <div class="col-12">
+                  <div class="card p-3" style="background:var(--bg-sunken); border:1px solid var(--border);">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h6 class="mb-0 fw-bold">Shop Activity</h6>
+                        <small class="text-muted">Turn off to show "Launching Soon" message.</small>
+                      </div>
+                      <form method="POST" action="/admin/shop/toggle">
+                        <button type="submit" class="btn btn-sm {% if settings.shop_active %}btn-success{% else %}btn-outline-danger{% endif %}">
+                          {% if settings.shop_active %}<i class="fa-solid fa-check me-1"></i>Active{% else %}<i class="fa-solid fa-clock me-1"></i>Launching Soon{% endif %}
+                        </button>
+                      </form>
+                    </div>
+                  </div>
                 </div>
                 <div class="col-12">
                   <button type="submit" class="btn btn-terra px-4">

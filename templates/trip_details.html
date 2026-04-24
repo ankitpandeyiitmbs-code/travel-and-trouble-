@@ -46,19 +46,32 @@
             </div>
             {% endif %}
             {% if itinerary %}
-            <h5 class="fw-bold mt-4 mb-3" style="color:var(--navy)">Itinerary</h5>
-            {% for day in itinerary %}
-            <div class="d-flex gap-3 mb-3">
-              <div class="flex-shrink-0">
-                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                     style="width:36px;height:36px;background:var(--terra-dim);color:var(--terra);font-size:0.85rem">{{ day.day }}</div>
+            <h5 class="fw-bold mt-5 mb-4" style="color:var(--navy); font-family:'Cormorant Garamond', serif; font-size:1.5rem; letter-spacing:0.5px;">Detailed Itinerary</h5>
+            <div class="itinerary-timeline ms-2">
+              {% for day in itinerary %}
+              <div class="itinerary-day position-relative ps-4 pb-4" style="border-left:1px dashed var(--border-strong);">
+                <div class="day-marker position-absolute" style="left:-10px; top:0; width:20px; height:20px; background:var(--terra); border-radius:50%; border:4px solid #fff; box-shadow:0 0 0 2px var(--terra-dim);"></div>
+                <div class="day-header d-flex justify-content-between align-items-baseline mb-2">
+                  <h6 class="fw-bold mb-0" style="color:var(--navy);">Day {{ day.day }}: {{ day.title }}</h6>
+                </div>
+                <p class="small text-muted mb-2" style="line-height:1.6;">{{ day.description }}</p>
+                <div class="d-flex flex-wrap gap-3 mt-2">
+                  {% if day.meals %}
+                  <div class="small text-muted d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-utensils text-terra" style="font-size:0.7rem"></i>
+                    <span>{{ day.meals }}</span>
+                  </div>
+                  {% endif %}
+                  {% if day.accommodation %}
+                  <div class="small text-muted d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-bed text-terra" style="font-size:0.7rem"></i>
+                    <span>{{ day.accommodation }}</span>
+                  </div>
+                  {% endif %}
+                </div>
               </div>
-              <div>
-                <div class="fw-bold">{{ day.title }}</div>
-                <div class="small" style="color:var(--text-secondary)">{{ day.description }}</div>
-              </div>
+              {% endfor %}
             </div>
-            {% endfor %}
             {% endif %}
           </div>
         </div>

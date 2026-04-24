@@ -12,7 +12,7 @@
         <div class="card p-4 p-md-5">
           <h3 class="mb-1" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Share Your Story</h3>
           <p class="text-muted mb-4">Inspire fellow adventurers with your experience</p>
-          <form method="POST" action="/create_post">
+          <form method="POST" action="/create_post" enctype="multipart/form-data">
             <div class="mb-3">
               <label class="form-label">Post Title</label>
               <input type="text" class="form-control" name="title" required maxlength="120"
@@ -37,8 +37,8 @@
                 </select>
               </div>
               <div class="col-12 col-md-6">
-                <label class="form-label">Image URL (optional)</label>
-                <input type="url" class="form-control" name="image_url" placeholder="https://…">
+                <label class="form-label">Upload Image (optional)</label>
+                <input type="file" class="form-control" name="image" accept="image/*">
               </div>
             </div>
             <div class="d-flex gap-3 mt-4">

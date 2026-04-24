@@ -1,4 +1,5 @@
 import os
+import time
 import re
 import json
 import uuid
@@ -28,6 +29,10 @@ IS_SIMULATION_MODE = os.environ.get('IS_SIMULATION_MODE', 'false').lower() == 't
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+ITEMS_PER_PAGE = 12
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 
 ADMIN_EMAILS = ['admin@wanderbuddy.com', 'travelandtrouble@gmail.com']
 
@@ -106,7 +111,8 @@ DEFAULT_SITE_SETTINGS = {
     'hero_tagline': 'Explore the Unexplored',
     'hero_subtext': 'Join us on unforgettable journeys through the mountains.',
     'email': 'hello@travelandtrouble.com',
-    'phone': '+91 98765 43210',
+    'phone': '+91 85956 89569',
+    'shop_active': 1,
     'address': 'Mountain Base, Manali, Himachal Pradesh',
     'working_hours': 'Mon-Sat: 9AM-6PM',
     'instagram': 'https://instagram.com/travelandtrouble',
@@ -124,7 +130,7 @@ def ensure_site_settings_row(conn):
          instagram, twitter, facebook, youtube)
         VALUES (1,'Travel & Trouble','Where Adventure Meets Comfort',
         'Discover breathtaking destinations crafted for the modern explorer',
-        'admin@travelandtrouble.com','+91 98765 43210','New Delhi, India',
+        'admin@travelandtrouble.com','+91 85956 89569','New Delhi, India',
         'Mon-Sat 9am-6pm',2022,'','#C4622D','DM Sans','','','','')""")
     row = conn.execute("SELECT * FROM site_settings WHERE id=1").fetchone()
     return dict(row) if row else DEFAULT_SITE_SETTINGS.copy()
@@ -230,8 +236,23 @@ def ensure_database_ready():
         schema = f.read()
     conn.executescript(schema)
     migrate_bookings_table(conn)
+    
+    # ── Custom Migrations ───────────────────────────────────────────────────
+    try:
+        # Add is_active to quests
+        cols_q = [r[1] for r in conn.execute("PRAGMA table_info(quests)").fetchall()]
+        if 'is_active' not in cols_q:
+            conn.execute("ALTER TABLE quests ADD COLUMN is_active BOOLEAN DEFAULT 1")
+            
+        # Add shop_active to site_settings
+        cols_s = [r[1] for r in conn.execute("PRAGMA table_info(site_settings)").fetchall()]
+        if 'shop_active' not in cols_s:
+            conn.execute("ALTER TABLE site_settings ADD COLUMN shop_active BOOLEAN DEFAULT 1")
+    except Exception as e:
+        print(f"Migration error: {e}")
+        
     ensure_site_settings_row(conn)
-    for pname in ['about', 'privacy', 'terms', 'home']:
+    for pname in ['about', 'privacy', 'terms', 'home', 'events-cms', 'featured-events-cms']:
         load_cms_page(conn, pname)
     conn.commit()
     conn.close()
@@ -365,47 +386,41 @@ def trip_details(trip_id):
             conn.close()
             return render_template('404.html'), 404
         batch_choices = build_batch_choices(conn, target, target_type)
-        # Only get addons for trips, not events
         addons = []
         if target_type == 'trip':
             try:
                 addons = conn.execute("SELECT a.*, u.name as vendor_name FROM addons a JOIN users u ON a.vendor_id=u.id WHERE a.trip_id=?", (trip_id,)).fetchall()
             except Exception as e:
-                print(f"Error fetching addons: {e}")
                 addons = []
         existing_booking = None
         sub_tier = None
         discount_pct = 0
         if session.get('user_id'):
-            try:
-                existing_booking = conn.execute(
-                    "SELECT * FROM bookings WHERE user_id=? AND trip_id=? AND status NOT IN ('cancelled')",
-                    (session['user_id'], trip_id)).fetchone()
-                discount_pct = get_membership_discount(session['user_id'])
-                sub = conn.execute(
-                    "SELECT plan_name FROM subscriptions WHERE user_id=? AND status='active' AND valid_until > date('now')",
-                    (session['user_id'],)).fetchone()
-                if sub:
-                    sub_tier = sub['plan_name']
-            except Exception as e:
-                print(f"Error fetching booking info: {e}")
-        # Only parse itinerary for trips, not events
+            existing_booking = conn.execute(
+                "SELECT * FROM bookings WHERE user_id=? AND trip_id=? AND status NOT IN ('cancelled')",
+                (session['user_id'], trip_id)).fetchone()
+            discount_pct = get_membership_discount(session['user_id'])
+            sub = conn.execute(
+                "SELECT plan_name FROM subscriptions WHERE user_id=? AND status='active' AND valid_until > date('now')",
+                (session['user_id'],)).fetchone()
+            if sub:
+                sub_tier = sub['plan_name']
+        
         itinerary = []
-        if target_type == 'trip':
+        raw_itinerary = target.get('itinerary', '[]')
+        if raw_itinerary and target_type == 'trip':
             try:
-                itinerary = json.loads(target.get('itinerary', '[]') or '[]')
-            except Exception:
+                itinerary = json.loads(raw_itinerary)
+            except:
                 itinerary = []
         conn.close()
-        return render_template('trip_details.html', trip=target, target_type=target_type,
-                               batch_choices=batch_choices, addons=addons,
-                               existing_booking=existing_booking, sub_tier=sub_tier,
+        return render_template('trip_details.html', trip=target, target_type=target_type, 
+                               batch_choices=batch_choices, addons=addons, 
+                               existing_booking=existing_booking, sub_tier=sub_tier, 
                                discount_pct=discount_pct, itinerary=itinerary,
                                razorpay_key=RAZORPAY_KEY_ID)
     except Exception as e:
-        print(f"Error in trip_details for {trip_id}: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Error in trip_details for {trip_id}: {e}")
         return render_template('404.html'), 404
 
 
@@ -671,40 +686,54 @@ def book():
     target, target_type = get_booking_target(conn, trip_id)
     if not target:
         conn.close()
-        flash('Trip not found.', 'danger')
-        return redirect(url_for('trips'))
-    base_price = target['price']
-    if target_type == 'event':
-        price_per_person = base_price
-        sharing_type = 'ticket'
-    else:
-        multipliers = {'quad': 1.0, 'triple': 1.125, 'double': 1.375}
-        multiplier = multipliers.get(sharing_type, 1.0)
-        price_per_person = int(base_price * multiplier)
-    discount_pct = get_membership_discount(session['user_id'])
-    final_price_per_person = int(price_per_person * (100 - discount_pct) / 100)
-    total_price = final_price_per_person * num_travelers
-    conn.execute(
-        """INSERT INTO bookings (user_id,trip_id,booking_type,batch_date,status,num_travelers,
-           sharing_type,price_per_person,total_price) VALUES (?,?,?,?,?,?,?,?,?)""",
-        (session['user_id'], trip_id, target_type, batch_date, 'pending',
-         num_travelers, sharing_type, final_price_per_person, total_price))
-    conn.commit()
-    booking = conn.execute("SELECT last_insert_rowid() as id").fetchone()
-    booking_id = booking['id']
-    for aid in addon_ids:
-        try:
-            conn.execute("INSERT INTO booking_addons (booking_id, addon_id) VALUES (?,?)",
-                         (booking_id, int(aid)))
-        except Exception:
-            pass
+        flash('Invalid adventure selected.', 'danger')
+        return redirect(url_for('index'))
+
+    base_price = int(target.get('price', 0))
+    num_travelers = int(request.form.get('num_travelers', 1))
+    sharing_type = request.form.get('sharing_type', 'quad')
+    
+    # Calculate per-person price based on sharing
     if target_type == 'trip':
-        conn.execute(
-            """INSERT INTO trip_batches (trip_id, batch_date, current_bookings, min_required, max_allowed, status)
-               VALUES (?,?,?,6,16,'pending') ON CONFLICT(trip_id,batch_date) DO UPDATE
-               SET current_bookings = current_bookings + ?""",
-            (trip_id, batch_date, num_travelers, num_travelers))
-    conn.commit()
+        # Applying sharing multipliers
+        sharing_multipliers = {'quad': 1.0, 'triple': 1.125, 'double': 1.375}
+        price_per_person = int(base_price * sharing_multipliers.get(sharing_type, 1.0))
+    else:
+        price_per_person = base_price
+
+    addon_ids = request.form.getlist('addons')
+    addons_info = []
+    addons_total = 0
+    if addon_ids:
+        for aid in addon_ids:
+            row = conn.execute("SELECT * FROM addons WHERE id=?", (aid,)).fetchone()
+            if row:
+                addons_info.append(row)
+                addons_total += row['price']
+
+    # Total Price Calculation
+    sub_discount = get_membership_discount(session['user_id'])
+    total_price = (price_per_person * num_travelers) + (addons_total * num_travelers)
+    if sub_discount > 0:
+        total_price = int(total_price * (1 - sub_discount / 100))
+
+    try:
+        cur = conn.execute(
+            '''INSERT INTO bookings (user_id, trip_id, booking_type, batch_date, 
+               num_travelers, sharing_type, price_per_person, total_price, status) 
+               VALUES (?,?,?,?,?,?,?,?,?)''',
+            (session['user_id'], trip_id, target_type, batch_date, 
+             num_travelers, sharing_type, price_per_person, total_price, 'pending')
+        )
+        booking_id = cur.lastrowid
+        for aid in addon_ids:
+            conn.execute("INSERT INTO booking_addons (booking_id, addon_id) VALUES (?,?)", (booking_id, aid))
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        flash('Something went wrong. Please try again.', 'danger')
+        return redirect(url_for('trips'))
+    
     conn.close()
     return redirect(url_for('payment', booking_id=booking_id))
 
@@ -804,7 +833,7 @@ def dashboard():
     if booking_ids:
         placeholders = ','.join('?' * len(booking_ids))
         user_quests = conn.execute(
-            f"""SELECT uq.*, q.title as quest_title, q.points, q.icon
+            f"""SELECT uq.*, q.title as quest_title, q.points, q.icon, q.is_active
                 FROM user_quests uq JOIN quests q ON uq.quest_id=q.id
                 WHERE uq.booking_id IN ({placeholders})""",
             booking_ids).fetchall()
@@ -1122,7 +1151,18 @@ def create_post():
         title = request.form.get('title', '').strip()
         content = request.form.get('content', '').strip()
         tag = request.form.get('tag', 'General').strip()
-        image_url = request.form.get('image_url', '').strip()
+        
+        image_url = ''
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                ext = filename.rsplit('.', 1)[1].lower()
+                new_filename = f"post_{int(time.time())}_{session['user_id']}.{ext}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+                file.save(file_path)
+                image_url = f"/static/uploads/{new_filename}"
+
         if title and content:
             conn = get_db_connection()
             conn.execute(
@@ -1983,6 +2023,34 @@ def admin_edit_quest_page(quest_id):
         return redirect(url_for('admin_panel') + '#quests')
     conn.close()
     return render_template('admin/edit/quest.html', quest=dict(quest))
+
+
+@app.route('/admin/quest/toggle/<int:quest_id>', methods=['POST'])
+@login_required
+@admin_required
+def toggle_quest(quest_id):
+    conn = get_db_connection()
+    q = conn.execute("SELECT * FROM quests WHERE id=?", (quest_id,)).fetchone()
+    if q:
+        new_status = 0 if q['is_active'] else 1
+        conn.execute("UPDATE quests SET is_active=? WHERE id=?", (new_status, quest_id))
+        conn.commit()
+    conn.close()
+    return redirect(url_for('admin_panel') + '#quests')
+
+
+@app.route('/admin/shop/toggle', methods=['POST'])
+@login_required
+@admin_required
+def toggle_shop():
+    conn = get_db_connection()
+    settings = dict(conn.execute("SELECT * FROM site_settings WHERE id=1").fetchone())
+    new_status = 0 if settings.get('shop_active') else 1
+    conn.execute("UPDATE site_settings SET shop_active=? WHERE id=1", (new_status,))
+    conn.commit()
+    conn.close()
+    flash(f"Shop {'activated' if new_status else 'deactivated (Launching Soon mode)'}", "info")
+    return redirect(url_for('admin_panel') + '#settings')
 
 
 @app.route('/admin/quest/action', methods=['POST'])

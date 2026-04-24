@@ -13,6 +13,14 @@
         {% if cart_count > 0 %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:var(--terra)">{{ cart_count }}</span>{% endif %}
       </a>
     </div>
+    {% if not settings.shop_active %}
+    <div class="text-center py-5">
+      <i class="fa-solid fa-rocket fa-4x mb-4 text-terra" style="opacity:0.3"></i>
+      <h2 class="display-4 fw-bold text-navy">Launching Soon!</h2>
+      <p class="lead text-muted">We're curating the best gear for your next adventure. Stay tuned.</p>
+      <a href="{{ url_for('index') }}" class="btn btn-terra mt-3">Back to Home</a>
+    </div>
+    {% else %}
     <div class="row g-4">
       {% for item in items %}
       <div class="col-md-4 col-lg-3">
@@ -42,6 +50,7 @@
       </div>
       {% endfor %}
     </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

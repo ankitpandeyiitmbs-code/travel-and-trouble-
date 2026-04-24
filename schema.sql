@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS quests (
     title TEXT NOT NULL,
     points INTEGER NOT NULL DEFAULT 50,
     icon TEXT NOT NULL DEFAULT 'fa-solid fa-star',
+    is_active BOOLEAN DEFAULT 1,
     FOREIGN KEY (trip_id) REFERENCES trips(id)
 );
 
@@ -203,7 +204,8 @@ CREATE TABLE IF NOT EXISTS site_settings (
     font_family TEXT DEFAULT 'DM Sans',
     hero_tagline TEXT DEFAULT 'Where Adventure Meets Comfort',
     hero_subtext TEXT DEFAULT 'Discover breathtaking destinations crafted for the modern explorer',
-    site_title TEXT DEFAULT 'Travel & Trouble'
+    site_title TEXT DEFAULT 'Travel & Trouble',
+    shop_active BOOLEAN DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS page_content (
