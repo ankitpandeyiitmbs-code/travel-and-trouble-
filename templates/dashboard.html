@@ -60,6 +60,13 @@
               <input type="file" name="document" class="form-control form-control-sm" style="max-width:200px">
               <button class="btn btn-sm btn-outline-terra">Upload Doc</button>
             </form>
+            {% if booking.booking_type == 'trip' %}
+              {% if booking.wb_batch_id %}
+                <a href="{{ url_for('batch_chat', batch_id=booking.wb_batch_id) }}" class="btn btn-sm btn-terra">💬 Squad Chat</a>
+              {% else %}
+                <a href="{{ url_for('batch_chat', batch_id='general-' ~ booking.trip_id) }}" class="btn btn-sm btn-outline-terra">💬 Trip Community</a>
+              {% endif %}
+            {% endif %}
           </div>
           {% endif %}
           {% if booking.status in ['pending', 'confirmed'] %}

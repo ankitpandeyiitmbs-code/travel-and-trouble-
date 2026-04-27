@@ -2774,26 +2774,41 @@ def admin_wb_batch_delete(batch_id):
 
 # ─── GROUP CHAT: TRIP BATCHES ─────────────────────────────────────────────────
 
-@app.route('/batch-chat/<int:batch_id>')
+@app.route('/batch-chat/<batch_id>')
 @login_required
 def batch_chat(batch_id):
     conn = get_db_connection()
-    batch = conn.execute(
-        "SELECT tb.*, t.title as trip_title FROM trip_batch tb JOIN trips t ON tb.trip_id=t.id WHERE tb.id=?",
-        (batch_id,)).fetchone()
-    if not batch:
-        conn.close()
-        flash('Batch not found.', 'danger')
-        return redirect(url_for('dashboard'))
-    if not _is_admin() and not _is_confirmed_batch_booker(conn, session['user_id'], batch_id):
-        conn.close()
-        flash('Access denied — you need a confirmed booking for this batch.', 'danger')
-        return redirect(url_for('dashboard'))
+    
+    # Handle General Trip Fallback (for TBC or non-batch bookings)
+    if isinstance(batch_id, str) and batch_id.startswith('general-'):
+        trip_id = batch_id.replace('general-', '')
+        trip = conn.execute("SELECT title FROM trips WHERE id=?", (trip_id,)).fetchone()
+        if not trip:
+            conn.close()
+            flash('Trip not found.', 'danger')
+            return redirect(url_for('dashboard'))
+        batch = {'id': batch_id, 'trip_title': trip['title'], 'batch_date': 'Community'}
+    else:
+        batch = conn.execute(
+            "SELECT tb.*, t.title as trip_title FROM trip_batch tb JOIN trips t ON tb.trip_id=t.id WHERE tb.id=?",
+            (batch_id,)).fetchone()
+        if not batch:
+            conn.close()
+            flash('Batch not found.', 'danger')
+            return redirect(url_for('dashboard'))
+        if not _is_admin() and not _is_confirmed_batch_booker(conn, session['user_id'], batch_id):
+            conn.close()
+            flash('Access denied — you need a confirmed booking for this batch.', 'danger')
+            return redirect(url_for('dashboard'))
+
     messages = conn.execute(
         """SELECT bcm.*, u.name as sender_name FROM batch_chat_message bcm
            JOIN users u ON bcm.user_id=u.id
            WHERE bcm.batch_id=? ORDER BY bcm.sent_at ASC""", (batch_id,)).fetchall()
-    travelers_bookings = conn.execute(
+    
+    travelers_bookings = []
+    if not isinstance(batch_id, str) or not batch_id.startswith('general-'):
+        travelers_bookings = conn.execute(
         """SELECT b.*, u.name as user_name FROM bookings b
            JOIN users u ON b.user_id=u.id
            WHERE b.wb_batch_id=? AND b.status='confirmed'""", (batch_id,)).fetchall()
