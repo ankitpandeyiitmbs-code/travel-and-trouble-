@@ -188,8 +188,10 @@ def build_batch_choices(conn, target, target_type):
             return [{'value': 'TBC', 'label': 'Dates to be confirmed', 'status': 'pending'}]
         choices = []
         for b in batches:
-            label = f"{b['batch_date']} ({b['current_bookings']}/{b['max_allowed']} booked)"
-            choices.append({'value': b['batch_date'], 'label': label, 'status': b['status']})
+            # Handle different column names (batch_date vs start_date)
+            d = b.get('batch_date') or b.get('start_date') or 'TBC'
+            label = f"{d} ({b.get('current_bookings', 0)}/{b.get('max_allowed', 16)} booked)"
+            choices.append({'value': d, 'label': label, 'status': b.get('status', 'active')})
         return choices
     except Exception as e:
         print(f"Error in build_batch_choices: {e}")
