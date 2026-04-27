@@ -177,21 +177,34 @@ def build_batch_choices(conn, target, target_type):
             ed = target.get('event_date', 'TBC')
             return [{'value': ed, 'label': ed, 'status': 'pending'}]
         try:
-            batches = conn.execute(
-                "SELECT * FROM trip_batches WHERE trip_id=? ORDER BY batch_date", (target['id'],)).fetchall()
+            # Try to fetch from trip_batches first
+            batches = conn.execute("SELECT * FROM trip_batches WHERE trip_id=?", (target['id'],)).fetchall()
         except Exception:
-            # Fallback to singular table name if plural doesn't exist
-            batches = conn.execute(
-                "SELECT * FROM trip_batch WHERE trip_id=? ORDER BY batch_date", (target['id'],)).fetchall()
+            # Fallback to trip_batch
+            batches = conn.execute("SELECT * FROM trip_batch WHERE trip_id=?", (target['id'],)).fetchall()
         
         if not batches:
             return [{'value': 'TBC', 'label': 'Dates to be confirmed', 'status': 'pending'}]
+        
+        # Determine the date column name dynamically
         choices = []
         for b in batches:
-            # Handle different column names (batch_date vs start_date)
-            d = b.get('batch_date') or b.get('start_date') or 'TBC'
+            # Check for standard names
+            d = b.get('batch_date') or b.get('start_date') or b.get('date')
+            
+            # If still not found, try to find any column with 'date' in its name
+            if not d:
+                for k in b.keys():
+                    if 'date' in k.lower():
+                        d = b[k]
+                        break
+            
+            d = d or 'TBC'
             label = f"{d} ({b.get('current_bookings', 0)}/{b.get('max_allowed', 16)} booked)"
-            choices.append({'value': d, 'label': label, 'status': b.get('status', 'active')})
+            choices.append({'value': d, 'label': label, 'status': b.get('status', 'active'), 'sort_date': d})
+        
+        # Sort in Python to avoid SQL errors
+        choices.sort(key=lambda x: x['sort_date'])
         return choices
     except Exception as e:
         print(f"Error in build_batch_choices: {e}")
