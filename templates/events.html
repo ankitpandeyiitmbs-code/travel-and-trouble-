@@ -1,51 +1,80 @@
 {% extends "layout.html" %}
-{% block title %}Events — {{ settings.site_title }}{% endblock %}
+{% block title %}Events & Festivals — Travel & Trouble{% endblock %}
 {% block content %}
-<section class="py-5">
+<section class="py-5" style="background:var(--bg-sunken);">
   <div class="container">
-    <h1 class="section-title mb-1">Upcoming Events</h1>
-    {% if cms_content %}
-    <div class="cms-page-content mb-4" style="color:var(--text-secondary)">
-      {{ cms_content|safe }}
-    </div>
-    {% endif %}
-    <p style="color:var(--text-muted)" class="mb-4">Special experiences, limited seats</p>
-    <div class="d-flex gap-2 mb-4 flex-wrap">
-      <a href="{{ url_for('events') }}" class="btn {% if not category %}btn-terra{% else %}btn-outline-terra{% endif %} btn-sm">All</a>
-      {% for cat in categories %}
-      <a href="{{ url_for('events', category=cat) }}" class="btn {% if category == cat %}btn-terra{% else %}btn-outline-terra{% endif %} btn-sm">{{ cat }}</a>
-      {% endfor %}
-    </div>
-    <div class="row g-4">
-      {% for event in all_events %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card trip-card" style="overflow:hidden;height:100%;display:flex;flex-direction:column">
-          <div class="img-container-4-3">
-            <img src="{{ event.image_url or 'https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400' }}"
-                 class="img-container-fixed" alt="{{ event.title }}" loading="lazy"
-                 onerror="this.src='https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400'">
-          </div>
-          <div class="card-body d-flex flex-column" style="flex:1">
-            <div class="d-flex justify-content-between mb-2">
-              <span class="tag-pill">{{ event.category }}</span>
-              <span class="fw-bold" style="color:var(--terra)">₹{{ "{:,}".format(event.price) }}</span>
+    <!-- Section 1: Featured Events -->
+    <div class="mb-5">
+      <h1 class="section-title mb-1">Featured Events</h1>
+      <p style="color:var(--text-muted)" class="mb-4 text-uppercase tracking-wider small">Exclusive WanderBuddy Flagship Experiences</p>
+      
+      <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="{{ url_for('events') }}" class="btn {% if not category %}btn-terra{% else %}btn-outline-terra{% endif %} btn-sm rounded-pill px-3">All</a>
+        {% for cat in categories %}
+        <a href="{{ url_for('events', category=cat) }}" class="btn {% if category == cat %}btn-terra{% else %}btn-outline-terra{% endif %} btn-sm rounded-pill px-3">{{ cat }}</a>
+        {% endfor %}
+      </div>
+
+      <div class="row g-4 mb-5">
+        {% for event in featured %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card trip-card h-100 shadow-sm border-0" style="border-radius:20px; overflow:hidden;">
+            <div class="img-container-4-3 position-relative">
+              <img src="{{ event.image_url or 'https://images.unsplash.com/photo-1514525253344-96737c718a91' }}" class="img-container-fixed" alt="{{ event.title }}">
+              <div class="position-absolute top-0 start-0 m-3">
+                <span class="badge bg-white text-dark shadow-sm">FEATURED</span>
+              </div>
             </div>
-            <h6 class="fw-bold mb-1">{{ event.title }}</h6>
-            <div class="text-muted small mb-2">
-              <i class="fa-solid fa-calendar me-1"></i>{{ event.event_date }}
-              <span class="ms-2"><i class="fa-solid fa-location-dot me-1"></i>{{ event.location }}</span>
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="tag-pill">{{ event.category }}</span>
+                <span class="fw-bold text-terra fs-5">₹{{ "{:,}".format(event.price) }}</span>
+              </div>
+              <h5 class="fw-bold mb-3">{{ event.title }}</h5>
+              <p class="text-muted small mb-4 line-clamp-3">{{ event.description }}</p>
+              <a href="{{ url_for('trip_details', trip_id=event.id) }}" class="btn btn-terra w-100 rounded-pill">Book Featured Event</a>
             </div>
-            <p class="small flex-grow-1" style="color:var(--text-secondary);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">{{ (event.description or '') }}</p>
-            <a href="{{ url_for('trip_details', trip_id=event.id) }}" class="btn btn-terra btn-sm mt-auto">Book Event</a>
           </div>
         </div>
+        {% endfor %}
       </div>
-      {% else %}
-      <div class="col-12 text-center py-5" style="color:var(--text-muted)">
-        <i class="fa-solid fa-calendar-xmark fa-3x mb-3"></i>
-        <p>No events found.</p>
+    </div>
+
+    <!-- Section 2: Upcoming Adventure Calendar -->
+    <div class="pt-5 border-top">
+      <h2 class="fw-bold mb-1">Adventure Calendar</h2>
+      <p style="color:var(--text-muted)" class="mb-4 text-uppercase tracking-wider small">Upcoming Meetups & Local Adventures</p>
+
+      <div class="row g-4">
+        {% for u in upcoming %}
+        <div class="col-12 col-md-6">
+          <div class="card bg-white border-0 shadow-sm p-3" style="border-radius:16px;">
+            <div class="d-flex align-items-center gap-3">
+              <div class="text-center p-3 rounded-4" style="background:var(--bg-sunken); min-width:80px;">
+                <div class="fw-bold text-terra fs-4 mb-0">{{ u.event_date.split('-')[2] if '-' in u.event_date else 'TBC' }}</div>
+                <div class="small text-uppercase text-muted">{{ u.event_date.split('-')[1] if '-' in u.event_date else 'DATE' }}</div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="fw-bold mb-1">{{ u.title }}</h6>
+                <div class="text-muted small">
+                  <i class="fa-solid fa-location-dot me-1"></i> {{ u.location }}
+                  <span class="ms-2">₹{{ "{:,}".format(u.price) }}</span>
+                </div>
+              </div>
+              <div>
+                <a href="{{ url_for('trip_details', trip_id=u.id) }}" class="btn btn-outline-terra rounded-circle p-2" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-4 text-muted">
+          No upcoming meetup dates scheduled yet.
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
     </div>
   </div>
 </section>

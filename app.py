@@ -393,13 +393,19 @@ def treks():
 def events():
     category = request.args.get('category', '')
     conn = get_db_connection()
+    
+    # 1. Featured Events (from events table)
     if category:
-        all_events = conn.execute("SELECT * FROM events WHERE category=?", (category,)).fetchall()
+        featured_events = conn.execute("SELECT * FROM events WHERE category=?", (category,)).fetchall()
     else:
-        all_events = conn.execute("SELECT * FROM events").fetchall()
+        featured_events = conn.execute("SELECT * FROM events").fetchall()
+    
+    # 2. Upcoming Events (from upcoming_events table)
+    upcoming_events = conn.execute("SELECT * FROM upcoming_events ORDER BY event_date ASC").fetchall()
+    
     categories = [r[0] for r in conn.execute("SELECT DISTINCT category FROM events").fetchall()]
     conn.close()
-    return render_template('events.html', all_events=all_events, category=category, categories=categories)
+    return render_template('events.html', featured=featured_events, upcoming=upcoming_events, category=category, categories=categories)
 
 
 @app.route('/trip/<trip_id>')
