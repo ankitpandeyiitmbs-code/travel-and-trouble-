@@ -1340,20 +1340,6 @@ def chat():
     return render_template('chat.html', messages=messages)
 
 
-@app.route('/send_message', methods=['POST'])
-@login_required
-def send_message():
-    data = request.json
-    batch_id = data.get('batch_id')
-    content = data.get('content')
-    if not batch_id or not content:
-        return jsonify({'success': False})
-    conn = get_db_connection()
-    conn.execute("INSERT INTO batch_chat_message (batch_id, user_id, content) VALUES (?,?,?)",
-                 (batch_id, session['user_id'], content))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True})
 
 
 @app.route('/upload_chat_image', methods=['POST'])
@@ -1377,15 +1363,6 @@ def upload_chat_image():
     return jsonify({'success': False, 'error': 'Invalid file'})
 
 
-@app.route('/get_messages/<batch_id>')
-@login_required
-def get_messages(batch_id):
-    conn = get_db_connection()
-    messages = conn.execute(
-        "SELECT m.*, u.name as sender_name FROM batch_chat_message m JOIN users u ON m.user_id=u.id WHERE m.batch_id=? ORDER BY m.sent_at ASC",
-        (batch_id,)).fetchall()
-    conn.close()
-    return jsonify([dict(m) for m in messages])
 
 
 @app.route('/delete_message/<int:msg_id>', methods=['POST'])
