@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vendor Partner | Travel and Trouble</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-white pt-5">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary fixed-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/vendor/dashboard">
+                <i class="fa-solid fa-store text-accent me-2"></i>
+                <span class="fw-bold">Partner Portal</span>
+            </a>
+            <div class="d-flex small align-items-center" style="color: rgba(255,255,255,0.6);">
+                <span class="me-4"><i class="fa-regular fa-user me-1"></i> {{ vendor_profile['business_name'] }}</span>
+                <a href="/logout" class="btn btn-sm btn-outline-danger">Sign Out</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-4">
+        <h2 class="fw-bold mb-4">Command Center</h2>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card bg-secondary bg-opacity-10 border-success p-4 h-100">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="text-success text-uppercase fw-bold">Active Listings</h6>
+                        <i class="fa-solid fa-list text-success"></i>
+                    </div>
+                    <h2 class="display-4 fw-bold mb-0 text-white">{{ stats['total_addons'] }}</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-secondary bg-opacity-10 border-primary p-4 h-100">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="text-primary text-uppercase fw-bold">Total Bookings</h6>
+                        <i class="fa-solid fa-ticket text-primary"></i>
+                    </div>
+                    <h2 class="display-4 fw-bold mb-0 text-white">{{ stats['total_bookings'] }}</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-secondary bg-opacity-10 border-accent p-4 h-100">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="text-accent text-uppercase fw-bold">Est. Revenue</h6>
+                        <i class="fa-solid fa-indian-rupee-sign text-accent"></i>
+                    </div>
+                    <h2 class="display-4 fw-bold mb-0 text-white shadow-text">₹{{ stats['total_revenue'] }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
+                <h4 class="fw-bold m-0"><i class="fa-solid fa-clock-rotate-left me-2 text-accent"></i>Recent Activity</h4>
+                <a href="/vendor/addons" class="btn btn-outline-light"><i class="fa-solid fa-box-open me-2"></i>Manage Listings</a>
+            </div>
+            
+            <div class="col-12">
+                <div class="card bg-dark border-secondary overflow-hidden">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr class="small text-uppercase" style="color: rgba(255,255,255,0.5);">
+                                <th class="bg-secondary bg-opacity-25 py-3 ps-4">Order ID</th>
+                                <th class="bg-secondary bg-opacity-25 py-3">Traveler</th>
+                                <th class="bg-secondary bg-opacity-25 py-3">Add-on Sold</th>
+                                <th class="bg-secondary bg-opacity-25 py-3">Trip</th>
+                                <th class="bg-secondary bg-opacity-25 py-3 text-end pe-4">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in recent_bookings %}
+                            <tr>
+                                <td class="ps-4 align-middle">#{{ b['booking_id'] }}</td>
+                                <td class="align-middle fw-bold">{{ b['traveler_name'] }}</td>
+                                <td class="align-middle text-accent">{{ b['addon_title'] }}</td>
+                                <td class="align-middle small" style="color: rgba(255,255,255,0.6);">{{ b['trip_id'] | title }}<br>{{ b['batch_date'] }}</td>
+                                <td class="text-end pe-4 align-middle fw-bold text-success">+₹{{ b['price'] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5" style="color: rgba(255,255,255,0.5);">
+                                    <i class="fa-solid fa-ghost fa-2x mb-3 opacity-50"></i>
+                                    <p>No recent bookings for your services.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

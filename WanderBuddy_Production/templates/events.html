@@ -1,0 +1,164 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .event-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        transition: all 0.3s var(--ease);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .event-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--terra);
+        box-shadow: var(--shadow-lg);
+    }
+    .event-card img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+    }
+    .event-card-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .event-category-pill {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--r-full);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+    .pill-music    { background: rgba(236,72,153,0.1); color: #ec4899; border: 1px solid rgba(236,72,153,0.2); }
+    .pill-adventure{ background: rgba(196,98,45,0.1); color: var(--terra); border: 1px solid rgba(196,98,45,0.2); }
+    .pill-sports   { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+    .pill-wellness { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+
+    .page-banner { 
+        padding: 120px 0 60px; 
+        background: var(--bg-surface); 
+        position: relative; 
+        overflow: hidden;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+    }
+    .page-banner::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, rgba(196,98,45,0.05), transparent);
+    }
+    .page-banner h1 { font-size: 3.5rem; color: var(--navy); margin-bottom: 1rem; }
+    .page-banner p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+    .filter-tab { 
+        padding: 0.6rem 1.4rem; 
+        border-radius: var(--r-full); 
+        font-size: 0.9rem; 
+        font-weight: 500; 
+        border: 1px solid var(--border); 
+        color: var(--text-secondary); 
+        background: var(--bg-elevated); 
+        text-decoration: none; 
+        transition: all 0.2s var(--ease); 
+    }
+    .filter-tab:hover, .filter-tab.active { 
+        background: var(--terra); 
+        border-color: var(--terra); 
+        color: #fff; 
+        box-shadow: 0 4px 15px rgba(196,98,45,0.3);
+    }
+
+    .event-meta {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .event-meta i { color: var(--terra); }
+    .event-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main>
+    <div class="page-banner">
+        <div class="container relative">
+            <h1 class="serif">Upcoming <span style="color:var(--terra);">Events</span></h1>
+            <p>Festivals, adventure camps, races & wellness retreats across the Himalayas</p>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="py-4" style="background: var(--bg-sunken); border-bottom: 1px solid var(--border);">
+        <div class="container">
+            <div class="d-flex gap-2 flex-wrap justify-content-center">
+                <a href="/events" class="filter-tab {% if not active_category %}active{% endif %}">All Events</a>
+                <a href="/events?category=Music+%26+Festivals" class="filter-tab {% if active_category == 'Music & Festivals' %}active{% endif %}">Music & Festivals</a>
+                <a href="/events?category=Adventure+Camps" class="filter-tab {% if active_category == 'Adventure Camps' %}active{% endif %}">Adventure Camps</a>
+                <a href="/events?category=Sports+%26+Races" class="filter-tab {% if active_category == 'Sports & Races' %}active{% endif %}">Sports & Races</a>
+                <a href="/events?category=Wellness" class="filter-tab {% if active_category == 'Wellness' %}active{% endif %}">Wellness</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        {% if events %}
+            <div class="row g-4">
+                {% for event in events %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="event-card">
+                        <img src="{{ event['image_url'] }}" alt="{{ event['title'] }}">
+                        <div class="event-card-body">
+                            {% set cat = event['category'] | lower %}
+                            {% if 'music' in cat or 'festival' in cat %}
+                                <span class="event-category-pill pill-music">{{ event['category'] }}</span>
+                            {% elif 'sport' in cat or 'race' in cat %}
+                                <span class="event-category-pill pill-sports">{{ event['category'] }}</span>
+                            {% elif 'wellness' in cat or 'yoga' in cat %}
+                                <span class="event-category-pill pill-wellness">{{ event['category'] }}</span>
+                            {% else %}
+                                <span class="event-category-pill pill-adventure">{{ event['category'] }}</span>
+                            {% endif %}
+
+                            <h3 class="serif h4 mb-2" style="color: var(--navy);">{{ event['title'] }}</h3>
+                            <div class="event-meta">
+                                <span><i class="fa-solid fa-calendar-days"></i> {{ event['event_date'] }}</span>
+                                <span><i class="fa-solid fa-location-dot"></i> {{ event['location'] }}</span>
+                            </div>
+                            <p class="event-desc">{{ event['description'][:120] }}...</p>
+                            <div class="mt-auto d-flex align-items-center justify-content-between">
+                                <span class="h4 serif mb-0" style="color:var(--terra);">₹{{ event['price'] }}</span>
+                                <a href="/trip/{{ event['id'] }}" class="btn btn-terra btn-sm">Book Spot</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fa-solid fa-calendar-xmark fa-3x mb-3" style="opacity: 0.2; color: var(--navy);"></i>
+                <h3 class="serif">No Events Found</h3>
+                <p class="text-muted">Try another filter or check back later.</p>
+                <a href="/events" class="btn btn-terra mt-3">Reset Filters</a>
+            </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

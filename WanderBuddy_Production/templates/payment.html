@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment | Travel & Trouble</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .pay-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 6rem 1rem 3rem; background: var(--bg-base); }
+        .pay-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--r-xl); box-shadow: var(--shadow-lg); max-width: 500px; width: 100%; padding: 2.5rem; }
+        .pay-lock { width: 52px; height: 52px; background: var(--success-bg); border-radius: var(--r-full); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--success); margin: 0 auto 1.25rem; }
+        .order-summary { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.25rem; margin-bottom: 1.75rem; }
+        .sum-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.65rem; }
+        .sum-row span:first-child { color: var(--text-secondary); }
+        .sum-row span:last-child { color: var(--text-primary); font-weight: 600; }
+        .sum-total { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 700; color: var(--terra); }
+        .card-input { font-family: monospace; letter-spacing: 2px; }
+        .loader { display: none; border: 3px solid var(--border); border-top: 3px solid var(--terra); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin-left: 10px; }
+        @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+        .batch-status { padding: 0.75rem 1rem; border-radius: var(--r-md); font-size: 0.85rem; margin-bottom: 1.25rem; }
+        .batch-confirmed { background: var(--success-bg); color: var(--success); border: 1px solid rgba(45,106,79,0.25); }
+        .batch-pending { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(125,90,0,0.25); }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            {% if settings and settings.logo_url %}
+                <img src="{{ settings.logo_url }}" alt="Logo" class="custom-brand-logo" style="height: 40px; margin-right: 10px; border-radius: 4px; object-fit: contain;">
+            {% else %}
+                <div class="logo-mark"><i class="fa-solid fa-compass"></i></div>
+            {% endif %}
+            <div class="brand-text">
+                <span class="main">Travel & Trouble</span>
+                <span class="sub">Adventure Awaits</span>
+            </div>
+        </a>
+        <div class="ms-auto">
+            <a href="/dashboard" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left me-2"></i>Back to Dashboard</a>
+        </div>
+    </div>
+</nav>
+
+<div class="pay-wrap">
+    <div class="pay-card fade-up">
+        <div class="text-center mb-4">
+            <div class="pay-lock"><i class="fa-solid fa-lock"></i></div>
+            <h2 style="font-family:'Cormorant Garamond',serif; color:var(--navy);">Secure Checkout</h2>
+            <p style="color:var(--text-muted); font-size:0.92rem;">Completing booking for <strong style="color:var(--text-primary);">{{ booking['title'] }}</strong></p>
+        </div>
+
+        {% if batch_status %}
+        <div class="batch-status {{ 'batch-confirmed' if batch_status.confirmed else 'batch-pending' }}">
+            <i class="fa-solid fa-{{ 'circle-check' if batch_status.confirmed else 'clock' }} me-2"></i>
+            {% if batch_status.confirmed %}
+                Batch confirmed! {{ batch_status.current }}/{{ batch_status.max_allowed }} travelers joined.
+            {% else %}
+                {{ batch_status.current }} of {{ batch_status.min_required }} minimum travelers — trip confirms at {{ batch_status.min_required }}.
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="order-summary">
+            <div class="sum-row">
+                <span>Trip</span>
+                <span>{{ booking['title'] }}</span>
+            </div>
+            <div class="sum-row">
+                <span>Batch Date</span>
+                <span>{{ booking['batch_date'] }}</span>
+            </div>
+            <div class="sum-row">
+                <span>Travelers</span>
+                <span>{{ booking['num_travelers'] or 1 }}</span>
+            </div>
+            <div class="sum-row">
+                <span>Sharing Type</span>
+                <span>{{ (booking['sharing_type'] or 'quad') | capitalize }}</span>
+            </div>
+            <div class="sum-row">
+                <span>Base Amount</span>
+                <span>₹{{ base_price }}</span>
+            </div>
+
+            {% if addons %}
+                <hr style="border-color:var(--border); margin:0.75rem 0;">
+                <div class="sum-row" style="font-size:0.78rem; text-transform:uppercase; font-weight:700; color:var(--text-muted);">
+                    <span>Add-On Upgrades</span>
+                </div>
+                {% for a in addons %}
+                <div class="sum-row">
+                    <span>{{ a['title'] }}</span>
+                    <span>+₹{{ a['price'] }}</span>
+                </div>
+                {% endfor %}
+                <div class="sum-row" style="font-weight:700; color:var(--text-primary);">
+                    <span>Addons Subtotal</span>
+                    <span>+₹{{ addon_total }}</span>
+                </div>
+            {% endif %}
+
+            {% if membership_tier %}
+                {% set discount_pct = {'basic': 5, 'pro': 10, 'elite': 15}.get(membership_tier.lower(), 0) %}
+                {% set savings = ((booking['price_per_person'] * booking['num_travelers'] * discount_pct / 100) | int) %}
+                <hr style="border-color:var(--border); margin:0.75rem 0;">
+                <div class="sum-row" style="color:var(--success);">
+                    <span><i class="fa-solid fa-gem me-1"></i>Explorer {{ membership_tier | title }} Discount ({{ discount_pct }}%)</span>
+                    <span>−₹{{ savings }}</span>
+                </div>
+            {% endif %}
+
+            <hr style="border-color:var(--border); margin:0.75rem 0;">
+            <div class="d-flex justify-content-between align-items-center">
+                <span style="font-weight:700; color:var(--text-primary);">Total Due</span>
+                <div class="sum-total">₹{{ final_total }}</div>
+            </div>
+            <div class="text-end mt-1">
+                <small style="color:var(--text-muted);">Booking ID #{{ booking['id'] }}</small>
+            </div>
+        </div>
+
+        
+        <form action="/process_payment/{{ booking['id'] }}" method="POST" id="paymentForm">
+            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+            
+            <button type="button" class="btn btn-terra w-100 btn-lg d-flex align-items-center justify-content-center" id="payBtn">
+                <i class="fa-solid fa-lock me-2"></i>
+                <span id="btnText">Pay ₹{{ final_total }} securely via Razorpay</span>
+                <div class="loader" id="loader"></div>
+            </button>
+        </form>
+
+
+        <div class="text-center mt-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" height="18" class="mx-2" style="opacity:0.4; filter:grayscale(1);">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" height="18" class="mx-2" style="opacity:0.4; filter:grayscale(1);">
+            <p class="mt-2 mb-0" style="font-size:0.78rem; color:var(--text-muted);">
+                <i class="fa-solid fa-shield-halved me-1"></i>256-bit SSL Encrypted Connection
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ final_total * 100 }}", 
+        "currency": "INR",
+        "name": "WanderBuddy",
+        "description": "Booking #{{ booking['id'] }}",
+        "image": "https://cdn-icons-png.flaticon.com/512/3068/3068367.png",
+        "handler": function (response){
+            document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+            document.getElementById('razorpay_order_id').value = response.razorpay_order_id || 'mock_order';
+            document.getElementById('razorpay_signature').value = response.razorpay_signature || 'mock_signature';
+            document.getElementById('paymentForm').submit();
+        },
+        "prefill": {
+            "name": "{{ session.get('user_name', 'Traveler') }}",
+            "email": "{{ session.get('user_email', '') }}"
+        },
+        "theme": {
+            "color": "#c4622d"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    
+    document.getElementById('payBtn').onclick = function(e){
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+
+</body>
+</html>

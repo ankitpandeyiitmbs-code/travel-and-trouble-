@@ -1,0 +1,302 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <style>
+        .dash-sidebar { position: sticky; top: 100px; }
+        .booking-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
+        .booking-img { width: 100%; height: 100%; min-height: 200px; object-fit: cover; display: block; }
+        .status-confirmed { background: var(--success-bg); color: var(--success); border: 1px solid rgba(45,106,79,0.25); }
+        .status-pending { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(125,90,0,0.25); }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 6rem; padding-bottom: 4rem;">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="dash-sidebar">
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="avatar-circle mx-auto mb-3" style="width:64px;height:64px;font-size:1.6rem; background: var(--terra-dim); color: var(--terra);">
+                            {{ user[0] }}
+                        </div>
+                        <div style="font-weight:700;color:var(--text-primary);font-size:1.05rem;">{{ user }}</div>
+                        <div style="font-size:0.8rem;color:var(--text-muted);">Explorer</div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <h6 class="label-caps mb-3">Commander Console</h6>
+                        <ul class="nav nav-pills flex-column" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active w-100" id="journeys-tab" data-bs-toggle="pill" data-bs-target="#journeys" type="button" role="tab">
+                                    <i class="fa-solid fa-suitcase-rolling me-2"></i>My Journeys
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link w-100" id="shop-tab" data-bs-toggle="pill" data-bs-target="#shop" type="button" role="tab">
+                                    <i class="fa-solid fa-box-open me-2"></i>Gear Orders
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="divider my-3"></div>
+                        <ul class="footer-links" style="list-style:none;padding:0;margin:0;">
+                            <li><a href="/profile" style="color:var(--text-secondary);font-size:0.88rem;"><i class="fa-solid fa-user-gear me-2"></i>My Profile</a></li>
+                            <li class="mt-2"><a href="/treks" style="color:var(--text-secondary);font-size:0.88rem;"><i class="fa-solid fa-mountain me-2"></i>Browse Trips</a></li>
+                            <li class="mt-2"><a href="/shop" style="color:var(--text-secondary);font-size:0.88rem;"><i class="fa-solid fa-bag-shopping me-2"></i>Visit Shop</a></li>
+                            <li class="mt-2"><a href="/logout" style="color:var(--danger);font-size:0.88rem;"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="tab-content" id="pills-tabContent">
+
+                <!-- My Journeys -->
+                <div class="tab-pane fade show active" id="journeys" role="tabpanel" tabindex="0">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <div class="section-label">My Adventures</div>
+                            <h2>Your Journeys</h2>
+                        </div>
+                        <a href="/treks" class="btn btn-outline-navy btn-sm">+ Book a Trip</a>
+                    </div>
+
+                    {% if booking_data %}
+                        {% for item in booking_data %}
+                        {% set booking = item.details %}
+                        <div class="booking-card border-0 shadow-sm">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    <img src="{{ booking['image_url'] }}" class="booking-img" alt="{{ booking['title'] }}">
+                                </div>
+                                <div class="col-md-8 p-4">
+                                    <div class="d-flex align-items-start justify-content-between mb-3">
+                                        <div>
+                                            <span class="badge status-{{ booking['status'] }} me-2">{{ booking['status'] | upper }}</span>
+                                            <h4 class="mt-2 mb-1" style="color:var(--navy);">{{ booking['title'] }}</h4>
+                                            <p class="mb-0" style="font-size:0.88rem; color:var(--text-muted);">
+                                                <i class="fa-regular fa-calendar me-1"></i>{{ booking['batch_date'] }}
+                                                &nbsp;·&nbsp;
+                                                <i class="fa-solid fa-users me-1"></i>{{ booking['num_travelers'] or 1 }} traveler(s)
+                                            </p>
+                                        </div>
+                                        <div class="text-end d-flex flex-column gap-2">
+                                            {% if booking['status'] == 'confirmed' %}
+                                                <a href="/chat?room={{ booking['trip_id'] }}_{{ booking['batch_date'] | replace(' ', '') | replace('-', '') }}" class="btn btn-navy btn-sm">
+                                                    <i class="fa-solid fa-comments me-1"></i>Group Chat
+                                                </a>
+                                                <button class="btn btn-ghost btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal{{ booking['id'] }}">
+                                                    <i class="fa-solid fa-file-arrow-up me-1"></i>
+                                                    {{ 'Uploaded ✓' if booking['document_path'] else 'Upload ID' }}
+                                                </button>
+                                                <form action="/cancel_booking/{{ booking['id'] }}" method="POST" class="mt-1">
+                                                    <button type="submit" class="btn btn-link text-danger btn-sm p-0" 
+                                                        style="font-size:0.75rem; text-decoration:none;"
+                                                        onclick="return confirm('Cancel this journey? This will release your spot.')">
+                                                        <i class="fa-solid fa-xmark me-1"></i>Cancel Journey
+                                                    </button>
+                                                </form>
+                                            {% elif booking['status'] == 'pending' %}
+                                                <a href="/payment/{{ booking['id'] }}" class="btn btn-terra btn-sm">
+                                                    <i class="fa-solid fa-credit-card me-1"></i>Complete Payment
+                                                </a>
+                                                <form action="/cancel_booking/{{ booking['id'] }}" method="POST" class="mt-1">
+                                                    <button type="submit" class="btn btn-link text-muted btn-sm p-0" 
+                                                        style="font-size:0.75rem; text-decoration:none;"
+                                                        onclick="return confirm('Discard this pending booking?')">
+                                                        <i class="fa-solid fa-trash-can me-1"></i>Discard
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {% if booking['status'] == 'confirmed' %}
+                                    <div style="border-top:1px solid var(--border); padding-top:1.25rem; margin-top:0.5rem;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div>
+                                                <h6 class="mb-0" style="color:var(--navy);"><i class="fa-solid fa-trophy me-2" style="color:var(--gold);"></i>WanderQuest</h6>
+                                                <small style="color:var(--text-muted);">Complete tasks to unlock a Mystery Gift!</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span style="font-family:'Cormorant Garamond',serif; font-size:1.4rem; font-weight:700; color:var(--terra);">{{ item.score }}</span>
+                                                <small style="color:var(--text-muted);"> / 500 XP</small>
+                                            </div>
+                                        </div>
+                                        <div class="reward-bar mb-4">
+                                            <div class="reward-fill" style="width:{{ item.progress }}%;"></div>
+                                        </div>
+                                        <div class="row g-2">
+                                            {% for quest in item.quests %}
+                                            <div class="col-md-6">
+                                                <div class="quest-box p-3 d-flex align-items-center justify-content-between {{ 'quest-done' if quest.done else ('quest-pending' if quest.pending else '') }}">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="icon-box icon-box-sm {{ 'icon-success' if quest.done else 'icon-terra' }}">
+                                                            <i class="fa-solid {{ quest.icon }}"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div style="font-weight:600; font-size:0.88rem; color:var(--text-primary);">{{ quest.title }}</div>
+                                                            <div style="font-size:0.78rem; color:var(--text-muted);">+{{ quest.points }} XP</div>
+                                                        </div>
+                                                    </div>
+                                                    {% if quest.done %}
+                                                        <span style="color:var(--success); font-size:0.82rem; font-weight:700;"><i class="fa-solid fa-circle-check me-1"></i>Done</span>
+                                                    {% elif quest.pending %}
+                                                        <span style="color:var(--warning); font-size:0.82rem; font-weight:700;"><i class="fa-solid fa-clock me-1"></i>Review</span>
+                                                    {% else %}
+                                                        <button class="btn btn-terra btn-sm" data-bs-toggle="modal" data-bs-target="#questModal_{{ booking['id'] }}_{{ quest.id }}">Claim</button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+
+                                            <!-- Quest Modal -->
+                                            <div class="modal fade" id="questModal_{{ booking['id'] }}_{{ quest.id }}" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Prove It! 📸</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form action="/complete_quest" method="POST" enctype="multipart/form-data">
+                                                                <input type="hidden" name="booking_id" value="{{ booking['id'] }}">
+                                                                <input type="hidden" name="quest_id" value="{{ quest.id }}">
+                                                                <p class="mb-3" style="color:var(--text-secondary);font-size:0.92rem;">Upload photo/video proof for: <strong>{{ quest.title }}</strong></p>
+                                                                <input type="file" name="proof" class="form-control mb-4" required>
+                                                                <button type="submit" class="btn btn-terra w-100">Submit & Claim Points</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload ID Modal -->
+                        <div class="modal fade" id="uploadModal{{ booking['id'] }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Upload ID Proof</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="/upload/{{ booking['id'] }}" method="POST" enctype="multipart/form-data">
+                                            <p style="color:var(--text-secondary); font-size:0.9rem;" class="mb-3">Please upload a government-issued ID (Aadhar, Passport, etc.)</p>
+                                            <input type="file" name="file" class="form-control mb-4" required>
+                                            <button type="submit" class="btn btn-navy w-100">Upload Document</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="icon-box icon-box-lg icon-terra mx-auto mb-4">
+                                <i class="fa-solid fa-suitcase-rolling"></i>
+                            </div>
+                            <h3>No bookings yet</h3>
+                            <p>Explore our treks and book your first adventure!</p>
+                            <a href="/treks" class="btn btn-terra mt-3">
+                                <i class="fa-solid fa-mountain me-2"></i>Explore Trips
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Gear Orders -->
+                <div class="tab-pane fade" id="shop" role="tabpanel" tabindex="0">
+                    <div class="mb-4">
+                        <div class="section-label">Shopping</div>
+                        <h2>Gear Orders</h2>
+                    </div>
+                    {% if shop_orders %}
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <table class="table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Order #</th>
+                                            <th>Date</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in shop_orders %}
+                                        <tr>
+                                            <td><strong>ORD-{{ order.id }}</strong></td>
+                                            <td>{{ order.timestamp[:10] }}</td>
+                                            <td style="font-size:0.87rem; color:var(--text-secondary);">{{ order.items }}</td>
+                                            <td style="font-family:'Cormorant Garamond',serif; font-size:1.2rem; font-weight:700; color:var(--terra);">₹{{ order.total_amount }}</td>
+                                            <td>
+                                                {% if order.status == 'confirmed' %}
+                                                    <span class="badge badge-success">Confirmed</span>
+                                                {% elif order.status == 'pending' %}
+                                                    <span class="badge badge-gold">Pending Payment</span>
+                                                {% elif order.status == 'shipped' %}
+                                                    <span class="badge" style="background:var(--navy);color:#fff;">Shipped</span>
+                                                {% elif order.status == 'cancelled' %}
+                                                    <span class="badge bg-secondary">Cancelled</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ order.status | capitalize }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if order.status == 'pending' %}
+                                                    <a href="/shop/payment/{{ order.id }}" class="btn btn-terra btn-sm">
+                                                        <i class="fa-solid fa-credit-card me-1"></i>Pay Now
+                                                    </a>
+                                                {% endif %}
+                                                {% if order.status in ['pending', 'confirmed'] %}
+                                                    <form action="/cancel_order/{{ order.id }}" method="POST" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-ghost"
+                                                            style="color:var(--danger); border:1px solid var(--danger);"
+                                                            onclick="return confirm('Cancel order ORD-{{ order.id }}? Stock will be restored.')">
+                                                            <i class="fa-solid fa-xmark me-1"></i>Cancel
+                                                        </button>
+                                                    </form>
+                                                {% elif order.status == 'cancelled' %}
+                                                    <span style="font-size:0.8rem;color:var(--text-muted);">—</span>
+                                                {% elif order.status == 'shipped' %}
+                                                    <span style="font-size:0.8rem;color:var(--text-muted);">In Transit</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="icon-box icon-box-lg icon-terra mx-auto mb-4">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+                            <h3>No gear ordered yet</h3>
+                            <p>Visit the Supply Drop to grab explorer essentials.</p>
+                            <a href="/shop" class="btn btn-outline-navy mt-3">
+                                <i class="fa-solid fa-bag-shopping me-2"></i>Visit the Drop Shop
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

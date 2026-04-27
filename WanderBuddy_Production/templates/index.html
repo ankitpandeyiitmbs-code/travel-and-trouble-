@@ -1,0 +1,646 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <style>
+        /* ── HERO SLIDER ─────────────────────────────── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 6rem;
+        }
+
+        /* Slider stack — images cross-fade behind everything */
+        .hero-slider {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center center;
+            opacity: 0;
+            transition: opacity 1.4s ease-in-out;
+        }
+        .hero-slide.active { opacity: 1; }
+
+        /* 4 nature images */
+        .hero-slide:nth-child(1) {
+            background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80&auto=format&fit=crop');
+        }
+        .hero-slide:nth-child(2) {
+            background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80&auto=format&fit=crop');
+        }
+        .hero-slide:nth-child(3) {
+            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=80&auto=format&fit=crop');
+        }
+        .hero-slide:nth-child(4) {
+            background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1920&q=80&auto=format&fit=crop');
+        }
+
+        /* Dark tinted overlay — navy base + terracotta warmth so text pops */
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background:
+                linear-gradient(105deg,
+                    rgba(20,35,55,0.82) 0%,
+                    rgba(28,49,68,0.68) 45%,
+                    rgba(196,98,45,0.18) 100%),
+                linear-gradient(to bottom,
+                    rgba(10,18,30,0.35) 0%,
+                    rgba(10,18,30,0.0) 40%,
+                    rgba(10,18,30,0.55) 100%);
+        }
+
+        /* Fine dot grid on top of overlay for texture */
+        .hero-grid {
+            position: absolute; inset: 0; z-index: 2; pointer-events: none;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+            background-size: 36px 36px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+        }
+
+        .hero-content {
+            position: relative; z-index: 3;
+            padding: 3rem 0 5rem;
+        }
+
+        /* Slide indicator dots */
+        .hero-dots {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+            display: flex;
+            gap: 0.55rem;
+            align-items: center;
+        }
+        .hero-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            border: 1.5px solid rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .hero-dot.active {
+            background: var(--terra-light);
+            border-color: var(--terra-light);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        /* Prev / Next arrow buttons */
+        .hero-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 4;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            color: #fff;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(8px);
+        }
+        .hero-arrow:hover {
+            background: rgba(196,98,45,0.5);
+            border-color: var(--terra-light);
+        }
+        .hero-arrow-prev { left: 1.5rem; }
+        .hero-arrow-next { right: 1.5rem; }
+
+        /* Eyebrow pill */
+        .hero-pill {
+            display: inline-flex; align-items: center; gap: 0.55rem;
+            background: rgba(196,98,45,0.15);
+            border: 1px solid rgba(196,98,45,0.35);
+            color: var(--gold-light);
+            padding: 0.5rem 1.1rem;
+            border-radius: var(--r-full);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 7vw, 5.5rem);
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: var(--terra-light);
+        }
+
+        .hero-sub {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.6);
+            max-width: 520px;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-actions {
+            display: flex; gap: 1rem; flex-wrap: wrap;
+            margin-bottom: 3.5rem;
+        }
+
+        /* Trust bar */
+        .hero-trust {
+            display: flex; align-items: center; gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .trust-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+        .trust-item i { color: var(--gold-light); font-size: 0.9rem; }
+
+        /* Right column — floating cards */
+        .hero-cards {
+            position: relative; z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 2rem 0 2rem 2rem;
+        }
+
+        .hero-action-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--r-xl);
+            padding: 1.75rem;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s var(--ease);
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+        }
+        .hero-action-card:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+            color: #fff;
+        }
+        .hero-action-card:nth-child(2) {
+            margin-top: 1.5rem;
+        }
+
+        .hac-icon {
+            width: 48px; height: 48px;
+            border-radius: var(--r-md);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.1rem;
+        }
+        .hac-trips  .hac-icon { background: rgba(212,165,92,0.18); color: var(--gold-light); }
+        .hac-events .hac-icon { background: rgba(196,98,45,0.18);  color: var(--terra-light); }
+
+        .hac-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.45rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+        .hac-desc {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85rem;
+            line-height: 1.55;
+            flex: 1;
+            margin-bottom: 1.1rem;
+        }
+        .hac-cta {
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .hac-trips  .hac-cta { color: var(--gold-light); }
+        .hac-events .hac-cta { color: var(--terra-light); }
+
+        /* ── FEATURES ─────────────────────────────── */
+        .features-section { background: var(--bg-surface); }
+
+        .feature-icon-wrap {
+            width: 56px; height: 56px;
+            border-radius: var(--r-md);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.25rem;
+        }
+        .fi-green  { background: rgba(45,106,79,0.09); color: var(--success); }
+        .fi-navy   { background: rgba(28,49,68,0.09);  color: var(--navy);    }
+        .fi-terra  { background: var(--terra-dim);      color: var(--terra);   }
+        .fi-gold   { background: var(--gold-dim);       color: var(--gold);    }
+
+        .feature-card-plain {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 1.75rem;
+            height: 100%;
+            transition: all 0.25s var(--ease);
+        }
+        .feature-card-plain:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--terra);
+        }
+        .feature-card-plain h4 { font-size: 1.05rem; color: var(--navy); margin-bottom: 0.5rem; }
+        .feature-card-plain p  { font-size: 0.88rem; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+
+        /* ── ABOUT ──────────────────────────────────── */
+        .about-section { background: var(--bg-base); }
+
+        .about-img-wrap {
+            position: relative;
+            border-radius: var(--r-xl);
+            overflow: hidden;
+        }
+        .about-img-wrap img {
+            width: 100%;
+            height: 460px;
+            object-fit: cover;
+            display: block;
+            border-radius: var(--r-xl);
+            border: 1px solid var(--border);
+        }
+
+        /* Floating stat badge on image */
+        .img-badge {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .img-badge-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--terra);
+            line-height: 1;
+        }
+        .img-badge-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* ── CTA BAND ────────────────────────────────── */
+        .cta-band {
+            background: var(--terra);
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-band::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 60% 80% at 100% 50%, rgba(0,0,0,0.15), transparent);
+            pointer-events: none;
+        }
+        .cta-band h2 { color: #fff; }
+        .cta-band p  { color: rgba(255,255,255,0.75); }
+
+        @media(max-width: 991px) {
+            .hero-cards {
+                grid-template-columns: 1fr;
+                padding: 0;
+                max-width: 360px;
+                margin: 2rem auto 0;
+            }
+            .hero-action-card:nth-child(2) { margin-top: 0; }
+        }
+        @media(max-width: 576px) {
+            .hero-actions { flex-direction: column; }
+            .hero-actions .btn { width: 100%; justify-content: center; }
+            .hero-trust { gap: 1rem; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<!-- ── HERO ───────────────────────────────────────────── -->
+<section class="hero" id="heroSection">
+
+    <!-- Sliding background images -->
+    <div class="hero-slider" id="heroSlider">
+        <div class="hero-slide active"></div>
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+    </div>
+
+    <!-- Dark tinted overlay for contrast -->
+    <div class="hero-overlay"></div>
+
+    <!-- Dot grid texture -->
+    <div class="hero-grid"></div>
+
+    <!-- Prev / Next arrows -->
+    <button class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="Previous slide">
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button class="hero-arrow hero-arrow-next" id="heroNext" aria-label="Next slide">
+        <i class="fa-solid fa-chevron-right"></i>
+    </button>
+
+    <!-- Slide indicator dots -->
+    <div class="hero-dots" id="heroDots">
+        <div class="hero-dot active" data-slide="0"></div>
+        <div class="hero-dot" data-slide="1"></div>
+        <div class="hero-dot" data-slide="2"></div>
+        <div class="hero-dot" data-slide="3"></div>
+    </div>
+
+    <div class="container hero-content">
+        <div class="row align-items-center">
+
+            <!-- Left: copy -->
+            <div class="col-lg-6 fade-up">
+                {% if session.get('user_id') %}
+                    <div class="hero-pill">
+                        <i class="fa-solid fa-sparkles"></i>
+                        Welcome back, {{ session.get('user_name') }}
+                    </div>
+                    <h1>{{ settings.get('hero_tagline', 'Your Next Adventure Awaits') | replace('Awaits', '<em>Awaits</em>') | safe }}</h1>
+                    <p class="hero-sub">{{ settings.get('hero_subtext', 'Continue your journey. Check your dashboard for upcoming trips, quests, and rewards.') }}</p>
+                    <div class="hero-actions">
+                        <a href="/dashboard" class="btn btn-terra btn-lg">
+                            Go to Dashboard <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                        <a href="/trips" class="btn btn-lg" style="background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);color:#fff;">
+                            Explore Trips
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="hero-pill">
+                        <i class="fa-solid fa-fire"></i>
+                        India's #1 Adventure Platform
+                    </div>
+                    <h1>Where Mountains<br>Become <em>Memories</em></h1>
+                    <p class="hero-sub">Join 10,000+ explorers on curated treks, exclusive events, and unforgettable experiences across the Himalayas and beyond.</p>
+                    <div class="hero-actions">
+                        <a href="/signup" class="btn btn-terra btn-lg">
+                            Start Exploring <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                        <a href="/trips" class="btn btn-lg" style="background:rgba(255,255,255,0.09);border:1.5px solid rgba(255,255,255,0.2);color:#fff;">
+                            View All Trips
+                        </a>
+                    </div>
+                    <div class="hero-trust">
+                        <div class="trust-item"><i class="fa-solid fa-star"></i> 4.9 Rated</div>
+                        <div class="trust-item"><i class="fa-solid fa-users"></i> 10,000+ Travelers</div>
+                        <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> Verified Guides</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Right: action cards -->
+            <div class="col-lg-6 fade-up-1">
+                <div class="hero-cards">
+                    <a href="/trips" class="hero-action-card hac-trips">
+                        <div class="hac-icon"><i class="fa-solid fa-mountain-sun"></i></div>
+                        <div class="hac-title">Adventure Trips</div>
+                        <p class="hac-desc">Curated treks & expeditions across Himachal, Uttarakhand & beyond.</p>
+                        <div class="hac-cta">Explore <i class="fa-solid fa-arrow-right"></i></div>
+                    </a>
+                    <a href="/events" class="hero-action-card hac-events">
+                        <div class="hac-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                        <div class="hac-title">Special Events</div>
+                        <p class="hac-desc">Music festivals, yoga retreats, races & exclusive experiences.</p>
+                        <div class="hac-cta">Discover <i class="fa-solid fa-arrow-right"></i></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── HOW IT WORKS ────────────────────────────────────────── -->
+<section class="section features-section">
+    <div class="container">
+        <div class="row align-items-end mb-5">
+            <div class="col-lg-7">
+                <div class="section-label">⚡ How Travel & Trouble Works</div>
+                <h2>A New Way To<br>Experience Adventure</h2>
+            </div>
+            <div class="col-lg-5 d-none d-lg-flex justify-content-end align-items-end">
+                <a href="/about" class="btn btn-outline-navy">Learn Our Story</a>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4 fade-up-1">
+                <div class="feature-card-plain h-100">
+                    <div class="feature-icon-wrap fi-green"><i class="fa-solid fa-1"></i></div>
+                    <h4>Book Your Escape</h4>
+                    <p>Choose your adventure, secure your spot, and join the tribe.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 fade-up-2">
+                <div class="feature-card-plain h-100">
+                    <div class="feature-icon-wrap fi-navy"><i class="fa-solid fa-2"></i></div>
+                    <h4>Enter the Adventure Hub</h4>
+                    <p>After booking, unlock your Adventure Dashboard where all challenges and missions are revealed.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 fade-up-3">
+                <div class="feature-card-plain h-100">
+                    <div class="feature-icon-wrap fi-terra"><i class="fa-solid fa-3"></i></div>
+                    <h4>Form Your Squad</h4>
+                    <p>Compete solo or team up with other travelers. Build your squad or partner and climb together.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 fade-up-1">
+                <div class="feature-card-plain h-100">
+                    <div class="feature-icon-wrap fi-green"><i class="fa-solid fa-4"></i></div>
+                    <h4>Complete Fun Challenges</h4>
+                    <p>Treasure hunts, social dares, trekking tasks, campfire games, storytelling battles and more. Earn Adventure Points for every challenge completed.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 fade-up-2">
+                <div class="feature-card-plain h-100">
+                    <div class="feature-icon-wrap fi-navy"><i class="fa-solid fa-5"></i></div>
+                    <h4>Climb the Leaderboard</h4>
+                    <p>Track your rank against other travelers during the trip. The more tasks you complete, the higher you rise.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 fade-up-3">
+                <div class="feature-card-plain h-100">
+                    <div class="feature-icon-wrap fi-gold"><i class="fa-solid fa-6"></i></div>
+                    <h4>Win Rewards & Free Trips</h4>
+                    <p>At the end of the trip, top players win:<br>🏆 Free trips<br>🎁 Exclusive rewards<br>🎖️ Travel badges<br>👑 Travel & Trouble Champion title.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── ABOUT ──────────────────────────────────────────── -->
+<section class="section about-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 fade-up">
+                <div class="about-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80" alt="Mountain Adventure">
+                    <div class="img-badge">
+                        <div>
+                            <div class="img-badge-val">4.9★</div>
+                            <div class="img-badge-label">Avg. Rating</div>
+                        </div>
+                        <div style="width:1px;background:var(--border);align-self:stretch;"></div>
+                        <div>
+                            <div class="img-badge-val">10K+</div>
+                            <div class="img-badge-label">Happy Travelers</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 fade-up-1">
+                <div class="section-label">Our Story</div>
+                <h2>Not Your Average<br>Travel Company</h2>
+                <p style="font-size:1.05rem; margin-bottom:1.5rem; color:var(--text-secondary);">
+                    Founded in 2026, we set out to fix everything wrong with adventure travel in India — no more crowded buses, sketchy hotels, or hidden charges. Just pure mountain air with people who get it.
+                </p>
+
+                <div class="row g-3 mb-2rem" style="margin-bottom:2rem;">
+                    <div class="col-4">
+                        <div class="stat">
+                            <span class="stat-value">12+</span>
+                            <span class="stat-label">Destinations</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat">
+                            <span class="stat-value">10K+</span>
+                            <span class="stat-label">Travelers</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat">
+                            <span class="stat-value">4.9</span>
+                            <span class="stat-label">Rating</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 flex-wrap mt-4">
+                    <a href="/about" class="btn btn-outline-navy">Our Story</a>
+                    <a href="/trips" class="btn btn-terra">View Trips</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA BAND ───────────────────────────────────────── -->
+<section class="cta-band section-sm">
+    <div class="container text-center position-relative" style="z-index:1;">
+        <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(1.8rem,4vw,3rem); margin-bottom:0.75rem;">Ready for your next chapter?</h2>
+        <p style="color:rgba(255,255,255,0.75); font-size:1.05rem; margin-bottom:2rem;">Join thousands of explorers. Book your first trip in under 3 minutes.</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/signup" class="btn btn-lg" style="background:#fff;color:var(--terra);font-weight:700;border:none;">
+                Create Free Account <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+            <a href="/trips" class="btn btn-lg" style="background:transparent;border:1.5px solid rgba(255,255,255,0.45);color:#fff;">
+                Browse Trips
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ── Hero Image Slider ──────────────────────────────────── */
+(function () {
+    const slides  = document.querySelectorAll('.hero-slide');
+    const dots    = document.querySelectorAll('.hero-dot');
+    const prevBtn = document.getElementById('heroPrev');
+    const nextBtn = document.getElementById('heroNext');
+    const section = document.getElementById('heroSection');
+    let current   = 0;
+    let timer;
+
+    if (!section) return;
+
+    function goTo(n) {
+        if (!slides.length) return;
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (n + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+    }
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    function startTimer() {
+        timer = setInterval(next, 5000);
+    }
+    function stopTimer() {
+        clearInterval(timer);
+    }
+
+    /* Arrows */
+    if (nextBtn) nextBtn.addEventListener('click', function () { stopTimer(); next(); startTimer(); });
+    if (prevBtn) prevBtn.addEventListener('click', function () { stopTimer(); prev(); startTimer(); });
+
+    /* Dot clicks */
+    dots.forEach(function (dot) {
+        dot.addEventListener('click', function () {
+            stopTimer();
+            goTo(parseInt(this.dataset.slide));
+            startTimer();
+        });
+    });
+
+    /* Pause on hover */
+    section.addEventListener('mouseenter', stopTimer);
+    section.addEventListener('mouseleave', startTimer);
+
+    /* Keyboard support */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft')  { stopTimer(); prev(); startTimer(); }
+        if (e.key === 'ArrowRight') { stopTimer(); next(); startTimer(); }
+    });
+
+    startTimer();
+})();
+</script>
+{% endblock %}

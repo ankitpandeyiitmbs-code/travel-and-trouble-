@@ -37,6 +37,8 @@
       <form id="rzp-form" action="{{ url_for('confirm_shop_payment') }}" method="POST">
         <input type="hidden" name="order_id" value="{{ order.id }}">
         <input type="hidden" name="razorpay_payment_id" id="payment_id">
+        <input type="hidden" name="razorpay_order_id" id="order_id" value="{{ razorpay_order_id }}">
+        <input type="hidden" name="razorpay_signature" id="signature">
       </form>
     </div>
     {% endif %}
@@ -49,8 +51,19 @@
 <script>
 document.getElementById('rzp-button').onclick=function(e){
   e.preventDefault();
-  var rzp=new Razorpay({key:"{{ razorpay_key }}",amount:{{ order.total_amount|int*100 }},currency:"INR",name:"{{ settings.site_title }}",
-  handler:function(r){document.getElementById('payment_id').value=r.razorpay_payment_id;document.getElementById('rzp-form').submit();}});
+  var rzp=new Razorpay({
+      key:"{{ razorpay_key }}",
+      amount:{{ order.total_amount|int*100 }},
+      currency:"INR",
+      name:"{{ settings.site_title }}",
+      order_id:"{{ razorpay_order_id }}",
+      handler:function(r){
+          document.getElementById('payment_id').value=r.razorpay_payment_id;
+          document.getElementById('order_id').value=r.razorpay_order_id;
+          document.getElementById('signature').value=r.razorpay_signature;
+          document.getElementById('rzp-form').submit();
+      }
+  });
   rzp.open();
 };
 </script>

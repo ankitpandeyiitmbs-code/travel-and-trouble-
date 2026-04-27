@@ -1,0 +1,192 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .cart-hero {
+        padding: 5rem 0 3rem;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+    }
+    .cart-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .cart-row {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .cart-row:last-child {
+        border-bottom: none;
+    }
+    .cart-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: var(--r-md);
+        border: 1px solid var(--border);
+    }
+    .item-name {
+        color: var(--navy);
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+    .item-price-each {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+    .qty-control {
+        display: flex;
+        align-items: center;
+        background: var(--bg-sunken);
+        border: 1.5px solid var(--border);
+        border-radius: var(--r-full);
+        padding: 0.25rem 0.5rem;
+    }
+    .qty-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        color: var(--navy);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s var(--ease);
+    }
+    .qty-btn:hover { background: var(--bg-elevated); }
+    .qty-val {
+        width: 32px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    .item-subtotal {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--terra);
+        min-width: 100px;
+        text-align: right;
+    }
+    .summary-panel {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 2rem;
+        position: sticky;
+        top: 100px;
+        box-shadow: var(--shadow-md);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="cart-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-3">
+                <li class="breadcrumb-item"><a href="/shop">Shop</a></li>
+                <li class="breadcrumb-item active">Your Cart</li>
+            </ol>
+        </nav>
+        <h1 class="serif display-4 mb-0" style="color: var(--navy);">Review <em class="text-terra italic">Cart</em></h1>
+    </div>
+</section>
+
+<div class="container py-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} mb-5">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row g-5">
+        <div class="col-lg-8">
+            {% if cart_items %}
+                <div class="cart-card">
+                    {% for item in cart_items %}
+                    <div class="cart-row">
+                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="cart-img">
+                        <div class="flex-grow-1">
+                            <h4 class="item-name">{{ item.name }}</h4>
+                            <div class="item-price-each">Unit Price: ₹{{ item.price }}</div>
+                        </div>
+                        
+                        <div class="qty-control">
+                            <form action="/update_cart/{{ item.id }}" method="POST" class="m-0">
+                                <input type="hidden" name="action" value="decrease">
+                                <button type="submit" class="qty-btn" title="Decrease"><i class="fa-solid fa-minus p-1"></i></button>
+                            </form>
+                            <span class="qty-val">{{ item.quantity }}</span>
+                            <form action="/update_cart/{{ item.id }}" method="POST" class="m-0">
+                                <input type="hidden" name="action" value="increase">
+                                <button type="submit" class="qty-btn" title="Increase"><i class="fa-solid fa-plus p-1"></i></button>
+                            </form>
+                        </div>
+
+                        <div class="item-subtotal">₹{{ item.subtotal }}</div>
+
+                        <form action="/remove_from_cart/{{ item.id }}" method="POST" class="m-0 ms-2">
+                            <button type="submit" class="btn btn-link text-danger p-0" title="Remove" onclick="return confirm('Remove item?')">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="icon-box icon-terra mx-auto mb-4" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <i class="fa-solid fa-cart-arrow-down"></i>
+                    </div>
+                    <h3 class="serif text-navy">Your cart is feeling light</h3>
+                    <p class="text-muted">Explore our curated gear collection to find your next favorite trail companion.</p>
+                    <a href="/shop" class="btn btn-terra rounded-pill px-5 mt-4">Browse Supply Drop</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="summary-panel">
+                <h4 class="serif mb-4" style="color: var(--navy);">Order Summary</h4>
+                
+                <div class="d-flex justify-content-between mb-3 text-muted">
+                    <span>Items Subtotal</span>
+                    <span class="fw-bold">₹{{ total_price }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 text-muted">
+                    <span>Shipping</span>
+                    <span class="text-success fw-bold">FREE HQ DROP</span>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <span class="h5 serif mb-0">Grand Total</span>
+                    <span class="h2 serif mb-0 text-terra fw-bold">₹{{ total_price }}</span>
+                </div>
+
+                <form action="/checkout_shop" method="POST">
+                    <button type="submit" class="btn btn-terra btn-lg w-100 rounded-pill shadow-sm" {% if not cart_items %}disabled{% endif %}>
+                        <i class="fa-solid fa-lock me-2"></i>Checkout Now
+                    </button>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <p class="small text-muted mb-0"><i class="fa-solid fa-shield-halved me-2"></i>Secure Transaction Verified</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

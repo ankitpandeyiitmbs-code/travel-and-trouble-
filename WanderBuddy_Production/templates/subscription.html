@@ -1,0 +1,234 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .sub-hero {
+        padding: 8rem 0 4rem;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+    }
+    .plan-card {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 3rem;
+        height: 100%;
+        transition: all 0.3s var(--ease);
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-sm);
+    }
+    .plan-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--terra-dim);
+    }
+    .plan-card.featured {
+        border-color: var(--terra);
+        background: var(--terra-dim);
+    }
+    .plan-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+    .plan-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--navy);
+        margin-bottom: 0.5rem;
+    }
+    .plan-price {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--navy);
+        margin-bottom: 2rem;
+    }
+    .plan-price span {
+        font-size: 1rem;
+        color: var(--text-muted);
+        font-family: 'DM Sans', sans-serif;
+    }
+    .benefit-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 2.5rem;
+        flex: 1;
+    }
+    .benefit-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .benefit-list li:last-child {
+        border-bottom: none;
+    }
+    .benefit-list i {
+        color: var(--success);
+        font-size: 0.85rem;
+    }
+    .benefit-list li.unavailable {
+        color: var(--text-muted);
+        text-decoration: line-through;
+        opacity: 0.6;
+    }
+    .benefit-list li.unavailable i {
+        color: var(--text-muted);
+    }
+    .logic-box {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 2.5rem;
+        margin-top: 5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="sub-hero">
+    <div class="container">
+        <span class="badge-hero mb-3"><i class="fa-solid fa-gem me-2"></i>Membership</span>
+        <h1 class="serif display-3 mb-3" style="color: var(--navy);">Explorer <em class="text-terra italic serif">Pass</em></h1>
+        <p class="lead mx-auto" style="max-width: 600px; color: var(--text-secondary);">Unlock priority booking, exclusive discounts, and a verified community status for your Himalayan adventures.</p>
+    </div>
+</section>
+
+<section class="py-5" style="background: var(--bg-base);">
+    <div class="container py-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} mb-5 border-0 shadow-sm">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row g-4 justify-content-center">
+            <!-- Basic -->
+            <div class="col-md-4">
+                <div class="plan-card">
+                    <div class="plan-badge">Basecamp Member</div>
+                    <h3 class="plan-title text-muted">Explorer Basic</h3>
+                    <div class="plan-price">₹999<span>/year</span></div>
+                    
+                    <ul class="benefit-list">
+                        <li><i class="fa-solid fa-check"></i> <strong>5% OFF</strong> trip bookings</li>
+                        <li><i class="fa-solid fa-check"></i> Early access to new trips</li>
+                        <li><i class="fa-solid fa-check"></i> Member-only Discord</li>
+                        <li><i class="fa-solid fa-check"></i> Welcome Trek Patch</li>
+                        <li class="unavailable"><i class="fa-solid fa-xmark"></i> Priority concierge</li>
+                        <li class="unavailable"><i class="fa-solid fa-xmark"></i> Free merchandise</li>
+                    </ul>
+
+                    {% if session.get('user_id') %}
+                        {% if membership_tier == 'basic' %}
+                            <button class="btn btn-navy w-100 rounded-pill" disabled><i class="fa-solid fa-circle-check me-2"></i>Active Plan</button>
+                        {% else %}
+                            <form action="/subscribe_pass" method="POST">
+                                <input type="hidden" name="tier" value="basic">
+                                <button type="submit" class="btn btn-outline-navy w-100 rounded-pill">Select Basic</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="/login" class="btn btn-outline-navy w-100 rounded-pill">Sign in to Join</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pro -->
+            <div class="col-md-4">
+                <div class="plan-card featured">
+                    <div class="plan-badge text-terra">Summit Specialist</div>
+                    <h3 class="plan-title">Explorer Pro</h3>
+                    <div class="plan-price text-navy">₹1,999<span>/year</span></div>
+                    
+                    <ul class="benefit-list">
+                        <li><i class="fa-solid fa-check"></i> <strong>10% OFF</strong> all bookings</li>
+                        <li><i class="fa-solid fa-check"></i> <strong>48h Priority</strong> booking</li>
+                        <li><i class="fa-solid fa-check"></i> Exclusive WhatsApp Ops</li>
+                        <li><i class="fa-solid fa-check"></i> Free Premium Hoodie</li>
+                        <li><i class="fa-solid fa-check"></i> 2 Free event tickets/yr</li>
+                        <li><i class="fa-solid fa-check"></i> Extra rewards on XP</li>
+                    </ul>
+
+                    {% if session.get('user_id') %}
+                        {% if membership_tier == 'pro' %}
+                            <button class="btn btn-terra w-100 rounded-pill" disabled><i class="fa-solid fa-circle-check me-2"></i>Active Plan</button>
+                        {% else %}
+                            <form action="/subscribe_pass" method="POST">
+                                <input type="hidden" name="tier" value="pro">
+                                <button type="submit" class="btn btn-terra w-100 rounded-pill shadow-sm">Upgrade to Pro</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="/login" class="btn btn-terra w-100 rounded-pill">Sign in to Join</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Elite -->
+            <div class="col-md-4">
+                <div class="plan-card">
+                    <div class="plan-badge" style="color: var(--gold);">Peak Performance</div>
+                    <h3 class="plan-title" style="color: var(--gold);">Explorer Elite</h3>
+                    <div class="plan-price">₹4,999<span>/year</span></div>
+                    
+                    <ul class="benefit-list">
+                        <li><i class="fa-solid fa-check"></i> <strong>15% OFF</strong> all trips</li>
+                        <li><i class="fa-solid fa-check"></i> <strong>VIP Priority</strong> (1 week early)</li>
+                        <li><i class="fa-solid fa-circle-star text-gold"></i> <strong>1 FREE TRIP</strong> per year</li>
+                        <li><i class="fa-solid fa-check"></i> Personal Concierge</li>
+                        <li><i class="fa-solid fa-check"></i> Unlimited Event Access</li>
+                        <li><i class="fa-solid fa-check"></i> Elite-only expeditions</li>
+                    </ul>
+
+                    {% if session.get('user_id') %}
+                        {% if membership_tier == 'elite' %}
+                            <button class="btn btn-navy w-100 rounded-pill" disabled><i class="fa-solid fa-circle-check me-2"></i>Active Plan</button>
+                        {% else %}
+                            <form action="/subscribe_pass" method="POST">
+                                <input type="hidden" name="tier" value="elite">
+                                <button type="submit" class="btn btn-navy w-100 rounded-pill">Select Elite</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="/login" class="btn btn-navy w-100 rounded-pill">Sign in to Join</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="logic-box">
+            <h4 class="serif mb-4" style="color: var(--navy); border-bottom: 2px solid var(--terra-dim); padding-bottom: 1rem; display: inline-block;">How it Works</h4>
+            <div class="row g-4 mt-2">
+                <div class="col-md-4">
+                    <div class="icon-box icon-terra mb-3"><i class="fa-solid fa-wand-sparkles"></i></div>
+                    <h6 class="fw-bold">Auto-Applied Benefits</h6>
+                    <p class="small text-muted mb-0">Discounts are automatically detected and applied at the booking stage based on your active pass.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="icon-box icon-navy mb-3"><i class="fa-solid fa-calendar-check"></i></div>
+                    <h6 class="fw-bold">Priority Windows</h6>
+                    <p class="small text-muted mb-0">Elite and Pro members receive notifications and booking links 48h to 7 days before general launch.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="icon-box icon-gold mb-3"><i class="fa-solid fa-users"></i></div>
+                    <h6 class="fw-bold">Group Advantage</h6>
+                    <p class="small text-muted mb-0">If an Elite member books for a group of 12, the entire group benefits from the 15% discount.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

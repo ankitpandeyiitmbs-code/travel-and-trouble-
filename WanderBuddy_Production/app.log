@@ -1,0 +1,218 @@
+2026-04-16 11:40:57,481 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:40:57,482 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-16 11:40:57,500 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:40:57,542 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.30:5000
+2026-04-16 11:40:57,542 INFO: [33mPress CTRL+C to quit[0m
+2026-04-16 11:40:57,543 INFO:  * Restarting with stat
+2026-04-16 11:40:57,846 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:40:57,847 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-16 11:40:57,864 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:40:57,895 WARNING:  * Debugger is active!
+2026-04-16 11:40:57,897 INFO:  * Debugger PIN: 619-841-879
+2026-04-16 11:48:39,509 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:48:39,510 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-16 11:48:39,525 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:48:39,563 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.30:5000
+2026-04-16 11:48:39,563 INFO: [33mPress CTRL+C to quit[0m
+2026-04-16 11:48:39,564 INFO:  * Restarting with stat
+2026-04-16 11:48:39,819 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:48:39,820 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-16 11:48:39,835 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:48:39,862 WARNING:  * Debugger is active!
+2026-04-16 11:48:39,865 INFO:  * Debugger PIN: 619-841-879
+2026-04-16 11:51:30,625 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:51:30,626 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-16 11:51:30,642 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:51:30,686 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.30:5001
+2026-04-16 11:51:30,686 INFO: [33mPress CTRL+C to quit[0m
+2026-04-16 11:51:30,686 INFO:  * Restarting with stat
+2026-04-16 11:51:30,967 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:51:30,967 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-16 11:51:30,983 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-16 11:51:31,010 WARNING:  * Debugger is active!
+2026-04-16 11:51:31,011 INFO:  * Debugger PIN: 619-841-879
+2026-04-16 11:51:49,503 INFO: 127.0.0.1 - - [16/Apr/2026 11:51:49] "GET /admin HTTP/1.1" 200 -
+2026-04-16 11:51:49,626 INFO: 127.0.0.1 - - [16/Apr/2026 11:51:49] "GET /static/style.css HTTP/1.1" 200 -
+2026-04-16 11:51:49,743 INFO: 127.0.0.1 - - [16/Apr/2026 11:51:49] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-16 11:51:51,061 INFO: 127.0.0.1 - - [16/Apr/2026 11:51:51] "GET /trips HTTP/1.1" 200 -
+2026-04-16 11:51:51,096 INFO: 127.0.0.1 - - [16/Apr/2026 11:51:51] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:52:24,958 INFO: 127.0.0.1 - - [16/Apr/2026 11:52:24] "GET /admin/trip/batches/triund HTTP/1.1" 200 -
+2026-04-16 11:52:24,987 INFO: 127.0.0.1 - - [16/Apr/2026 11:52:24] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:52:33,953 INFO: 127.0.0.1 - - [16/Apr/2026 11:52:33] "GET /admin HTTP/1.1" 200 -
+2026-04-16 11:52:33,983 INFO: 127.0.0.1 - - [16/Apr/2026 11:52:33] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:54:07,493 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:07] "GET /admin/event/edit/biking-challenge-manali HTTP/1.1" 200 -
+2026-04-16 11:54:28,556 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:28] "GET / HTTP/1.1" 200 -
+2026-04-16 11:54:28,597 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:28] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:54:36,656 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:36] "GET /trips HTTP/1.1" 200 -
+2026-04-16 11:54:36,680 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:36] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:54:39,783 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:39] "GET /treks HTTP/1.1" 200 -
+2026-04-16 11:54:39,813 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:54:41,639 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:41] "GET /events HTTP/1.1" 200 -
+2026-04-16 11:54:41,667 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:41] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:54:48,449 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:48] "GET /shop HTTP/1.1" 200 -
+2026-04-16 11:54:48,470 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:48] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:54:53,092 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:53] "GET /explorer-pass HTTP/1.1" 200 -
+2026-04-16 11:54:53,114 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:53] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:54:56,329 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:56] "GET /trips HTTP/1.1" 200 -
+2026-04-16 11:54:56,350 INFO: 127.0.0.1 - - [16/Apr/2026 11:54:56] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:55:03,830 INFO: 127.0.0.1 - - [16/Apr/2026 11:55:03] "GET /dashboard HTTP/1.1" 200 -
+2026-04-16 11:55:03,863 INFO: 127.0.0.1 - - [16/Apr/2026 11:55:03] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 11:55:05,832 INFO: 127.0.0.1 - - [16/Apr/2026 11:55:05] "GET / HTTP/1.1" 200 -
+2026-04-16 11:55:05,856 INFO: 127.0.0.1 - - [16/Apr/2026 11:55:05] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:01:40,972 INFO: 127.0.0.1 - - [16/Apr/2026 12:01:40] "GET /about HTTP/1.1" 200 -
+2026-04-16 12:01:41,013 INFO: 127.0.0.1 - - [16/Apr/2026 12:01:41] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:02:14,573 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:14] "GET /about HTTP/1.1" 200 -
+2026-04-16 12:02:14,603 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:14] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:02:17,766 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:17] "GET /contact HTTP/1.1" 200 -
+2026-04-16 12:02:17,793 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:17] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:02:25,156 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:25] "GET /terms HTTP/1.1" 200 -
+2026-04-16 12:02:25,179 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:25] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:02:33,882 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:33] "GET /privacy HTTP/1.1" 200 -
+2026-04-16 12:02:33,906 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:33] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:02:39,558 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:39] "GET /shop HTTP/1.1" 200 -
+2026-04-16 12:02:39,582 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:02:41,400 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:41] "GET /trips HTTP/1.1" 200 -
+2026-04-16 12:02:41,428 INFO: 127.0.0.1 - - [16/Apr/2026 12:02:41] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:04:14,613 INFO: 127.0.0.1 - - [16/Apr/2026 12:04:14] "GET / HTTP/1.1" 200 -
+2026-04-16 12:04:14,649 INFO: 127.0.0.1 - - [16/Apr/2026 12:04:14] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:04:29,535 INFO: 127.0.0.1 - - [16/Apr/2026 12:04:29] "GET /trips HTTP/1.1" 200 -
+2026-04-16 12:04:29,564 INFO: 127.0.0.1 - - [16/Apr/2026 12:04:29] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:04:53,866 INFO: 127.0.0.1 - - [16/Apr/2026 12:04:53] "GET /events HTTP/1.1" 200 -
+2026-04-16 12:04:53,896 INFO: 127.0.0.1 - - [16/Apr/2026 12:04:53] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:05:10,996 INFO: 127.0.0.1 - - [16/Apr/2026 12:05:10] "GET /dashboard HTTP/1.1" 200 -
+2026-04-16 12:05:11,022 INFO: 127.0.0.1 - - [16/Apr/2026 12:05:11] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:05:17,407 INFO: 127.0.0.1 - - [16/Apr/2026 12:05:17] "GET /admin HTTP/1.1" 200 -
+2026-04-16 12:05:17,434 INFO: 127.0.0.1 - - [16/Apr/2026 12:05:17] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:05:31,006 INFO: 127.0.0.1 - - [16/Apr/2026 12:05:31] "GET /dashboard HTTP/1.1" 200 -
+2026-04-16 12:05:31,036 INFO: 127.0.0.1 - - [16/Apr/2026 12:05:31] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:41:58,231 INFO: 127.0.0.1 - - [16/Apr/2026 12:41:58] "GET / HTTP/1.1" 200 -
+2026-04-16 12:41:58,297 INFO: 127.0.0.1 - - [16/Apr/2026 12:41:58] "GET /static/style.css HTTP/1.1" 200 -
+2026-04-16 12:41:58,792 INFO: 127.0.0.1 - - [16/Apr/2026 12:41:58] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-16 12:42:39,932 INFO: 127.0.0.1 - - [16/Apr/2026 12:42:39] "GET /about HTTP/1.1" 200 -
+2026-04-16 12:42:39,984 INFO: 127.0.0.1 - - [16/Apr/2026 12:42:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:42:50,919 INFO: 127.0.0.1 - - [16/Apr/2026 12:42:50] "GET /privacy HTTP/1.1" 200 -
+2026-04-16 12:42:51,213 INFO: 127.0.0.1 - - [16/Apr/2026 12:42:51] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:43:02,300 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:02] "GET /shop HTTP/1.1" 200 -
+2026-04-16 12:43:02,397 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:02] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:43:25,896 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:25] "GET /trips HTTP/1.1" 200 -
+2026-04-16 12:43:26,196 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:26] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:43:37,946 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:37] "GET /login HTTP/1.1" 200 -
+2026-04-16 12:43:38,018 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:38] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:43:51,787 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:51] "GET /trips HTTP/1.1" 200 -
+2026-04-16 12:43:52,048 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:52] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:43:59,203 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:59] "GET /treks?location=McLeodganj HTTP/1.1" 200 -
+2026-04-16 12:43:59,255 INFO: 127.0.0.1 - - [16/Apr/2026 12:43:59] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:44:08,728 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:08] "GET / HTTP/1.1" 200 -
+2026-04-16 12:44:09,020 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:09] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:44:17,270 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:17] "GET /login HTTP/1.1" 200 -
+2026-04-16 12:44:17,325 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:17] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:44:24,224 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:24] "GET /about HTTP/1.1" 200 -
+2026-04-16 12:44:24,526 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:24] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:44:30,665 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:30] "GET /privacy HTTP/1.1" 200 -
+2026-04-16 12:44:30,700 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:30] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:44:42,166 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:42] "GET /login HTTP/1.1" 200 -
+2026-04-16 12:44:42,501 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:42] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:44:47,526 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:47] "GET /privacy HTTP/1.1" 200 -
+2026-04-16 12:44:47,573 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:47] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:44:53,802 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:53] "GET /shop HTTP/1.1" 200 -
+2026-04-16 12:44:54,104 INFO: 127.0.0.1 - - [16/Apr/2026 12:44:54] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:45:11,461 INFO: 127.0.0.1 - - [16/Apr/2026 12:45:11] "GET /login HTTP/1.1" 200 -
+2026-04-16 12:45:11,509 INFO: 127.0.0.1 - - [16/Apr/2026 12:45:11] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:45:17,173 INFO: 127.0.0.1 - - [16/Apr/2026 12:45:17] "GET /about HTTP/1.1" 200 -
+2026-04-16 12:45:17,490 INFO: 127.0.0.1 - - [16/Apr/2026 12:45:17] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:47:03,381 INFO: 127.0.0.1 - - [16/Apr/2026 12:47:03] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:47:20,693 INFO: 127.0.0.1 - - [16/Apr/2026 12:47:20] "GET /login HTTP/1.1" 200 -
+2026-04-16 12:47:20,752 INFO: 127.0.0.1 - - [16/Apr/2026 12:47:20] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:51:09,341 INFO: 127.0.0.1 - - [16/Apr/2026 12:51:09] "GET /trips HTTP/1.1" 200 -
+2026-04-16 12:51:09,374 INFO: 127.0.0.1 - - [16/Apr/2026 12:51:09] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:51:25,939 INFO: 127.0.0.1 - - [16/Apr/2026 12:51:25] "GET /treks HTTP/1.1" 200 -
+2026-04-16 12:51:25,967 INFO: 127.0.0.1 - - [16/Apr/2026 12:51:25] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:52:10,536 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:10] "GET /dashboard HTTP/1.1" 200 -
+2026-04-16 12:52:10,569 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:10] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:52:15,532 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:15] "[32mGET /logout HTTP/1.1[0m" 302 -
+2026-04-16 12:52:15,549 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:15] "GET / HTTP/1.1" 200 -
+2026-04-16 12:52:15,580 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:15] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:52:23,546 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:23] "GET / HTTP/1.1" 200 -
+2026-04-16 12:52:23,599 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:23] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-16 12:52:29,957 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:29] "GET /login HTTP/1.1" 200 -
+2026-04-16 12:52:29,984 INFO: 127.0.0.1 - - [16/Apr/2026 12:52:29] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 01:18:08,472 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:18:08,474 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-24 01:18:08,492 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:18:08,528 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.184:5000
+2026-04-24 01:18:08,528 INFO: [33mPress CTRL+C to quit[0m
+2026-04-24 01:18:08,533 INFO:  * Restarting with stat
+2026-04-24 01:18:08,810 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:18:08,811 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-24 01:18:08,827 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:18:08,834 WARNING:  * Debugger is active!
+2026-04-24 01:18:08,840 INFO:  * Debugger PIN: 524-294-157
+2026-04-24 01:20:09,219 INFO:  * Detected change in 'C:\\Users\\Welcome\\Downloads\\final wanderbudyy\\WanderBuddy_Production\\app.py', reloading
+2026-04-24 01:20:09,272 INFO:  * Restarting with stat
+2026-04-24 01:20:09,577 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:20:09,578 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-24 01:20:09,596 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:20:09,603 WARNING:  * Debugger is active!
+2026-04-24 01:20:09,607 INFO:  * Debugger PIN: 524-294-157
+2026-04-24 01:24:02,727 INFO:  * Detected change in 'C:\\Users\\Welcome\\Downloads\\final wanderbudyy\\WanderBuddy_Production\\temp_wsgi.py', reloading
+2026-04-24 01:24:02,772 INFO:  * Restarting with stat
+2026-04-24 01:24:03,042 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:24:03,043 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-24 01:24:03,066 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:24:03,075 WARNING:  * Debugger is active!
+2026-04-24 01:24:03,078 INFO:  * Debugger PIN: 524-294-157
+2026-04-24 01:24:23,662 INFO:  * Detected change in 'C:\\Users\\Welcome\\Downloads\\final wanderbudyy\\WanderBuddy_Production\\temp_app.py', reloading
+2026-04-24 01:24:23,705 INFO:  * Restarting with stat
+2026-04-24 01:24:23,981 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:24:23,982 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-24 01:24:24,001 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:24:24,007 WARNING:  * Debugger is active!
+2026-04-24 01:24:24,010 INFO:  * Debugger PIN: 524-294-157
+2026-04-24 01:49:41,777 INFO:  * Detected change in 'C:\\Users\\Welcome\\Downloads\\final wanderbudyy\\WanderBuddy_Production\\seed_db.py', reloading
+2026-04-24 01:49:41,893 INFO:  * Restarting with stat
+2026-04-24 01:49:42,275 INFO: [DB] Using database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:49:42,276 INFO: [DB] Startup check — trips:12  events:9  merchandise:18
+2026-04-24 01:49:42,293 INFO: Booting database at: C:\Users\Welcome\Downloads\final wanderbudyy\WanderBuddy_Production\wanderbuddy.db
+2026-04-24 01:49:42,301 WARNING:  * Debugger is active!
+2026-04-24 01:49:42,305 INFO:  * Debugger PIN: 524-294-157
+2026-04-24 02:28:43,952 INFO: 127.0.0.1 - - [24/Apr/2026 02:28:43] "GET / HTTP/1.1" 200 -
+2026-04-24 02:28:44,046 INFO: 127.0.0.1 - - [24/Apr/2026 02:28:44] "GET /static/style.css HTTP/1.1" 200 -
+2026-04-24 02:28:44,227 INFO: 127.0.0.1 - - [24/Apr/2026 02:28:44] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-24 02:29:47,940 INFO: 127.0.0.1 - - [24/Apr/2026 02:29:47] "GET /trips HTTP/1.1" 200 -
+2026-04-24 02:29:48,031 INFO: 127.0.0.1 - - [24/Apr/2026 02:29:48] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:29:54,650 INFO: 127.0.0.1 - - [24/Apr/2026 02:29:54] "GET /events HTTP/1.1" 200 -
+2026-04-24 02:29:54,680 INFO: 127.0.0.1 - - [24/Apr/2026 02:29:54] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:30:08,340 INFO: 127.0.0.1 - - [24/Apr/2026 02:30:08] "GET / HTTP/1.1" 200 -
+2026-04-24 02:30:08,374 INFO: 127.0.0.1 - - [24/Apr/2026 02:30:08] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:30:29,392 INFO: 127.0.0.1 - - [24/Apr/2026 02:30:29] "GET /trips HTTP/1.1" 200 -
+2026-04-24 02:30:29,421 INFO: 127.0.0.1 - - [24/Apr/2026 02:30:29] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:30:38,813 INFO: 127.0.0.1 - - [24/Apr/2026 02:30:38] "GET / HTTP/1.1" 200 -
+2026-04-24 02:30:38,854 INFO: 127.0.0.1 - - [24/Apr/2026 02:30:38] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:31:37,721 INFO: 127.0.0.1 - - [24/Apr/2026 02:31:37] "GET /trips HTTP/1.1" 200 -
+2026-04-24 02:31:37,880 INFO: 127.0.0.1 - - [24/Apr/2026 02:31:37] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:32:16,465 INFO: 127.0.0.1 - - [24/Apr/2026 02:32:16] "GET / HTTP/1.1" 200 -
+2026-04-24 02:32:16,499 INFO: 127.0.0.1 - - [24/Apr/2026 02:32:16] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:32:27,135 INFO: 127.0.0.1 - - [24/Apr/2026 02:32:27] "GET /trips HTTP/1.1" 200 -
+2026-04-24 02:32:27,164 INFO: 127.0.0.1 - - [24/Apr/2026 02:32:27] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:32:30,104 INFO: 127.0.0.1 - - [24/Apr/2026 02:32:30] "GET /treks?location=McLeodganj HTTP/1.1" 200 -
+2026-04-24 02:32:30,123 INFO: 127.0.0.1 - - [24/Apr/2026 02:32:30] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:32:32,564 INFO: 127.0.0.1 - - [24/Apr/2026 02:32:32] "GET /trip/triund HTTP/1.1" 200 -
+2026-04-24 02:32:32,591 INFO: 127.0.0.1 - - [24/Apr/2026 02:32:32] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:33:16,581 INFO: 127.0.0.1 - - [24/Apr/2026 02:33:16] "GET /login HTTP/1.1" 200 -
+2026-04-24 02:33:16,619 INFO: 127.0.0.1 - - [24/Apr/2026 02:33:16] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 02:33:38,416 INFO: 127.0.0.1 - - [24/Apr/2026 02:33:38] "POST /login HTTP/1.1" 200 -
+2026-04-24 02:33:38,442 INFO: 127.0.0.1 - - [24/Apr/2026 02:33:38] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-24 16:03:26,878 INFO:  * Detected change in 'C:\\Users\\Welcome\\Downloads\\final wanderbudyy\\WanderBuddy_Production\\app.py', reloading
+2026-04-24 16:03:27,572 INFO:  * Restarting with stat

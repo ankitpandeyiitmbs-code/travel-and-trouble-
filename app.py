@@ -12,6 +12,7 @@ from flask import (Flask, render_template, request, redirect, url_for,
                    session, flash, jsonify, g)
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+import razorpay
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,7 +26,10 @@ app.config['DATABASE'] = os.environ.get('DATABASE') or os.path.join(_base_dir, '
 app.config['UPLOAD_FOLDER'] = os.path.join(_base_dir, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID') or 'rzp_test_replace_me'
-IS_SIMULATION_MODE = os.environ.get('IS_SIMULATION_MODE', 'false').lower() == 'true'
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET') or 'your_secret_here'
+IS_SIMULATION_MODE = False  # Switched to False for real Razorpay testing as per request
+
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -726,6 +730,12 @@ def book():
              num_travelers, sharing_type, price_per_person, total_price, 'pending')
         )
         booking_id = cur.lastrowid
+        
+        # Link to actual batch record if it exists
+        batch = conn.execute("SELECT id FROM trip_batches WHERE trip_id=? AND batch_date=?", (trip_id, batch_date)).fetchone()
+        if batch:
+            conn.execute("UPDATE bookings SET wb_batch_id=? WHERE id=?", (batch['id'], booking_id))
+            
         for aid in addon_ids:
             conn.execute("INSERT INTO booking_addons (booking_id, addon_id) VALUES (?,?)", (booking_id, aid))
         conn.commit()
@@ -766,11 +776,30 @@ def payment(booking_id):
         "SELECT plan_name FROM subscriptions WHERE user_id=? AND status='active' AND valid_until > date('now')",
         (session['user_id'],)).fetchone()
     membership_tier = sub['plan_name'] if sub else None
+    
+    razorpay_order_id = None
+    if not IS_SIMULATION_MODE:
+        try:
+            order_data = {
+                'amount': int(final_total * 100),  # amount in paise
+                'currency': 'INR',
+                'receipt': f'rcpt_booking_{booking_id}',
+                'payment_capture': 1
+            }
+            razorpay_order = razorpay_client.order.create(data=order_data)
+            razorpay_order_id = razorpay_order['id']
+        except Exception as e:
+            conn.close()
+            print(f"Razorpay Order Error: {e}")
+            flash('Failed to initiate payment. Please try again.', 'danger')
+            return redirect(url_for('dashboard'))
+
     conn.close()
     return render_template('payment.html', booking=booking, target=target, addons=addons,
                            addon_total=addon_total, final_total=final_total,
                            batch_info=batch_info, membership_tier=membership_tier,
-                           razorpay_key=RAZORPAY_KEY_ID, is_simulation=IS_SIMULATION_MODE)
+                           razorpay_key=RAZORPAY_KEY_ID, is_simulation=IS_SIMULATION_MODE,
+                           razorpay_order_id=razorpay_order_id)
 
 
 @app.route('/process_payment/<int:booking_id>', methods=['POST'])
@@ -783,9 +812,38 @@ def process_payment(booking_id):
         conn.close()
         flash('Booking not found.', 'danger')
         return redirect(url_for('dashboard'))
-    payment_id = request.form.get('razorpay_payment_id') or f"SIM_{uuid.uuid4().hex[:12].upper()}"
+    if not IS_SIMULATION_MODE:
+        # Standard Razorpay Signature Verification
+        razorpay_payment_id = request.form.get('razorpay_payment_id')
+        razorpay_order_id = request.form.get('razorpay_order_id')
+        razorpay_signature = request.form.get('razorpay_signature')
+        
+        try:
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            }
+            razorpay_client.utility.verify_payment_signature(params_dict)
+            payment_id = razorpay_payment_id
+        except Exception as e:
+            conn.close()
+            print(f"Payment Verification Error: {e}")
+            flash('Payment verification failed. If your money was deducted, please contact support.', 'danger')
+            return redirect(url_for('dashboard'))
+    else:
+        payment_id = request.form.get('razorpay_payment_id') or f"SIM_{uuid.uuid4().hex[:12].upper()}"
+
     conn.execute("UPDATE bookings SET status='confirmed', payment_id=? WHERE id=?",
                  (payment_id, booking_id))
+    
+    # Update inventory/seat count
+    if booking['booking_type'] == 'trip':
+        conn.execute(
+            "UPDATE trip_batches SET current_bookings = current_bookings + ? WHERE trip_id=? AND batch_date=?",
+            (booking['num_travelers'], booking['trip_id'], booking['batch_date'])
+        )
+    
     conn.commit()
     conn.close()
     flash('Payment successful! Your booking is confirmed.', 'success')
@@ -1014,15 +1072,52 @@ def shop_payment(order_id):
            JOIN merchandise m ON soi.item_id=m.id WHERE soi.order_id=?""",
         (order_id,)).fetchall()
     conn.close()
+    razorpay_order_id = None
+    if not IS_SIMULATION_MODE:
+        try:
+            order_data = {
+                'amount': int(order['total_amount'] * 100),
+                'currency': 'INR',
+                'receipt': f'rcpt_shop_{order_id}',
+                'payment_capture': 1
+            }
+            razorpay_order = razorpay_client.order.create(data=order_data)
+            razorpay_order_id = razorpay_order['id']
+        except Exception as e:
+            conn.close()
+            print(f"Razorpay Shop Order Error: {e}")
+            flash('Failed to initiate shop payment. Please try again.', 'danger')
+            return redirect(url_for('cart'))
+
+    conn.close()
     return render_template('shop_payment.html', order=order, items=items,
-                           razorpay_key=RAZORPAY_KEY_ID, is_simulation=IS_SIMULATION_MODE)
+                           razorpay_key=RAZORPAY_KEY_ID, is_simulation=IS_SIMULATION_MODE,
+                           razorpay_order_id=razorpay_order_id)
 
 
 @app.route('/shop/payment/confirm', methods=['POST'])
 @login_required
 def confirm_shop_payment():
     order_id = request.form.get('order_id')
-    payment_id = request.form.get('razorpay_payment_id') or f"SIM_{uuid.uuid4().hex[:12].upper()}"
+    if not IS_SIMULATION_MODE:
+        razorpay_payment_id = request.form.get('razorpay_payment_id')
+        razorpay_order_id = request.form.get('razorpay_order_id')
+        razorpay_signature = request.form.get('razorpay_signature')
+        
+        try:
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            }
+            razorpay_client.utility.verify_payment_signature(params_dict)
+            payment_id = razorpay_payment_id
+        except Exception as e:
+            print(f"Shop Payment Verification Error: {e}")
+            flash('Payment verification failed. Please contact support.', 'danger')
+            return redirect(url_for('dashboard'))
+    else:
+        payment_id = request.form.get('razorpay_payment_id') or f"SIM_{uuid.uuid4().hex[:12].upper()}"
     conn = get_db_connection()
     conn.execute("UPDATE shop_orders SET status='confirmed' WHERE id=? AND user_id=?",
                  (order_id, session['user_id']))
@@ -1103,8 +1198,25 @@ def explorer_pass_payment():
     price = session.get('pending_pass_price')
     if not tier or not price:
         return redirect(url_for('explorer_pass'))
+    razorpay_order_id = None
+    if not IS_SIMULATION_MODE:
+        try:
+            order_data = {
+                'amount': int(price * 100),
+                'currency': 'INR',
+                'receipt': f'rcpt_pass_{session.get("user_id")}',
+                'payment_capture': 1
+            }
+            razorpay_order = razorpay_client.order.create(data=order_data)
+            razorpay_order_id = razorpay_order['id']
+        except Exception as e:
+            print(f"Razorpay Pass Order Error: {e}")
+            flash('Failed to initiate subscription. Please try again.', 'danger')
+            return redirect(url_for('explorer_pass'))
+
     return render_template('explorer_pass_payment.html', tier=tier, price=price,
-                           razorpay_key=RAZORPAY_KEY_ID, is_simulation=IS_SIMULATION_MODE)
+                           razorpay_key=RAZORPAY_KEY_ID, is_simulation=IS_SIMULATION_MODE,
+                           razorpay_order_id=razorpay_order_id)
 
 
 @app.route('/explorer-pass/confirm', methods=['POST'])
@@ -1114,7 +1226,26 @@ def confirm_explorer_pass():
     price = session.pop('pending_pass_price', None)
     if not tier:
         return redirect(url_for('explorer_pass'))
-    payment_id = request.form.get('razorpay_payment_id') or f"SIM_{uuid.uuid4().hex[:12].upper()}"
+    
+    if not IS_SIMULATION_MODE:
+        razorpay_payment_id = request.form.get('razorpay_payment_id')
+        razorpay_order_id = request.form.get('razorpay_order_id')
+        razorpay_signature = request.form.get('razorpay_signature')
+        
+        try:
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            }
+            razorpay_client.utility.verify_payment_signature(params_dict)
+            payment_id = razorpay_payment_id
+        except Exception as e:
+            print(f"Pass Payment Verification Error: {e}")
+            flash('Payment verification failed. Please contact support.', 'danger')
+            return redirect(url_for('dashboard'))
+    else:
+        payment_id = request.form.get('razorpay_payment_id') or f"SIM_{uuid.uuid4().hex[:12].upper()}"
     conn = get_db_connection()
     existing = conn.execute("SELECT id FROM subscriptions WHERE user_id=?",
                             (session['user_id'],)).fetchone()

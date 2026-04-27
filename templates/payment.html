@@ -63,6 +63,8 @@
       <button id="rzp-button" class="btn btn-terra w-100 btn-lg"><i class="fa-solid fa-lock me-2"></i>Pay ₹{{ "{:,}".format(final_total) }} Securely</button>
       <form id="rzp-form" action="{{ url_for('process_payment', booking_id=booking.id) }}" method="POST">
         <input type="hidden" name="razorpay_payment_id" id="payment_id">
+        <input type="hidden" name="razorpay_order_id" id="order_id" value="{{ razorpay_order_id }}">
+        <input type="hidden" name="razorpay_signature" id="signature">
       </form>
     </div>
     {% endif %}
@@ -81,8 +83,11 @@ document.getElementById('rzp-button').onclick = function(e){
     currency: "INR",
     name: "{{ settings.site_title }}",
     description: "Trip Booking",
+    order_id: "{{ razorpay_order_id }}",
     handler: function(response){
       document.getElementById('payment_id').value = response.razorpay_payment_id;
+      document.getElementById('order_id').value = response.razorpay_order_id;
+      document.getElementById('signature').value = response.razorpay_signature;
       document.getElementById('rzp-form').submit();
     }
   };
