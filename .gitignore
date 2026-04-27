@@ -1,0 +1,15 @@
+.env
+*.db
+*.log
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+instance/
+static/uploads/*
+!static/uploads/.gitkeep
+dist/
+build/
+*.bak
+ WanderBuddy_Production/wanderbuddy.db
+ WanderBuddy_Production/.env
