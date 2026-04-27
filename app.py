@@ -1343,13 +1343,14 @@ def chat():
 @app.route('/send_message', methods=['POST'])
 @login_required
 def send_message():
-    content = request.json.get('content', '').strip() if request.is_json else request.form.get('content', '').strip()
-    if not content:
-        return jsonify({'success': False, 'error': 'Empty message'})
+    data = request.json
+    batch_id = data.get('batch_id')
+    content = data.get('content')
+    if not batch_id or not content:
+        return jsonify({'success': False})
     conn = get_db_connection()
-    conn.execute(
-        "INSERT INTO messages (room_id, user_id, sender, content, msg_type) VALUES (?,?,?,?,?)",
-        ('general', session['user_id'], session['user_name'], content, 'text'))
+    conn.execute("INSERT INTO batch_chat_message (batch_id, user_id, content) VALUES (?,?,?)",
+                 (batch_id, session['user_id'], content))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
@@ -1376,15 +1377,15 @@ def upload_chat_image():
     return jsonify({'success': False, 'error': 'Invalid file'})
 
 
-@app.route('/get_messages/<room_id>')
+@app.route('/get_messages/<batch_id>')
 @login_required
-def get_messages(room_id):
+def get_messages(batch_id):
     conn = get_db_connection()
     messages = conn.execute(
-        "SELECT id, sender, content, msg_type, timestamp FROM messages WHERE room_id=? ORDER BY timestamp DESC LIMIT 50",
-        (room_id,)).fetchall()
+        "SELECT m.*, u.name as sender_name FROM batch_chat_message m JOIN users u ON m.user_id=u.id WHERE m.batch_id=? ORDER BY m.sent_at ASC",
+        (batch_id,)).fetchall()
     conn.close()
-    return jsonify([dict(m) for m in reversed(messages)])
+    return jsonify([dict(m) for m in messages])
 
 
 @app.route('/delete_message/<int:msg_id>', methods=['POST'])
@@ -2827,34 +2828,50 @@ def batch_chat(batch_id):
            JOIN users u ON bcm.user_id=u.id
            WHERE bcm.batch_id=? ORDER BY bcm.sent_at ASC""", (batch_id,)).fetchall()
     
-    travelers_bookings = []
-    if not isinstance(batch_id, str) or not batch_id.startswith('general-'):
-        travelers_bookings = conn.execute(
-        """SELECT b.*, u.name as user_name FROM bookings b
-           JOIN users u ON b.user_id=u.id
-           WHERE b.wb_batch_id=? AND b.status='confirmed'""", (batch_id,)).fetchall()
     conn.close()
-    return render_template('chat/batch_chat.html', batch=dict(batch), messages=messages,
-                           travelers=travelers_bookings, current_user_id=session['user_id'])
+    return render_template('chat.html', messages=messages, batch_id=batch_id, 
+                           batch_name=f"{batch['trip_title']} ({batch['batch_date']})")
 
 
-@app.route('/batch-chat/<int:batch_id>/send', methods=['POST'])
+@app.route('/get_messages/<batch_id>')
 @login_required
-def send_batch_message(batch_id):
+def get_messages(batch_id):
     conn = get_db_connection()
-    batch = conn.execute("SELECT trip_id FROM trip_batch WHERE id=?", (batch_id,)).fetchone()
-    if not batch or (not _is_admin() and not _is_confirmed_batch_booker(conn, session['user_id'], batch_id)):
-        conn.close()
-        flash('Access denied.', 'danger')
-        return redirect(url_for('dashboard'))
-    message = request.form.get('message', '').strip()
-    if message:
-        conn.execute(
-            "INSERT INTO batch_chat_message (batch_id, user_id, message) VALUES (?,?,?)",
-            (batch_id, session['user_id'], message))
-        conn.commit()
+    messages = conn.execute(
+        "SELECT m.*, u.name as sender_name FROM batch_chat_message m JOIN users u ON m.user_id=u.id WHERE m.batch_id=? ORDER BY m.sent_at ASC",
+        (batch_id,)).fetchall()
     conn.close()
-    return redirect(url_for('batch_chat', batch_id=batch_id))
+    return jsonify([dict(m) for m in messages])
+
+
+@app.route('/send_message', methods=['POST'])
+@login_required
+def send_message():
+    data = request.json
+    batch_id = data.get('batch_id')
+    content = data.get('content')
+    if not batch_id or not content:
+        return jsonify({'success': False})
+    conn = get_db_connection()
+    conn.execute("INSERT INTO batch_chat_message (batch_id, user_id, content) VALUES (?,?,?)",
+                 (batch_id, session['user_id'], content))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+
+@app.route('/booking/voucher/<int:booking_id>')
+@login_required
+def booking_voucher(booking_id):
+    conn = get_db_connection()
+    booking = conn.execute("SELECT b.*, u.name as user_name FROM bookings b JOIN users u ON b.user_id=u.id WHERE b.id=? AND b.user_id=?",
+                           (booking_id, session['user_id'])).fetchone()
+    if not booking:
+        conn.close()
+        return "Booking not found", 404
+    trip = conn.execute("SELECT * FROM trips WHERE id=?", (booking['trip_id'],)).fetchone()
+    conn.close()
+    return render_template('voucher.html', booking=booking, trip=trip)
 
 
 # ─── GROUP CHAT: EVENTS ───────────────────────────────────────────────────────

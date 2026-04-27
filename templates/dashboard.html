@@ -61,6 +61,7 @@
               <button class="btn btn-sm btn-outline-terra">Upload Doc</button>
             </form>
             {% if booking.booking_type == 'trip' %}
+              <a href="{{ url_for('booking_voucher', booking_id=booking.id) }}" class="btn btn-sm btn-outline-navy"><i class="fa-solid fa-file-invoice me-1"></i>Voucher</a>
               {% if booking.wb_batch_id %}
                 <a href="{{ url_for('batch_chat', batch_id=booking.wb_batch_id) }}" class="btn btn-sm btn-terra">💬 Squad Chat</a>
               {% else %}
