@@ -176,8 +176,14 @@ def build_batch_choices(conn, target, target_type):
         if target_type == 'event' or target_type == 'upcoming_event':
             ed = target.get('event_date', 'TBC')
             return [{'value': ed, 'label': ed, 'status': 'pending'}]
-        batches = conn.execute(
-            "SELECT * FROM trip_batches WHERE trip_id=? ORDER BY batch_date", (target['id'],)).fetchall()
+        try:
+            batches = conn.execute(
+                "SELECT * FROM trip_batches WHERE trip_id=? ORDER BY batch_date", (target['id'],)).fetchall()
+        except Exception:
+            # Fallback to singular table name if plural doesn't exist
+            batches = conn.execute(
+                "SELECT * FROM trip_batch WHERE trip_id=? ORDER BY batch_date", (target['id'],)).fetchall()
+        
         if not batches:
             return [{'value': 'TBC', 'label': 'Dates to be confirmed', 'status': 'pending'}]
         choices = []
