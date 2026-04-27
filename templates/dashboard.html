@@ -68,6 +68,10 @@
               {% endif %}
             {% endif %}
           </div>
+          {% elif booking.status == 'pending' %}
+          <div class="mt-3">
+            <a href="{{ url_for('payment', booking_id=booking.id) }}" class="btn btn-sm btn-success w-100 mb-2">💳 Pay Now & Confirm</a>
+          </div>
           {% endif %}
           {% if booking.status in ['pending', 'confirmed'] %}
           <div class="mt-2">
