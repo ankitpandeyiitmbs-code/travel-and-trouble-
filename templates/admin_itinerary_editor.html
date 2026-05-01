@@ -27,7 +27,7 @@
                     <strong>{{ day.title }}</strong>
                   </div>
                   <div class="d-flex gap-1 flex-shrink-0 ms-2">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="fillEditDay('{{ day.day_number }}', '{{ day.title|e }}', '{{ day.description|e }}', '{{ day.meals|e }}', '{{ day.accommodation|e }}')">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick='fillEditDay({{ day|tojson|safe }})'>
                       <i class="fa-solid fa-pen"></i>
                     </button>
                     <form method="POST" action="/admin/trip/itinerary/delete" onsubmit="return confirm('Delete Day {{ day.day_number }}?')">
@@ -149,13 +149,13 @@
 {% endblock %}
 {% block scripts %}
 <script>
-function fillEditDay(day_number, title, description, meals, accommodation){
-  document.getElementById('editOriginalDayNumber').value = day_number;
-  document.getElementById('editDayNumber').value = day_number;
-  document.getElementById('editDayTitle').value = title || '';
-  document.getElementById('editDayDesc').value = description || '';
-  document.getElementById('editDayMeals').value = meals || '';
-  document.getElementById('editDayAccom').value = accommodation || '';
+function fillEditDay(day){
+  document.getElementById('editOriginalDayNumber').value = day.day_number;
+  document.getElementById('editDayNumber').value = day.day_number;
+  document.getElementById('editDayTitle').value = day.title || '';
+  document.getElementById('editDayDesc').value = day.description || '';
+  document.getElementById('editDayMeals').value = day.meals || '';
+  document.getElementById('editDayAccom').value = day.accommodation || '';
   var myModal = new bootstrap.Modal(document.getElementById('editDayModal'));
   myModal.show();
 }

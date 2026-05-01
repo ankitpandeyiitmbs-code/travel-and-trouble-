@@ -439,9 +439,12 @@ def trip_details(trip_id):
         
         itinerary = []
         raw_itinerary = target.get('itinerary', '[]')
-        if raw_itinerary and target_type == 'trip':
+        if raw_itinerary:
             try:
                 itinerary = json.loads(raw_itinerary)
+                for i, d in enumerate(itinerary):
+                    if 'day_number' not in d:
+                        d['day_number'] = i + 1
             except:
                 itinerary = []
         conn.close()
