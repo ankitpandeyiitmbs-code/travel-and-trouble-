@@ -174,8 +174,8 @@ def get_booking_target(conn, target_id):
 def build_batch_choices(conn, target, target_type):
     try:
         if target_type == 'event' or target_type == 'upcoming_event':
-            ed = target.get('event_date', 'TBC')
-            return [{'value': ed, 'label': ed, 'status': 'pending'}]
+            ed = target.get('event_date') or target.get('start_date') or 'TBC'
+            return [{'value': ed, 'label': ed, 'status': 'active'}]
         try:
             # Try to fetch from trip_batches first
             batches = conn.execute("SELECT * FROM trip_batches WHERE trip_id=?", (target['id'],)).fetchall()
@@ -2835,9 +2835,11 @@ def send_message():
     content = data.get('content')
     if not batch_id or not content:
         return jsonify({'success': False})
+    
     conn = get_db_connection()
+    # Ensure the batch_id is saved exactly as it comes (handle 'general-')
     conn.execute("INSERT INTO batch_chat_message (batch_id, user_id, content) VALUES (?,?,?)",
-                 (batch_id, session['user_id'], content))
+                 (str(batch_id), session['user_id'], content))
     conn.commit()
     conn.close()
     return jsonify({'success': True})

@@ -1,160 +1,156 @@
 {% extends "layout.html" %}
 {% block title %}{{ trip.title }} — {{ settings.site_title }}{% endblock %}
 {% block content %}
-<section class="py-4">
+<section class="py-5" style="background:var(--bg-sunken);">
   <div class="container">
-    <nav aria-label="breadcrumb" class="mb-3">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('trips') if target_type=='trip' else url_for('events') }}">{{ 'Trips' if target_type=='trip' else 'Events' }}</a></li>
-        <li class="breadcrumb-item active">{{ trip.title }}</li>
-      </ol>
-    </nav>
-    <div class="row g-4">
-      <!-- Left: Details -->
+    <div class="row g-5">
+      <!-- Left: Content -->
       <div class="col-lg-8">
-        <div class="card" style="overflow:hidden">
-          <img src="{{ trip.image_url or 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800' }}"
-               alt="{{ trip.title }}" style="width:100%;height:380px;object-fit:cover">
-          <div class="card-body p-4">
-            <div class="d-flex flex-wrap gap-2 mb-3">
-              <span class="tag-pill">{{ trip.category }}</span>
-              {% if trip.difficulty %}
-              <span class="tag-pill {% if trip.difficulty == 'Easy' %}difficulty-easy{% elif trip.difficulty == 'Challenging' %}difficulty-challenging{% else %}difficulty-moderate{% endif %}">{{ trip.difficulty }}</span>
-              {% endif %}
-              {% if target_type == 'event' %}<span class="tag-pill" style="background:#d1ecf1;color:#0c5460">Event</span>{% endif %}
-            </div>
-            <h1 style="font-size:2rem;color:var(--navy)">{{ trip.title }}</h1>
-            <div class="d-flex flex-wrap gap-4 my-3" style="color:var(--text-secondary)">
-              <span><i class="fa-solid fa-location-dot me-1" style="color:var(--terra)"></i>{{ trip.location }}</span>
-              <span><i class="fa-solid fa-clock me-1" style="color:var(--terra)"></i>{{ trip.duration }}</span>
-              {% if trip.event_date %}<span><i class="fa-solid fa-calendar me-1" style="color:var(--terra)"></i>{{ trip.event_date }}</span>{% endif %}
-              <span><i class="fa-solid fa-indian-rupee-sign me-1" style="color:var(--terra)"></i>{{ "{:,}".format(trip.price) }} / person</span>
-            </div>
-            <p style="color:var(--text-secondary)">{{ trip.description or '' }}</p>
-            {% if trip.highlights %}
-            <h5 class="fw-bold mt-4 mb-3" style="color:var(--navy)">Highlights</h5>
-            <div class="row g-2">
-              {% for h in trip.highlights.split(',') %}
-              <div class="col-md-6">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="fa-solid fa-check-circle" style="color:var(--terra)"></i>
-                  <span>{{ h.strip() }}</span>
-                </div>
+        <div class="bg-white rounded-5 shadow-sm overflow-hidden mb-4">
+          <div class="position-relative">
+            <img src="{{ trip.image_url or 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800' }}"
+                 alt="{{ trip.title }}" style="width:100%;height:450px;object-fit:cover">
+            <div class="position-absolute bottom-0 start-0 p-4 w-100" style="background:linear-gradient(transparent, rgba(0,0,0,0.8))">
+              <div class="d-flex gap-2 mb-2">
+                <span class="badge rounded-pill bg-terra text-white px-3">{{ trip.category }}</span>
+                {% if target_type == 'event' %}<span class="badge rounded-pill bg-white text-dark px-3">EVENT</span>{% endif %}
               </div>
-              {% endfor %}
+              <h1 class="display-5 text-white fw-bold">{{ trip.title }}</h1>
+            </div>
+          </div>
+          
+          <div class="p-4 p-md-5">
+            <!-- Iconic Info Bar -->
+            <div class="row g-4 text-center py-4 mb-5 rounded-4" style="background:var(--bg-sunken);">
+              <div class="col-4 border-end">
+                <div class="text-muted small mb-1"><i class="fa-solid fa-location-dot text-terra me-1"></i>Location</div>
+                <div class="fw-bold">{{ trip.location }}</div>
+              </div>
+              <div class="col-4 border-end">
+                <div class="text-muted small mb-1"><i class="fa-solid fa-clock text-terra me-1"></i>Duration</div>
+                <div class="fw-bold">{{ trip.duration }}</div>
+              </div>
+              <div class="col-4">
+                <div class="text-muted small mb-1"><i class="fa-solid fa-people-group text-terra me-1"></i>Vibe</div>
+                <div class="fw-bold">Community</div>
+              </div>
+            </div>
+
+            <!-- Description & Sections -->
+            <div class="description-section">
+              <h4 class="fw-bold mb-4" style="color:var(--navy); font-family:'Cormorant Garamond', serif;">About the Experience</h4>
+              <div style="line-height:1.8; color:var(--text-secondary); font-size:1.05rem;">
+                {{ trip.description | safe }}
+              </div>
+            </div>
+
+            {% if trip.highlights %}
+            <div class="mt-5 p-4 rounded-4" style="border:1px solid var(--border);">
+              <h5 class="fw-bold mb-4" style="color:var(--navy)"><i class="fa-solid fa-star text-terra me-2"></i>Key Highlights</h5>
+              <div class="row g-3">
+                {% for h in trip.highlights.split(',') %}
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-sunken d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+                      <i class="fa-solid fa-check text-terra small"></i>
+                    </div>
+                    <span>{{ h.strip() }}</span>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
             </div>
             {% endif %}
+
             {% if itinerary %}
-            <h5 class="fw-bold mt-5 mb-4" style="color:var(--navy); font-family:'Cormorant Garamond', serif; font-size:1.5rem; letter-spacing:0.5px;">Detailed Itinerary</h5>
-            <div class="itinerary-timeline ms-2">
-              {% for day in itinerary %}
-              <div class="itinerary-day position-relative ps-4 pb-4" style="border-left:1px dashed var(--border-strong);">
-                <div class="day-marker position-absolute" style="left:-10px; top:0; width:20px; height:20px; background:var(--terra); border-radius:50%; border:4px solid #fff; box-shadow:0 0 0 2px var(--terra-dim);"></div>
-                <div class="day-header d-flex justify-content-between align-items-baseline mb-2">
-                  <h6 class="fw-bold mb-0" style="color:var(--navy);">Day {{ day.day }}: {{ day.title }}</h6>
-                </div>
-                <p class="small text-muted mb-2" style="line-height:1.6;">{{ day.description }}</p>
-                <div class="d-flex flex-wrap gap-3 mt-2">
-                  {% if day.meals %}
-                  <div class="small text-muted d-flex align-items-center gap-1">
-                    <i class="fa-solid fa-utensils text-terra" style="font-size:0.7rem"></i>
-                    <span>{{ day.meals }}</span>
+            <div class="mt-5">
+              <h4 class="fw-bold mb-4" style="color:var(--navy); font-family:'Cormorant Garamond', serif;">The Journey</h4>
+              <div class="itinerary-timeline">
+                {% for day in itinerary %}
+                <div class="mb-4 p-4 rounded-4 bg-sunken transition-hover">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-navy text-white px-3">Day {{ day.day }}</span>
+                    <h5 class="fw-bold mb-0 flex-grow-1 ms-3" style="color:var(--navy)">{{ day.title }}</h5>
                   </div>
-                  {% endif %}
-                  {% if day.accommodation %}
-                  <div class="small text-muted d-flex align-items-center gap-1">
-                    <i class="fa-solid fa-bed text-terra" style="font-size:0.7rem"></i>
-                    <span>{{ day.accommodation }}</span>
-                  </div>
-                  {% endif %}
+                  <p class="mb-0 text-secondary small">{{ day.description }}</p>
                 </div>
+                {% endfor %}
               </div>
-              {% endfor %}
             </div>
             {% endif %}
           </div>
         </div>
       </div>
-      <!-- Right: Booking Form -->
+
+      <!-- Right: Sidebar -->
       <div class="col-lg-4">
-        <div class="card p-4 sticky-top" style="top:80px">
-          <h5 class="fw-bold mb-1" style="color:var(--navy)">Book This {{ 'Event' if target_type == 'event' else 'Trip' }}</h5>
-          <div class="h4 fw-bold mb-3" style="color:var(--terra)">₹{{ "{:,}".format(trip.price) }}<span class="small fw-normal" style="color:var(--text-muted)"> / person</span></div>
-          {% if discount_pct %}
-          <div class="alert py-2 px-3 mb-3" style="background:var(--terra-dim);border:none;color:var(--terra);font-size:0.9rem">
-            <i class="fa-solid fa-tag me-1"></i>Explorer Pass: {{ discount_pct }}% discount applied!
-          </div>
-          {% endif %}
-          {% if not session.user_id %}
-          <div class="text-center py-3">
-            <p style="color:var(--text-muted)">Please log in to book</p>
-            <a href="{{ url_for('login') }}" class="btn btn-terra w-100">Login to Book</a>
-          </div>
-          {% elif existing_booking %}
-          <div class="alert alert-success py-2 px-3"><i class="fa-solid fa-check me-1"></i>You have a {{ existing_booking.status }} booking for this {{ target_type }}.</div>
-          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-terra w-100 mb-2">View Dashboard</a>
-          {% if existing_booking.status == 'confirmed' and target_type == 'trip' %}
-          <a href="{{ url_for('adventure_dashboard', trip_id=trip.id) }}" class="btn btn-terra w-100 mb-2">🎮 Adventure Dashboard</a>
-          {% if existing_booking.wb_batch_id %}
-          <a href="{{ url_for('batch_chat', batch_id=existing_booking.wb_batch_id) }}" class="btn btn-outline-terra w-100">💬 Chat with your travel group</a>
-          {% endif %}
-          {% endif %}
-          {% if existing_booking.status == 'confirmed' and target_type == 'event' %}
-          <a href="{{ url_for('event_chat', event_id=trip.id) }}" class="btn btn-outline-terra w-100 mt-1">💬 Chat with fellow attendees →</a>
-          {% endif %}
-          {% else %}
-          <form action="{{ url_for('book') }}" method="POST">
-            <input type="hidden" name="trip_id" value="{{ trip.id }}">
-            <div class="mb-3">
-              <label class="form-label fw-600">Select Date</label>
-              <select name="batch_date" class="form-select" required>
-                {% for b in batch_choices %}
-                <option value="{{ b.value }}">{{ b.label }}</option>
-                {% endfor %}
-              </select>
+        <div class="sticky-top" style="top:100px;">
+          <div class="card border-0 shadow-lg p-4 rounded-5">
+            <div class="text-center mb-4">
+              <div class="text-muted small">Starting from</div>
+              <div class="display-6 fw-bold text-terra">₹{{ "{:,}".format(trip.price) }}</div>
+              <div class="text-muted small">per person</div>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-600">Number of Travelers</label>
-              <input type="number" name="num_travelers" class="form-control" value="1" min="1" max="12" required>
-            </div>
-            {% if target_type == 'trip' %}
-            <div class="mb-3">
-              <label class="form-label fw-600">Room Sharing</label>
-              <select name="sharing_type" class="form-select">
-                <option value="quad">Quad Sharing (₹{{ "{:,}".format(trip.price) }}/person)</option>
-                <option value="triple">Triple Sharing (₹{{ "{:,}".format((trip.price * 1.125)|int) }}/person)</option>
-                <option value="double">Double Sharing (₹{{ "{:,}".format((trip.price * 1.375)|int) }}/person)</option>
-              </select>
-            </div>
-            {% endif %}
-            {% if addons %}
-            <div class="mb-3">
-              <label class="form-label fw-600">Add-ons</label>
-              {% for addon in addons %}
-              <div class="form-check mb-2 p-3 rounded-2" style="background:var(--bg-sunken)">
-                <input class="form-check-input" type="checkbox" name="addons" value="{{ addon.id }}" id="addon{{ addon.id }}">
-                <label class="form-check-label" for="addon{{ addon.id }}">
-                  <span class="fw-600">{{ addon.title }}</span>
-                  <span class="ms-2 text-muted small">(+₹{{ "{:,}".format(addon.price) }})</span>
-                  <div class="small" style="color:var(--text-muted)">{{ addon.description }}</div>
-                </label>
+
+            {% if not session.user_id %}
+              <div class="bg-sunken p-4 rounded-4 text-center">
+                <p class="mb-3">Log in to book your spot</p>
+                <a href="{{ url_for('login') }}" class="btn btn-terra w-100 rounded-pill btn-lg">Join the Adventure</a>
               </div>
-              {% endfor %}
-            </div>
+            {% elif existing_booking %}
+              <div class="alert alert-success rounded-4 p-4 border-0 mb-3">
+                <h6 class="fw-bold mb-2"><i class="fa-solid fa-circle-check me-2"></i>Booking Confirmed!</h6>
+                <p class="small mb-3">You're all set for your adventure on <strong>{{ existing_booking.batch_date }}</strong>.</p>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-navy w-100 rounded-pill mb-2">Go to Dashboard</a>
+              </div>
+            {% else %}
+              <form action="{{ url_for('book') }}" method="POST">
+                <input type="hidden" name="trip_id" value="{{ trip.id }}">
+                <div class="mb-4">
+                  <label class="form-label fw-bold small text-uppercase">Select Your Date</label>
+                  <select name="batch_date" class="form-select form-select-lg rounded-4 border-2" required>
+                    {% for b in batch_choices %}
+                    <option value="{{ b.value }}">{{ b.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-4">
+                  <label class="form-label fw-bold small text-uppercase">Number of Travelers</label>
+                  <div class="input-group input-group-lg">
+                    <button type="button" class="btn btn-outline-secondary rounded-start-4 px-3" onclick="this.nextElementSibling.stepDown()">-</button>
+                    <input type="number" name="num_travelers" class="form-control text-center border-2" value="1" min="1" max="10" required>
+                    <button type="button" class="btn btn-outline-secondary rounded-end-4 px-3" onclick="this.previousElementSibling.stepUp()">+</button>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-terra w-100 btn-lg rounded-pill shadow mb-3">Reserve Spot</button>
+                <div class="text-center text-muted x-small">
+                  <i class="fa-solid fa-shield-check me-1"></i> Secure Booking & Instant Confirmation
+                </div>
+              </form>
             {% endif %}
-            <button type="submit" class="btn btn-terra w-100 btn-lg mt-2">Book Now</button>
-          </form>
-          {% endif %}
-          <div class="mt-3 pt-3" style="border-top:1px solid var(--border)">
-            <div class="d-flex align-items-center gap-2 text-muted small">
-              <i class="fa-solid fa-shield-halved" style="color:var(--terra)"></i>
-              <span>Secure payment. Free cancellation available.</span>
-            </div>
+          </div>
+
+          <!-- Need Help? -->
+          <div class="mt-4 p-4 rounded-5 text-white text-center" style="background:linear-gradient(135deg, var(--navy), #253958)">
+            <h6 class="fw-bold mb-2">Need help with booking?</h6>
+            <p class="small mb-3 opacity-75">Our adventure experts are here to help you 24/7.</p>
+            <a href="https://wa.me/{{ settings.whatsapp_number }}" class="btn btn-light btn-sm rounded-pill px-4">
+              <i class="fa-brands fa-whatsapp me-2 text-success"></i>Chat on WhatsApp
+            </a>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+.transition-hover:hover {
+  background: white !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  transform: translateY(-2px);
+}
+.transition { transition: all 0.3s ease; }
+.x-small { font-size: 0.75rem; }
+</style>
 {% endblock %}
