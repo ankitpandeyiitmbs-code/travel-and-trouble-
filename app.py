@@ -2840,9 +2840,8 @@ def send_message():
         return jsonify({'success': False})
     
     conn = get_db_connection()
-    # Ensure the batch_id is saved exactly as it comes (handle 'general-')
-    conn.execute("INSERT INTO batch_chat_message (batch_id, user_id, content) VALUES (?,?,?)",
-                 (str(batch_id), session['user_id'], content))
+    conn.execute("INSERT INTO batch_chat_message (batch_id, user_id, message) VALUES (?,?,?)",
+                 (batch_id, session['user_id'], content))
     conn.commit()
     conn.close()
     return jsonify({'success': True})

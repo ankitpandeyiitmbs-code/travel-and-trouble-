@@ -21,16 +21,16 @@
         <div class="d-flex flex-column {{ 'align-items-end' if msg.user_id == session.user_id else 'align-items-start' }} mb-2"
              data-msg-id="{{ msg.id }}">
           {% if msg.user_id != session.user_id %}
-          <div class="chat-sender">{{ msg.sender }}</div>
+          <div class="chat-sender">{{ msg.sender_name or 'Explorer' }}</div>
           {% endif %}
           <div class="chat-bubble {{ 'mine' if msg.user_id == session.user_id else 'theirs' }}">
             {% if msg.msg_type == 'image' %}
-            <img src="{{ msg.content }}" style="max-width:200px;border-radius:8px;" alt="Image">
+            <img src="{{ msg.message }}" style="max-width:200px;border-radius:8px;" alt="Image">
             {% else %}
-            {{ msg.content }}
+            {{ msg.message }}
             {% endif %}
           </div>
-          <div class="text-muted" style="font-size:0.7rem;">{{ msg.timestamp[:16] if msg.timestamp else '' }}</div>
+          <div class="text-muted" style="font-size:0.7rem;">{{ (msg.sent_at or '')[:16] }}</div>
         </div>
         {% endfor %}
       </div>
@@ -71,7 +71,7 @@ document.getElementById('chatForm').addEventListener('submit', async function(e)
     await fetch('/send_message', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({content})
+      body: JSON.stringify({content, batch_id: 'general'})
     });
     await fetchMessages();
   } catch(err){ console.error(err); }
@@ -106,13 +106,13 @@ async function fetchMessages(){
       wrap.className = `d-flex flex-column ${isMe ? 'align-items-end' : 'align-items-start'} mb-2`;
       wrap.dataset.msgId = msg.id;
       let inner = '';
-      if(!isMe) inner += `<div class="chat-sender">${msg.sender}</div>`;
+      if(!isMe) inner += `<div class="chat-sender">${msg.sender_name || 'Explorer'}</div>`;
       if(msg.msg_type === 'image'){
-        inner += `<div class="chat-bubble ${isMe?'mine':'theirs'}"><img src="${msg.content}" style="max-width:200px;border-radius:8px;" alt="Image"></div>`;
+        inner += `<div class="chat-bubble ${isMe?'mine':'theirs'}"><img src="${msg.message}" style="max-width:200px;border-radius:8px;" alt="Image"></div>`;
       } else {
-        inner += `<div class="chat-bubble ${isMe?'mine':'theirs'}">${escHtml(msg.content)}</div>`;
+        inner += `<div class="chat-bubble ${isMe?'mine':'theirs'}">${escHtml(msg.message)}</div>`;
       }
-      inner += `<div class="text-muted" style="font-size:0.7rem;">${(msg.timestamp||'').slice(0,16)}</div>`;
+      inner += `<div class="text-muted" style="font-size:0.7rem;">${(msg.sent_at||'').slice(0,16)}</div>`;
       wrap.innerHTML = inner;
       chatEl.appendChild(wrap);
     });
