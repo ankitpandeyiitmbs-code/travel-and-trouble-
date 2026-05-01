@@ -641,8 +641,9 @@ def forgot_password():
                     mail.send(msg)
                     flash('Password reset email sent!', 'success')
                 except Exception as e:
-                    print(f"Mail Error: {e}")
-                    flash(f'Error sending mail. Reset link (simulation): {reset_link}', 'info')
+                    error_msg = str(e)
+                    print(f"Mail Error: {error_msg}")
+                    flash(f'Mail failed: {error_msg}. Use this link instead: {reset_link}', 'warning')
             else:
                 flash(f'Reset link (test mode): {reset_link}', 'info')
         else:
