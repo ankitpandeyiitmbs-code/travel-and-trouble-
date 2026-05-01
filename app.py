@@ -10,6 +10,7 @@ from functools import wraps
 
 from flask import (Flask, render_template, request, redirect, url_for,
                    session, flash, jsonify, g)
+from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import razorpay
@@ -38,7 +39,18 @@ ITEMS_PER_PAGE = 12
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 
-ADMIN_EMAILS = ['admin@wanderbuddy.com', 'travelandtrouble@gmail.com']
+ADMIN_EMAILS = ['admin@wanderbuddy.com', 'travelandtroublee@gmail.com', 'travelandtrouble@gmail.com']
+
+# Mail Configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'travelandtroublee@gmail.com'
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD') or 'your-app-password-here'
+app.config['MAIL_DEFAULT_SENDER'] = 'travelandtroublee@gmail.com'
+
+mail = Mail(app)
+MAIL_ENABLED = True
 
 
 # ── DECORATORS ──────────────────────────────────────────────────────────────
@@ -623,12 +635,14 @@ def forgot_password():
             reset_link = url_for('reset_password', token=token, _external=True)
             if MAIL_ENABLED:
                 try:
-                    msg = MailMessage('Password Reset', recipients=[email],
-                                      body=f'Click here to reset your password: {reset_link}')
+                    msg = Message('Password Reset - WanderBuddy',
+                                recipients=[email],
+                                body=f'Hello,\n\nYou requested a password reset. Click the link below to set a new password:\n\n{reset_link}\n\nThis link will expire in 1 hour.\n\nHappy Travels,\nTeam WanderBuddy')
                     mail.send(msg)
                     flash('Password reset email sent!', 'success')
-                except Exception:
-                    flash(f'Reset link (simulation): {reset_link}', 'info')
+                except Exception as e:
+                    print(f"Mail Error: {e}")
+                    flash(f'Error sending mail. Reset link (simulation): {reset_link}', 'info')
             else:
                 flash(f'Reset link (test mode): {reset_link}', 'info')
         else:
