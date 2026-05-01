@@ -25,13 +25,16 @@
               </div>
             </div>
             <div class="card-body p-4">
-              <div class="d-flex justify-content-between mb-2">
-                <span class="tag-pill">{{ event.category }}</span>
-                <span class="fw-bold text-terra fs-5">₹{{ "{:,}".format(event.price) }}</span>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-sunken text-terra px-3 py-2 rounded-pill small fw-bold">{{ event.category }}</span>
+                <div class="fw-bold text-navy">₹{{ "{:,}".format(event.price) }}</div>
               </div>
-              <h5 class="fw-bold mb-3">{{ event.title }}</h5>
-              <p class="text-muted small mb-4 line-clamp-3">{{ event.description }}</p>
-              <a href="{{ url_for('trip_details', trip_id=event.id) }}" class="btn btn-terra w-100 rounded-pill">Book Featured Event</a>
+              <h5 class="fw-bold mb-3" style="color:var(--navy); font-family:'Cormorant Garamond', serif;">{{ event.title }}</h5>
+              <div class="d-flex flex-column gap-2 mb-4">
+                <div class="small text-muted"><i class="fa-solid fa-location-dot text-terra me-2"></i>{{ event.location }}</div>
+                <div class="small text-muted"><i class="fa-solid fa-calendar text-terra me-2"></i>{{ event.event_date or 'Coming Soon' }}</div>
+              </div>
+              <a href="{{ url_for('trip_details', trip_id=event.id) }}" class="btn btn-terra w-100 rounded-pill shadow-sm py-2">Reserve Spot</a>
             </div>
           </div>
         </div>
@@ -56,13 +59,13 @@
               <div class="flex-grow-1">
                 <h6 class="fw-bold mb-1">{{ u.title }}</h6>
                 <div class="text-muted small">
-                  <i class="fa-solid fa-location-dot me-1"></i> {{ u.location }}
-                  <span class="ms-2">₹{{ "{:,}".format(u.price) }}</span>
+                  <i class="fa-solid fa-location-dot text-terra me-1"></i> {{ u.location }}
+                  <span class="ms-2 fw-bold text-navy">₹{{ "{:,}".format(u.price) }}</span>
                 </div>
               </div>
               <div>
-                <a href="{{ url_for('trip_details', trip_id=u.id) }}" class="btn btn-outline-terra rounded-circle p-2" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
-                  <i class="fa-solid fa-chevron-right"></i>
+                <a href="{{ url_for('trip_details', trip_id=u.id) }}" class="btn btn-terra rounded-circle p-0" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                  <i class="fa-solid fa-chevron-right fa-sm"></i>
                 </a>
               </div>
             </div>
