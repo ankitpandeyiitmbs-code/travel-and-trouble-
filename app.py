@@ -1337,13 +1337,13 @@ def create_post():
 @app.route('/chat')
 @login_required
 def chat():
+    batch_id = 'general'
     conn = get_db_connection()
     messages = conn.execute(
-        "SELECT * FROM messages WHERE room_id='general' ORDER BY timestamp DESC LIMIT 50"
-    ).fetchall()
+        "SELECT m.*, u.name as sender_name FROM batch_chat_message m JOIN users u ON m.user_id=u.id WHERE m.batch_id=? ORDER BY m.sent_at ASC",
+        (batch_id,)).fetchall()
     conn.close()
-    messages = list(reversed(messages))
-    return render_template('chat.html', messages=messages)
+    return render_template('chat.html', messages=messages, batch_id=batch_id, batch_name="General Community")
 
 
 
