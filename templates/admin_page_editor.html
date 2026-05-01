@@ -11,9 +11,18 @@
         <i class="fa-solid fa-arrow-left me-1"></i>Back to Admin — Pages
       </a>
       <h3 class="mt-2 mb-0" style="font-family:'Cormorant Garamond',serif; color:var(--navy);">
-        {% if page %}Edit Page — <span class="text-terra">{{ page.page_name }}</span>{% else %}New CMS Page{% endif %}
-      </h3>
+    {% if page and page.page_name == 'featured-events-cms' %}
+    <div class="alert alert-warning border-0 shadow-sm p-4 rounded-4 mb-4">
+      <div class="d-flex gap-3">
+        <i class="fa-solid fa-triangle-exclamation fs-3 text-warning"></i>
+        <div>
+          <h6 class="fw-bold mb-1">Dynamic Data Warning</h6>
+          <p class="small mb-3">This page contains the dynamic logic for your Featured Events. Editing this content as plain text may break the layout on your home page.</p>
+          <a href="/admin#events" class="btn btn-warning btn-sm fw-bold px-3">Manage Featured Events Instead</a>
+        </div>
+      </div>
     </div>
+    {% endif %}
 
     <div class="card">
       <div class="card-body p-4">
