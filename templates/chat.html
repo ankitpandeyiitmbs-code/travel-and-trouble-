@@ -20,8 +20,8 @@
         {% for msg in messages %}
         <div class="d-flex flex-column {{ 'align-items-end' if msg.user_id == session.user_id else 'align-items-start' }} mb-2"
              data-msg-id="{{ msg.id }}">
-          {% if msg.user_id != session.user_id %}
-          <div class="chat-sender">{{ msg.sender_name or 'Explorer' }}</div>
+          {% if msg.user_id|string != session.user_id|string %}
+          <div class="chat-sender fw-bold mb-1" style="color:var(--terra); font-size:0.8rem;">{{ msg.sender_name or 'Traveler' }}</div>
           {% endif %}
           <div class="chat-bubble {{ 'mine' if msg.user_id == session.user_id else 'theirs' }}">
             {% if msg.msg_type == 'image' %}
@@ -101,12 +101,12 @@ async function fetchMessages(){
     lastId = latest;
     chatEl.innerHTML = '';
     msgs.forEach(msg => {
-      const isMe = msg.user_id === currentUserId;
+      const isMe = msg.user_id == currentUserId;
       const wrap = document.createElement('div');
       wrap.className = `d-flex flex-column ${isMe ? 'align-items-end' : 'align-items-start'} mb-2`;
       wrap.dataset.msgId = msg.id;
       let inner = '';
-      if(!isMe) inner += `<div class="chat-sender">${msg.sender_name || 'Explorer'}</div>`;
+      if(!isMe) inner += `<div class="chat-sender fw-bold mb-1" style="color:var(--terra); font-size:0.8rem;">${msg.sender_name || 'Traveler'}</div>`;
       if(msg.msg_type === 'image'){
         inner += `<div class="chat-bubble ${isMe?'mine':'theirs'}"><img src="${msg.message}" style="max-width:200px;border-radius:8px;" alt="Image"></div>`;
       } else {
